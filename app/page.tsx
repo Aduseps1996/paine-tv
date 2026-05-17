@@ -6,7 +6,7 @@ import Relogio from "../components/Relogio"
 import BannerRotativo from "../components/BannerRotativo"
 import RodapeNoticias from "../components/RodapeNoticias"
 import Image from "next/image"
-import { doc, getDoc } from "firebase/firestore"
+import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "../lib/firebase"
 
 
@@ -20,6 +20,8 @@ export default function Home() {
   const [chamadaAtiva, setChamadaAtiva] = useState(false)
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
+  const [logo, setLogo] = useState("/logos/logo.png")
+  const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
   const [fullscreenAtivado, setFullscreenAtivado] = useState(false)
 
   function chamarAtendimento() {
@@ -54,50 +56,42 @@ export default function Home() {
 
   useEffect(() => {
 
-    const intervaloAtualizacao = setInterval(() => {
-      window.location.reload()
-    }, 30000)
-
-    return () => {
-      clearInterval(intervaloAtualizacao)
-    }
-
-  }, [])
-
-  useEffect(() => {
-
-    async function carregarConfiguracoes() {
-
-      const documento = await getDoc(
-        doc(db, "configuracoes", "geral")
-      )
+  const unsubscribe = onSnapshot(
+    doc(db, "configuracoes", "geral"),
+    (documento) => {
 
       if (documento.exists()) {
 
         const dados = documento.data()
 
-        setNomePainel(dados.nomePainel)
-        setSubtitulo(dados.subtitulo)
+        setNomePainel(dados.nomePainel || "ADUSEPS")
+        setSubtitulo(dados.subtitulo || "Painel Institucional")
+        setLogo(dados.logo || "/logos/logo.png")
+
+        setFallback(
+          dados.fallback || "/fallbacks/offline.jpg"
+        )
 
       }
 
     }
+  )
 
-    carregarConfiguracoes()
+  return () => unsubscribe()
 
-  }, [])
+}, [])
 
   return (
     <main className="w-screen h-screen text-white relative overflow-hidden">
 
-      <BannerRotativo />
+      <BannerRotativo fallback={fallback} />
 
       <div className="absolute top-0 left-0 w-full h-28 bg-gradient-to-b from-black/80 to-transparent z-10" />
       
       <div className="absolute top-6 left-8 z-10 flex items-center gap-5">
 
         <Image
-          src="/logo.png"
+          src={logo}
           alt="Logo ADUSEPS"
           width={70}
           height={70}

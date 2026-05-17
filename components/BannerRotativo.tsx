@@ -20,7 +20,11 @@ type Midia = {
     duracao: number
 }
 
-export default function BannerRotativo() {
+    export default function BannerRotativo({
+        fallback
+    }: {
+        fallback: string
+    }) {
 
     const [midias, setMidias] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
@@ -46,7 +50,14 @@ export default function BannerRotativo() {
             )
 
             setMidias(listaAtiva)
-            setIndiceAtual(0)
+
+            setIndiceAtual((indiceAtual) => {
+                if (indiceAtual >= listaAtiva.length) {
+                    return 0
+                }
+
+                return indiceAtual
+            })
 
         })
 
@@ -81,7 +92,13 @@ export default function BannerRotativo() {
     }, [midiaAtual, midias.length])
 
     if (midias.length === 0 || !midiaAtual) {
-        return null
+        return (
+            <img
+                src={fallback}
+                alt="Imagem padrão"
+                className="absolute inset-0 w-full h-full object-cover"
+            />
+        )
     }
 
     return (
@@ -92,6 +109,9 @@ export default function BannerRotativo() {
                     <img
                         src={midiaAtual.arquivo}
                         alt="Banner institucional"
+                        onError={(e) => {
+                            e.currentTarget.src = fallback
+                        }}
                         className="absolute inset-0 w-full h-full object-cover transition-all duration-1000"
                     />
 
@@ -102,6 +122,20 @@ export default function BannerRotativo() {
                         autoPlay
                         muted
                         className="absolute inset-0 w-full h-full object-cover"
+
+                        onError={() => {
+                            setIndiceAtual((valorAtual) => {
+
+                                const proximo = valorAtual + 1
+
+                                if (proximo >= midias.length) {
+                                    return 0
+                                }
+
+                                return proximo
+
+                            })
+                        }}
                         onEnded={() => {
 
                             setIndiceAtual((valorAtual) => {

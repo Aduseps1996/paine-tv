@@ -54,6 +54,8 @@ export default function AdminPage() {
 
     const [nomePainel, setNomePainel] = useState("")
     const [subtitulo, setSubtitulo] = useState("")
+    const [logo, setLogo] = useState("")
+    const [indicePreview, setIndicePreview] = useState(0)
 
     async function carregarMidias() {
         const consulta = query(collection(db, "midias"), orderBy("ordem", "asc"))
@@ -87,6 +89,7 @@ export default function AdminPage() {
 
             setNomePainel(dados.nomePainel || "")
             setSubtitulo(dados.subtitulo || "")
+            setLogo(dados.logo || "")
         }
     }
 
@@ -95,7 +98,8 @@ export default function AdminPage() {
             doc(db, "configuracoes", "geral"),
             {
                 nomePainel,
-                subtitulo
+                subtitulo,
+                logo
             },
             { merge: true }
         )
@@ -174,7 +178,52 @@ export default function AdminPage() {
         return () => unsubscribe()
     }, [])
 
+    
+    const midiasAtivas = midias
+    .filter((midia) => midia.ativo)
+    .sort((a, b) => a.ordem - b.ordem)
+
+    const noticiasAtivas = noticias
+        .filter((noticia) => noticia.ativo)
+        .sort((a, b) => a.ordem - b.ordem)
+
+    const midiaPreview = midiasAtivas[indicePreview]
+
+    useEffect(() => {
+
+        if (midiasAtivas.length === 0) return
+
+        const midiaAtual = midiasAtivas[indicePreview]
+
+        if (!midiaAtual) {
+            setIndicePreview(0)
+            return
+        }
+
+        if (midiaAtual.tipo !== "imagem") return
+
+            const intervalo = setInterval(() => {
+
+                setIndicePreview((indiceAtual) => {
+
+                    const proximoIndice = indiceAtual + 1
+
+                    if (proximoIndice >= midiasAtivas.length) {
+                        return 0
+                    }
+
+                    return proximoIndice
+
+                })
+
+            }, midiaAtual.duracao * 1000)
+
+            return () => clearInterval(intervalo)
+
+        }, [midiasAtivas.length, indicePreview])
+
     if (!logado) {
+
         return (
             <main className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-8">
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 w-full max-w-md">
@@ -253,7 +302,7 @@ export default function AdminPage() {
                     Configurações do painel
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <input
                         type="text"
                         placeholder="Nome do painel"
@@ -269,6 +318,38 @@ export default function AdminPage() {
                         onChange={(e) => setSubtitulo(e.target.value)}
                         className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
                     />
+
+                    <input
+                        type="text"
+                        placeholder="Caminho da logo"
+                        value={logo}
+                        onChange={(e) => setLogo(e.target.value)}
+                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                    />
+                </div>
+
+                <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+                    <p className="text-sm text-zinc-400 mb-4">
+                        Pré-visualização
+                    </p>
+
+                    <div className="flex items-center gap-5">
+                        <img
+                            src={logo || "/logos/logo.png"}
+                            alt="Prévia da logo"
+                            className="w-20 h-20 object-contain bg-white rounded-xl p-2"
+                        />
+
+                        <div>
+                            <h3 className="text-3xl font-black tracking-wider leading-none">
+                                {nomePainel || "ADUSEPS"}
+                            </h3>
+
+                            <p className="text-zinc-400 mt-2">
+                                {subtitulo || "Painel Institucional"}
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <button
@@ -277,6 +358,70 @@ export default function AdminPage() {
                 >
                     Salvar configurações
                 </button>
+            </div>
+
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+
+                <h2 className="text-2xl font-bold mb-4">
+                    Prévia da TV
+                </h2>
+
+                <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-zinc-700">
+
+                    {midiaPreview && midiaPreview.tipo === "imagem" && (
+                        <img
+                            src={midiaPreview.arquivo}
+                            alt="Prévia do banner"
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                    )}
+
+                    {midiaPreview && midiaPreview.tipo === "video" && (
+                        <video
+                            src={midiaPreview.arquivo}
+                            muted
+                            controls
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                    )}
+
+                    <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/80 to-transparent" />
+
+                    <div className="absolute top-5 left-6 flex items-center gap-4">
+
+                        <img
+                            src={logo || "/logos/logo.png"}
+                            alt="Logo"
+                            className="w-14 h-14 object-contain"
+                        />
+
+                        <div>
+
+                            <h3 className="text-2xl font-black tracking-wider leading-none">
+                                {nomePainel || "ADUSEPS"}
+                            </h3>
+
+                            <p className="text-xs text-zinc-300 mt-1">
+                                {subtitulo || "Painel Institucional"}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 w-full bg-zinc-950 border-t-4 border-blue-600 h-14 flex items-center overflow-hidden">
+
+                        <p className="text-lg font-bold whitespace-nowrap px-6">
+
+                            {noticiasAtivas.length > 0
+                                ? noticiasAtivas.map((noticia) => noticia.texto).join("   •   ")
+                                : "Prévia das notícias do rodapé"}
+                        </p>
+
+                    </div>
+
+                </div>
+
             </div>
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
@@ -311,6 +456,32 @@ export default function AdminPage() {
                         Adicionar mídia
                     </button>
                 </div>
+
+                {arquivo.trim() !== "" && (
+                    <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+
+                        <p className="text-sm text-zinc-400 mb-4">
+                            Pré-visualização da mídia
+                        </p>
+
+                        {tipo === "imagem" ? (
+                            <img
+                                src={arquivo}
+                                alt="Prévia da mídia"
+                                className="w-full max-h-80 object-contain rounded-xl border border-zinc-700 bg-black"
+                            />
+                        ) : (
+                            <video
+                                src={arquivo}
+                                controls
+                                muted
+                                className="w-full max-h-80 rounded-xl border border-zinc-700 bg-black"
+                            />
+                        )}
+
+                    </div>
+                )}
+
             </div>
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
@@ -334,6 +505,23 @@ export default function AdminPage() {
                         Adicionar notícia
                     </button>
                 </div>
+
+                
+                    {novaNoticia.trim() !== "" && (
+                        <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+
+                            <p className="text-sm text-zinc-400 mb-4">
+                                Pré-visualização da notícia
+                            </p>
+
+                            <div className="bg-zinc-900 border-l-4 border-blue-600 rounded-xl px-6 py-4 overflow-hidden">
+                                <p className="text-2xl font-bold whitespace-nowrap">
+                                    {novaNoticia}
+                                </p>
+                            </div>
+
+                        </div>
+                    )}
             </div>
 
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">

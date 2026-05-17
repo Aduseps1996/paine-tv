@@ -4,9 +4,9 @@ import { useEffect, useState } from "react"
 
 import {
     collection,
-    getDocs,
     query,
-    orderBy
+    orderBy,
+    onSnapshot
 } from "firebase/firestore"
 
 import { db } from "../lib/firebase"
@@ -22,27 +22,30 @@ export default function RodapeNoticias() {
 
     const [noticias, setNoticias] = useState<Noticia[]>([])
 
-    async function carregarNoticias() {
-
-    const consulta = query(
-        collection(db, "noticias"),
-        orderBy("ordem", "asc")
-    )
-
-    const resultado = await getDocs(consulta)
-
-    const lista = resultado.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-    })) as Noticia[]
-
-    const listaAtiva = lista.filter((noticia) => noticia.ativo === true)
-
-      setNoticias(listaAtiva)
-  }
-
     useEffect(() => {
-        carregarNoticias()
+
+        const consulta = query(
+            collection(db, "noticias"),
+            orderBy("ordem", "asc")
+        )
+
+        const unsubscribe = onSnapshot(consulta, (resultado) => {
+
+            const lista = resultado.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Noticia[]
+
+            const listaAtiva = lista.filter(
+                (noticia) => noticia.ativo === true
+            )
+
+            setNoticias(listaAtiva)
+
+        })
+
+        return () => unsubscribe()
+
     }, [])
 
     return (
