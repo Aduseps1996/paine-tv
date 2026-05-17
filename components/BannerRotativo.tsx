@@ -112,7 +112,7 @@ type Midia = {
                         onError={(e) => {
                             e.currentTarget.src = fallback
                         }}
-                        className="absolute inset-0 w-full h-full object-cover transition-all duration-1000"
+                        className="absolute top-0 left-0 w-full h-[calc(100%-5rem)] object-contain bg-black transition-all duration-1000"
                     />
 
                 ) : (
@@ -121,7 +121,7 @@ type Midia = {
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute top-0 left-0 w-full h-[calc(100%-5rem)] object-contain bg-black"
 
                         onError={() => {
                             setIndiceAtual((valorAtual) => {
