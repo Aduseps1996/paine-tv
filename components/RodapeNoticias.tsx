@@ -57,9 +57,17 @@ export default function RodapeNoticias() {
 
                     <span
                         key={noticia.id}
-                        className="mx-16 inline-block"
+                        className="mx-16 inline-flex items-center gap-10"
                     >
-                        {noticia.texto}
+
+                        <span>
+                            {noticia.texto}
+                        </span>
+
+                        <span className="text-blue-500 text-4xl leading-none">
+                            •
+                        </span>
+
                     </span>
 
                 ))}
