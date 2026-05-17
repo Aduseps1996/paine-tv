@@ -53,20 +53,24 @@ export default function RodapeNoticias() {
 
             <div className="whitespace-nowrap animate-[marquee_35s_linear_infinite] text-3xl font-bold leading-none">
 
-                {noticias.map((noticia) => (
+                {noticias.map((noticia, index) => (
 
                     <span
                         key={noticia.id}
-                        className="mx-16 inline-flex items-center gap-10"
+                        className="inline-flex items-center"
                     >
 
-                        <span>
+                        <span className="mx-10">
                             {noticia.texto}
                         </span>
 
-                        <span className="text-blue-500 text-4xl leading-none">
-                            •
-                        </span>
+                        {index < noticias.length - 1 && (
+
+                            <span className="text-blue-500 text-3xl mx-4">
+                                •
+                            </span>
+
+                        )}
 
                     </span>
 
