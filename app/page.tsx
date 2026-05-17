@@ -64,8 +64,8 @@ export default function Home() {
 
         const dados = documento.data()
 
-        setNomePainel(dados.nomePainel || "ADUSEPS")
-        setSubtitulo(dados.subtitulo || "Painel Institucional")
+        setNomePainel(dados.nomePainel)
+        setSubtitulo(dados.subtitulo)
         setLogo(dados.logo || "/logos/logo.png")
 
         setFallback(
@@ -93,8 +93,8 @@ export default function Home() {
         <Image
           src={logo}
           alt="Logo ADUSEPS"
-          width={70}
-          height={70}
+          width={110}
+          height={110}
           priority
           className="object-contain"
         />
