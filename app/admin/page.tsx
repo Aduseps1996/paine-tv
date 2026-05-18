@@ -57,6 +57,9 @@ export default function AdminPage() {
     const [logo, setLogo] = useState("")
     const [indicePreview, setIndicePreview] = useState(0)
 
+    const [slogan, setSlogan] = useState("")
+    const [abaAtiva, setAbaAtiva] = useState("configuracoes")
+
     async function carregarMidias() {
         const consulta = query(collection(db, "midias"), orderBy("ordem", "asc"))
         const resultado = await getDocs(consulta)
@@ -90,6 +93,7 @@ export default function AdminPage() {
             setNomePainel(dados.nomePainel || "")
             setSubtitulo(dados.subtitulo || "")
             setLogo(dados.logo || "")
+            setSlogan(dados.slogan || "")
         }
     }
 
@@ -99,7 +103,8 @@ export default function AdminPage() {
             {
                 nomePainel,
                 subtitulo,
-                logo
+                logo,
+                slogan
             },
             { merge: true }
         )
@@ -297,447 +302,516 @@ export default function AdminPage() {
                 Gerenciamento do painel institucional da ADUSEPS
             </p>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-                <h2 className="text-2xl font-bold mb-4">
-                    Configurações do painel
-                </h2>
+            <div className="flex flex-wrap gap-3 mb-6">
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                        type="text"
-                        placeholder="Nome do painel"
-                        value={nomePainel}
-                        onChange={(e) => setNomePainel(e.target.value)}
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
+            <button
+                onClick={() => setAbaAtiva("configuracoes")}
+                className={`px-5 py-3 rounded-xl font-bold transition ${
+                    abaAtiva === "configuracoes"
+                        ? "bg-blue-600 text-white"
+                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+            >
+                Configurações
+            </button>
 
-                    <input
-                        type="text"
-                        placeholder="Subtítulo"
-                        value={subtitulo}
-                        onChange={(e) => setSubtitulo(e.target.value)}
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
+            <button
+                onClick={() => setAbaAtiva("previa")}
+                className={`px-5 py-3 rounded-xl font-bold transition ${
+                    abaAtiva === "previa"
+                        ? "bg-blue-600 text-white"
+                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+            >
+                Prévia da TV
+            </button>
 
-                    <input
-                        type="text"
-                        placeholder="Caminho da logo"
-                        value={logo}
-                        onChange={(e) => setLogo(e.target.value)}
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
-                </div>
+            <button
+                onClick={() => setAbaAtiva("midias")}
+                className={`px-5 py-3 rounded-xl font-bold transition ${
+                    abaAtiva === "midias"
+                        ? "bg-blue-600 text-white"
+                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+            >
+                Mídias
+            </button>
 
-                <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
-                    <p className="text-sm text-zinc-400 mb-4">
-                        Pré-visualização
-                    </p>
+            <button
+                onClick={() => setAbaAtiva("noticias")}
+                className={`px-5 py-3 rounded-xl font-bold transition ${
+                    abaAtiva === "noticias"
+                        ? "bg-blue-600 text-white"
+                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+            >
+                Notícias
+            </button>
 
-                    <div className="flex items-center gap-5">
-                        <img
-                            src={logo || "/logos/logo.png"}
-                            alt="Prévia da logo"
-                            className="w-20 h-20 object-contain bg-white rounded-xl p-2"
+        </div>
+
+            {abaAtiva === "configuracoes" && (
+                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+                    <h2 className="text-2xl font-bold mb-4">
+                        Configurações do painel
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input
+                            type="text"
+                            placeholder="Nome do painel"
+                            value={nomePainel}
+                            onChange={(e) => setNomePainel(e.target.value)}
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
                         />
 
-                        <div>
-                            <h3 className="text-3xl font-black tracking-wider leading-none">
-                                {nomePainel || "ADUSEPS"}
-                            </h3>
-
-                            <p className="text-zinc-400 mt-2">
-                                {subtitulo || "Painel Institucional"}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <button
-                    onClick={salvarConfiguracoes}
-                    className="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold"
-                >
-                    Salvar configurações
-                </button>
-            </div>
-
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-
-                <h2 className="text-2xl font-bold mb-4">
-                    Prévia da TV
-                </h2>
-
-                <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-zinc-700">
-
-                    {midiaPreview && midiaPreview.tipo === "imagem" && (
-                        <img
-                            src={midiaPreview.arquivo}
-                            alt="Prévia do banner"
-                            className="absolute inset-0 w-full h-full object-cover"
-                        />
-                    )}
-
-                    {midiaPreview && midiaPreview.tipo === "video" && (
-                        <video
-                            src={midiaPreview.arquivo}
-                            muted
-                            controls
-                            className="absolute inset-0 w-full h-full object-cover"
-                        />
-                    )}
-
-                    <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/80 to-transparent" />
-
-                    <div className="absolute top-5 left-6 flex items-center gap-4">
-
-                        <img
-                            src={logo || "/logos/logo.png"}
-                            alt="Logo"
-                            className="w-14 h-14 object-contain"
+                        <input
+                            type="text"
+                            placeholder="Subtítulo"
+                            value={subtitulo}
+                            onChange={(e) => setSubtitulo(e.target.value)}
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
                         />
 
-                        <div>
+                        <input
+                            type="text"
+                            placeholder="Caminho da logo"
+                            value={logo}
+                            onChange={(e) => setLogo(e.target.value)}
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                        />
 
-                            <h3 className="text-2xl font-black tracking-wider leading-none">
-                                {nomePainel || "ADUSEPS"}
-                            </h3>
-
-                            <p className="text-xs text-zinc-300 mt-1">
-                                {subtitulo || "Painel Institucional"}
-                            </p>
-
-                        </div>
-
+                        <input
+                            type="text"
+                            placeholder="Slogan do rodapé"
+                            value={slogan}
+                            onChange={(e) => setSlogan(e.target.value)}
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none md:col-span-3"
+                        />
                     </div>
 
-                    <div className="absolute bottom-0 left-0 w-full bg-zinc-950 border-t-4 border-blue-600 h-14 flex items-center overflow-hidden">
-
-                        <p className="text-lg font-bold whitespace-nowrap px-6">
-
-                            {noticiasAtivas.length > 0
-                                ? noticiasAtivas.map((noticia) => noticia.texto).join("   •   ")
-                                : "Prévia das notícias do rodapé"}
+                    <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+                        <p className="text-sm text-zinc-400 mb-4">
+                            Pré-visualização
                         </p>
 
+                        <div className="flex items-center gap-5">
+                            <img
+                                src={logo || "/logos/logo.png"}
+                                alt="Prévia da logo"
+                                className="w-20 h-20 object-contain bg-white rounded-xl p-2"
+                            />
+
+                            <div>
+                                <h3 className="text-3xl font-black tracking-wider leading-none">
+                                    {nomePainel || "ADUSEPS"}
+                                </h3>
+
+                                <p className="text-zinc-400 mt-2">
+                                    {subtitulo || "Painel Institucional"}
+                                </p>
+                            </div>
+                        </div>
                     </div>
-
-                </div>
-
-            </div>
-
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-                <h2 className="text-2xl font-bold mb-4">
-                    Adicionar mídia
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                        type="text"
-                        placeholder="URL da imagem ou vídeo"
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                        value={arquivo}
-                        onChange={(e) => setArquivo(e.target.value)}
-                    />
-
-                    <select
-                        value={tipo}
-                        onChange={(e) =>
-                            setTipo(e.target.value as "imagem" | "video")
-                        }
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    >
-                        <option value="imagem">imagem</option>
-                        <option value="video">video</option>
-                    </select>
 
                     <button
-                        onClick={adicionarMidia}
-                        className="bg-blue-600 hover:bg-blue-700 transition rounded-xl font-bold"
+                        onClick={salvarConfiguracoes}
+                        className="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold"
                     >
-                        Adicionar mídia
+                        Salvar configurações
                     </button>
                 </div>
+            )}
 
-                {arquivo.trim() !== "" && (
-                    <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+            {abaAtiva === "previa" && (
 
-                        <p className="text-sm text-zinc-400 mb-4">
-                            Pré-visualização da mídia
-                        </p>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
 
-                        {tipo === "imagem" ? (
+                    <h2 className="text-2xl font-bold mb-4">
+                        Prévia da TV
+                    </h2>
+
+                    <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-zinc-700">
+
+                        {midiaPreview && midiaPreview.tipo === "imagem" && (
                             <img
-                                src={arquivo}
-                                alt="Prévia da mídia"
-                                className="w-full max-h-80 object-contain rounded-xl border border-zinc-700 bg-black"
-                            />
-                        ) : (
-                            <video
-                                src={arquivo}
-                                controls
-                                muted
-                                className="w-full max-h-80 rounded-xl border border-zinc-700 bg-black"
+                                src={midiaPreview.arquivo}
+                                alt="Prévia do banner"
+                                className="absolute inset-0 w-full h-full object-cover"
                             />
                         )}
 
-                    </div>
-                )}
+                        {midiaPreview && midiaPreview.tipo === "video" && (
+                            <video
+                                src={midiaPreview.arquivo}
+                                muted
+                                controls
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        )}
 
-            </div>
+                        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/80 to-transparent" />
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-                <h2 className="text-2xl font-bold mb-4">
-                    Adicionar notícia
-                </h2>
+                        <div className="absolute top-5 left-6 flex items-center gap-4">
 
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4">
-                    <input
-                        type="text"
-                        placeholder="Texto da notícia do rodapé"
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                        value={novaNoticia}
-                        onChange={(e) => setNovaNoticia(e.target.value)}
-                    />
+                            <img
+                                src={logo || "/logos/logo.png"}
+                                alt="Logo"
+                                className="w-14 h-14 object-contain"
+                            />
 
-                    <button
-                        onClick={adicionarNoticia}
-                        className="bg-green-600 hover:bg-green-700 transition rounded-xl font-bold"
-                    >
-                        Adicionar notícia
-                    </button>
-                </div>
+                            <div>
 
-                
-                    {novaNoticia.trim() !== "" && (
-                        <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+                                <h3 className="text-2xl font-black tracking-wider leading-none">
+                                    {nomePainel || "ADUSEPS"}
+                                </h3>
 
-                            <p className="text-sm text-zinc-400 mb-4">
-                                Pré-visualização da notícia
-                            </p>
-
-                            <div className="bg-zinc-900 border-l-4 border-blue-600 rounded-xl px-6 py-4 overflow-hidden">
-                                <p className="text-2xl font-bold whitespace-nowrap">
-                                    {novaNoticia}
+                                <p className="text-xs text-zinc-300 mt-1">
+                                    {subtitulo || "Painel Institucional"}
                                 </p>
+
                             </div>
 
                         </div>
-                    )}
-            </div>
 
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-                    <h2 className="text-2xl font-bold mb-4">
-                        Mídias cadastradas
-                    </h2>
+                        <div className="absolute bottom-0 left-0 w-full bg-zinc-950 border-t-4 border-blue-600 h-14 flex items-center overflow-hidden">
 
-                    <div className="space-y-3">
-                        {midias.map((midia) => (
-                            <div
-                                key={midia.id}
-                                className="bg-zinc-800 rounded-xl p-4"
-                            >
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div
-                                        className={`w-3 h-3 rounded-full ${
-                                            midia.ativo
-                                                ? "bg-green-500"
-                                                : "bg-red-500"
-                                        }`}
-                                    />
+                            <p className="text-lg font-bold whitespace-nowrap px-6">
 
-                                    <span className="text-sm text-zinc-400">
-                                        {midia.ativo ? "Ativo" : "Inativo"}
-                                    </span>
-                                </div>
+                                {noticiasAtivas.length > 0
+                                    ? noticiasAtivas.map((noticia) => noticia.texto).join("   •   ")
+                                    : "Prévia das notícias do rodapé"}
+                            </p>
 
-                                <p className="font-bold">
-                                    {midia.tipo.toUpperCase()}
-                                </p>
+                        </div>
 
-                                <p className="text-zinc-400 text-sm break-all">
-                                    {midia.arquivo}
-                                </p>
-
-                                {midia.tipo === "imagem" ? (
-                                    <img
-                                        src={midia.arquivo}
-                                        alt="Prévia da mídia"
-                                        className="mt-3 w-full max-h-48 object-cover rounded-xl border border-zinc-700"
-                                    />
-                                ) : (
-                                    <video
-                                        src={midia.arquivo}
-                                        controls
-                                        muted
-                                        className="mt-3 w-full max-h-48 rounded-xl border border-zinc-700"
-                                    />
-                                )}
-
-                                <p className="text-zinc-500 text-xs mt-2">
-                                    Ordem: {midia.ordem} | Duração: {midia.duracao}s
-                                </p>
-
-                                <div className="mt-3 flex items-center gap-2">
-                                    <span className="text-sm text-zinc-400">
-                                        Duração:
-                                    </span>
-
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={midia.duracao}
-                                        onChange={(e) => {
-                                            if (!midia.id) return
-
-                                            updateDoc(doc(db, "midias", midia.id), {
-                                                duracao: Number(e.target.value)
-                                            })
-
-                                            carregarMidias()
-                                        }}
-                                        className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
-                                    />
-
-                                    <span className="text-sm text-zinc-400">
-                                        segundos
-                                    </span>
-                                </div>
-
-                                <div className="mt-3 flex items-center gap-2">
-                                    <span className="text-sm text-zinc-400">
-                                        Ordem:
-                                    </span>
-
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={midia.ordem}
-                                        onChange={(e) => {
-                                            if (!midia.id) return
-
-                                            updateDoc(doc(db, "midias", midia.id), {
-                                                ordem: Number(e.target.value)
-                                            })
-
-                                            carregarMidias()
-                                        }}
-                                        className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
-                                    />
-                                </div>
-
-                                <button
-                                    onClick={() => midia.id && removerMidia(midia.id)}
-                                    className="mt-3 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold"
-                                >
-                                    Excluir
-                                </button>
-
-                                <button
-                                    onClick={() =>
-                                        midia.id &&
-                                        alternarMidia(midia.id, midia.ativo)
-                                    }
-                                    className={`mt-3 ml-3 px-4 py-2 rounded-lg text-sm font-bold ${
-                                        midia.ativo
-                                            ? "bg-yellow-600 hover:bg-yellow-700"
-                                            : "bg-green-600 hover:bg-green-700"
-                                    }`}
-                                >
-                                    {midia.ativo ? "Desativar" : "Ativar"}
-                                </button>
-                            </div>
-                        ))}
                     </div>
-                </div>
 
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                </div>
+            )}
+
+            {abaAtiva === "midias" && (
+
+                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
                     <h2 className="text-2xl font-bold mb-4">
-                        Notícias do rodapé
+                        Adicionar mídia
                     </h2>
 
-                    <div className="space-y-3">
-                        {noticias.map((noticia) => (
-                            <div
-                                key={noticia.id}
-                                className="bg-zinc-800 rounded-xl p-4"
-                            >
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div
-                                        className={`w-3 h-3 rounded-full ${
-                                            noticia.ativo
-                                                ? "bg-green-500"
-                                                : "bg-red-500"
-                                        }`}
-                                    />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input
+                            type="text"
+                            placeholder="URL da imagem ou vídeo"
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                            value={arquivo}
+                            onChange={(e) => setArquivo(e.target.value)}
+                        />
 
-                                    <span className="text-sm text-zinc-400">
-                                        {noticia.ativo ? "Ativa" : "Inativa"}
-                                    </span>
+                        <select
+                            value={tipo}
+                            onChange={(e) =>
+                                setTipo(e.target.value as "imagem" | "video")
+                            }
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                        >
+                            <option value="imagem">imagem</option>
+                            <option value="video">video</option>
+                        </select>
+
+                        <button
+                            onClick={adicionarMidia}
+                            className="bg-blue-600 hover:bg-blue-700 transition rounded-xl font-bold"
+                        >
+                            Adicionar mídia
+                        </button>
+                    </div>
+
+                    {arquivo.trim() !== "" && (
+                        <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+
+                            <p className="text-sm text-zinc-400 mb-4">
+                                Pré-visualização da mídia
+                            </p>
+
+                            {tipo === "imagem" ? (
+                                <img
+                                    src={arquivo}
+                                    alt="Prévia da mídia"
+                                    className="w-full max-h-80 object-contain rounded-xl border border-zinc-700 bg-black"
+                                />
+                            ) : (
+                                <video
+                                    src={arquivo}
+                                    controls
+                                    muted
+                                    className="w-full max-h-80 rounded-xl border border-zinc-700 bg-black"
+                                />
+                            )}
+
+                        </div>
+                    )}
+
+                </div>
+            )}
+
+            {abaAtiva === "noticias" && (
+
+                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+                    <h2 className="text-2xl font-bold mb-4">
+                        Adicionar notícia
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4">
+                        <input
+                            type="text"
+                            placeholder="Texto da notícia do rodapé"
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                            value={novaNoticia}
+                            onChange={(e) => setNovaNoticia(e.target.value)}
+                        />
+
+                        <button
+                            onClick={adicionarNoticia}
+                            className="bg-green-600 hover:bg-green-700 transition rounded-xl font-bold"
+                        >
+                            Adicionar notícia
+                        </button>
+                    </div>
+
+                    
+                        {novaNoticia.trim() !== "" && (
+                            <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+
+                                <p className="text-sm text-zinc-400 mb-4">
+                                    Pré-visualização da notícia
+                                </p>
+
+                                <div className="bg-zinc-900 border-l-4 border-blue-600 rounded-xl px-6 py-4 overflow-hidden">
+                                    <p className="text-2xl font-bold whitespace-nowrap">
+                                        {novaNoticia}
+                                    </p>
                                 </div>
 
-                                <textarea
-                                    value={noticia.texto}
-                                    onChange={(e) => {
-                                        if (!noticia.id) return
+                            </div>
+                        )}
+                </div>
+            )}
 
-                                        updateDoc(doc(db, "noticias", noticia.id), {
-                                            texto: e.target.value
-                                        })
+            {(abaAtiva === "midias" || abaAtiva === "noticias") && (
+                <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                        <h2 className="text-2xl font-bold mb-4">
+                            Mídias cadastradas
+                        </h2>
 
-                                        carregarNoticias()
-                                    }}
-                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none resize-none min-h-[100px]"
-                                />
+                        <div className="space-y-3">
+                            {midias.map((midia) => (
+                                <div
+                                    key={midia.id}
+                                    className="bg-zinc-800 rounded-xl p-4"
+                                >
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div
+                                            className={`w-3 h-3 rounded-full ${
+                                                midia.ativo
+                                                    ? "bg-green-500"
+                                                    : "bg-red-500"
+                                            }`}
+                                        />
 
-                                <div className="mt-3 flex items-center gap-2">
-                                    <span className="text-sm text-zinc-400">
-                                        Ordem:
-                                    </span>
+                                        <span className="text-sm text-zinc-400">
+                                            {midia.ativo ? "Ativo" : "Inativo"}
+                                        </span>
+                                    </div>
 
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={noticia.ordem}
+                                    <p className="font-bold">
+                                        {midia.tipo.toUpperCase()}
+                                    </p>
+
+                                    <p className="text-zinc-400 text-sm break-all">
+                                        {midia.arquivo}
+                                    </p>
+
+                                    {midia.tipo === "imagem" ? (
+                                        <img
+                                            src={midia.arquivo}
+                                            alt="Prévia da mídia"
+                                            className="mt-3 w-full max-h-48 object-cover rounded-xl border border-zinc-700"
+                                        />
+                                    ) : (
+                                        <video
+                                            src={midia.arquivo}
+                                            controls
+                                            muted
+                                            className="mt-3 w-full max-h-48 rounded-xl border border-zinc-700"
+                                        />
+                                    )}
+
+                                    <p className="text-zinc-500 text-xs mt-2">
+                                        Ordem: {midia.ordem} | Duração: {midia.duracao}s
+                                    </p>
+
+                                    <div className="mt-3 flex items-center gap-2">
+                                        <span className="text-sm text-zinc-400">
+                                            Duração:
+                                        </span>
+
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={midia.duracao}
+                                            onChange={(e) => {
+                                                if (!midia.id) return
+
+                                                updateDoc(doc(db, "midias", midia.id), {
+                                                    duracao: Number(e.target.value)
+                                                })
+
+                                                carregarMidias()
+                                            }}
+                                            className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
+                                        />
+
+                                        <span className="text-sm text-zinc-400">
+                                            segundos
+                                        </span>
+                                    </div>
+
+                                    <div className="mt-3 flex items-center gap-2">
+                                        <span className="text-sm text-zinc-400">
+                                            Ordem:
+                                        </span>
+
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={midia.ordem}
+                                            onChange={(e) => {
+                                                if (!midia.id) return
+
+                                                updateDoc(doc(db, "midias", midia.id), {
+                                                    ordem: Number(e.target.value)
+                                                })
+
+                                                carregarMidias()
+                                            }}
+                                            className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={() => midia.id && removerMidia(midia.id)}
+                                        className="mt-3 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold"
+                                    >
+                                        Excluir
+                                    </button>
+
+                                    <button
+                                        onClick={() =>
+                                            midia.id &&
+                                            alternarMidia(midia.id, midia.ativo)
+                                        }
+                                        className={`mt-3 ml-3 px-4 py-2 rounded-lg text-sm font-bold ${
+                                            midia.ativo
+                                                ? "bg-yellow-600 hover:bg-yellow-700"
+                                                : "bg-green-600 hover:bg-green-700"
+                                        }`}
+                                    >
+                                        {midia.ativo ? "Desativar" : "Ativar"}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                        <h2 className="text-2xl font-bold mb-4">
+                            Notícias do rodapé
+                        </h2>
+
+                        <div className="space-y-3">
+                            {noticias.map((noticia) => (
+                                <div
+                                    key={noticia.id}
+                                    className="bg-zinc-800 rounded-xl p-4"
+                                >
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div
+                                            className={`w-3 h-3 rounded-full ${
+                                                noticia.ativo
+                                                    ? "bg-green-500"
+                                                    : "bg-red-500"
+                                            }`}
+                                        />
+
+                                        <span className="text-sm text-zinc-400">
+                                            {noticia.ativo ? "Ativa" : "Inativa"}
+                                        </span>
+                                    </div>
+
+                                    <textarea
+                                        value={noticia.texto}
                                         onChange={(e) => {
                                             if (!noticia.id) return
 
                                             updateDoc(doc(db, "noticias", noticia.id), {
-                                                ordem: Number(e.target.value)
+                                                texto: e.target.value
                                             })
 
                                             carregarNoticias()
                                         }}
-                                        className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
+                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none resize-none min-h-[100px]"
                                     />
+
+                                    <div className="mt-3 flex items-center gap-2">
+                                        <span className="text-sm text-zinc-400">
+                                            Ordem:
+                                        </span>
+
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={noticia.ordem}
+                                            onChange={(e) => {
+                                                if (!noticia.id) return
+
+                                                updateDoc(doc(db, "noticias", noticia.id), {
+                                                    ordem: Number(e.target.value)
+                                                })
+
+                                                carregarNoticias()
+                                            }}
+                                            className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={() =>
+                                            noticia.id && removerNoticia(noticia.id)
+                                        }
+                                        className="mt-3 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold"
+                                    >
+                                        Excluir
+                                    </button>
+
+                                    <button
+                                        onClick={() =>
+                                            noticia.id &&
+                                            alternarNoticia(noticia.id, noticia.ativo)
+                                        }
+                                        className={`mt-3 ml-3 px-4 py-2 rounded-lg text-sm font-bold ${
+                                            noticia.ativo
+                                                ? "bg-yellow-600 hover:bg-yellow-700"
+                                                : "bg-green-600 hover:bg-green-700"
+                                        }`}
+                                    >
+                                        {noticia.ativo ? "Desativar" : "Ativar"}
+                                    </button>
                                 </div>
-
-                                <button
-                                    onClick={() =>
-                                        noticia.id && removerNoticia(noticia.id)
-                                    }
-                                    className="mt-3 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold"
-                                >
-                                    Excluir
-                                </button>
-
-                                <button
-                                    onClick={() =>
-                                        noticia.id &&
-                                        alternarNoticia(noticia.id, noticia.ativo)
-                                    }
-                                    className={`mt-3 ml-3 px-4 py-2 rounded-lg text-sm font-bold ${
-                                        noticia.ativo
-                                            ? "bg-yellow-600 hover:bg-yellow-700"
-                                            : "bg-green-600 hover:bg-green-700"
-                                    }`}
-                                >
-                                    {noticia.ativo ? "Desativar" : "Ativar"}
-                                </button>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
         </main>
     )
 }

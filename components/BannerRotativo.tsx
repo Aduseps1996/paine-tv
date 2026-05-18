@@ -28,8 +28,27 @@ type Midia = {
 
     const [midias, setMidias] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
+    const [visivel, setVisivel] = useState(true)
 
     const midiaAtual = midias[indiceAtual]
+
+    function avancarMidia() {
+        setVisivel(false)
+
+        setTimeout(() => {
+            setIndiceAtual((valorAtual) => {
+                const proximo = valorAtual + 1
+
+                if (proximo >= midias.length) {
+                    return 0
+                }
+
+                return proximo
+            })
+
+            setVisivel(true)
+        }, 1200)
+    }
 
     useEffect(() => {
 
@@ -73,17 +92,7 @@ type Midia = {
 
         const intervaloBanner = setInterval(() => {
 
-            setIndiceAtual((valorAtual) => {
-
-                const proximo = valorAtual + 1
-
-                if (proximo >= midias.length) {
-                    return 0
-                }
-
-                return proximo
-
-            })
+            avancarMidia()
 
         }, midiaAtual.duracao * 1000)
 
@@ -112,7 +121,9 @@ type Midia = {
                         onError={(e) => {
                             e.currentTarget.src = fallback
                         }}
-                        className="absolute top-0 left-0 w-full h-[calc(100%-5rem)] object-contain bg-black transition-all duration-1000"
+                        className={`absolute top-0 left-0 w-full h-[calc(100vh-6.7rem)] object-cover transition-opacity duration-[1600ms] ease-in-out ${
+                            visivel ? "opacity-100" : "opacity-0"
+                        }`}
                     />
 
                 ) : (
@@ -121,20 +132,12 @@ type Midia = {
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
-                        className="absolute top-0 left-0 w-full h-[calc(100%-5rem)] object-contain bg-black"
+                        className={`absolute top-0 left-0 w-full h-[calc(100vh-6.7rem)] object-cover transition-opacity duration-[1600ms] ease-in-out ${
+                            visivel ? "opacity-100" : "opacity-0"
+                        }`}
 
                         onError={() => {
-                            setIndiceAtual((valorAtual) => {
-
-                                const proximo = valorAtual + 1
-
-                                if (proximo >= midias.length) {
-                                    return 0
-                                }
-
-                                return proximo
-
-                            })
+                            avancarMidia()
                         }}
                         onEnded={() => {
 

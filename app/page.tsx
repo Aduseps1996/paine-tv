@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import Chamada from "@/components/Chamada"
-import Relogio from "../components/Relogio"
 import BannerRotativo from "../components/BannerRotativo"
 import RodapeNoticias from "../components/RodapeNoticias"
 import Image from "next/image"
@@ -22,6 +21,7 @@ export default function Home() {
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
   const [logo, setLogo] = useState("/logos/logo.png")
   const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
+  const [slogan, setSlogan] = useState("Informação, acolhimento e compromisso com o associado.")
   const [fullscreenAtivado, setFullscreenAtivado] = useState(false)
 
   function chamarAtendimento() {
@@ -72,6 +72,8 @@ export default function Home() {
           dados.fallback || "/fallbacks/offline.jpg"
         )
 
+        setSlogan(dados.slogan || "")
+
       }
 
     }
@@ -93,8 +95,8 @@ export default function Home() {
         <Image
           src={logo}
           alt="Logo ADUSEPS"
-          width={110}
-          height={110}
+          width={150}
+          height={150}
           priority
           className="object-contain"
         />
@@ -110,8 +112,6 @@ export default function Home() {
         </div>
 
       </div>
-
-      <Relogio />
 
       <Chamada
         mostrar={mostrarChamada}
@@ -139,7 +139,7 @@ export default function Home() {
         )
       }
 
-      <RodapeNoticias />
+      <RodapeNoticias logo={logo} slogan={slogan} />
 
     </main>
   )
