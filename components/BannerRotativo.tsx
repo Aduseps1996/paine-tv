@@ -18,6 +18,7 @@ type Midia = {
     ativo: boolean
     ordem: number
     duracao: number
+    template?: "cheio" | "informativo"
 }
 
     export default function BannerRotativo({
@@ -110,8 +111,62 @@ type Midia = {
         )
     }
 
+    const templateAtual = midiaAtual.template || "cheio"
+
+    if (templateAtual === "informativo") {
+
+        return (
+
+            <div className="absolute inset-0">
+
+                <img
+                    src={midiaAtual.arquivo}
+                    alt="Banner institucional"
+                    onError={(e) => {
+                        e.currentTarget.src = fallback
+                    }}
+                    className={`absolute top-0 left-0 w-full h-[calc(100vh-6.5rem)] object-cover transition-opacity duration-[1600ms] ease-in-out ${
+                        visivel ? "opacity-100" : "opacity-0"
+                    }`}
+                />
+
+                <div className="absolute top-10 right-10 w-[420px] rounded-3xl overflow-hidden backdrop-blur-md bg-[#342c7c]/75 border border-white/10 shadow-2xl z-10">
+
+                    <div className="bg-[#34bcf8] px-6 py-4">
+
+                        <h2 className="text-2xl font-black text-white tracking-wide">
+                            ADUSEPS
+                        </h2>
+
+                    </div>
+
+                    <div className="p-6 text-white">
+
+                        <p className="text-3xl font-bold leading-tight">
+                            Informação e compromisso com o associado.
+                        </p>
+
+                        <div className="mt-6 h-px bg-white/10" />
+
+                        <p className="mt-6 text-lg text-white/80 leading-relaxed">
+                            Atendimento jurídico, financeiro e institucional com transparência e acolhimento.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        )
+
+    }
+
+
     return (
         <>
+            
+         */Adicono aqui*/
             {
                 midiaAtual.tipo === "imagem" ? (
 

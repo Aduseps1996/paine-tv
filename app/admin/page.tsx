@@ -31,6 +31,7 @@ type Midia = {
     ativo: boolean
     ordem: number
     duracao: number
+    template?: "cheio" | "informativo"
 }
 
 type Noticia = {
@@ -46,6 +47,7 @@ export default function AdminPage() {
 
     const [arquivo, setArquivo] = useState("")
     const [tipo, setTipo] = useState<"imagem" | "video">("imagem")
+    const [template, setTemplate] = useState<"cheio" | "informativo">("cheio")
     const [novaNoticia, setNovaNoticia] = useState("")
 
     const [email, setEmail] = useState("")
@@ -121,11 +123,13 @@ export default function AdminPage() {
             ativo: true,
             ordem: midias.length + 1,
             duracao: 8,
+            template,
             criadoEm: serverTimestamp()
         })
 
         setArquivo("")
         setTipo("imagem")
+        setTemplate("cheio")
         carregarMidias()
     }
 
@@ -497,7 +501,8 @@ export default function AdminPage() {
                         Adicionar mídia
                     </h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
                         <input
                             type="text"
                             placeholder="URL da imagem ou vídeo"
@@ -515,6 +520,17 @@ export default function AdminPage() {
                         >
                             <option value="imagem">imagem</option>
                             <option value="video">video</option>
+                        </select>
+
+                        <select
+                            value={template}
+                            onChange={(e) =>
+                                setTemplate(e.target.value as "cheio" | "informativo")
+                            }
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                        >
+                            <option value="cheio">Banner cheio</option>
+                            <option value="informativo">Informativo</option>
                         </select>
 
                         <button
