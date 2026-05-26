@@ -166,7 +166,7 @@ type Midia = {
     return (
         <>
             
-         */Adicono aqui*/
+         {/* Adiciono aqui */}
             {
                 midiaAtual.tipo === "imagem" ? (
 

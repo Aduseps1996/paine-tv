@@ -19,7 +19,8 @@ export default function Home() {
   const [chamadaAtiva, setChamadaAtiva] = useState(false)
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
-  const [logo, setLogo] = useState("/logos/logo.png")
+  const [logo, setLogo] = useState("")
+
   const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
   const [slogan, setSlogan] = useState("Informação, acolhimento e compromisso com o associado.")
   const [fullscreenAtivado, setFullscreenAtivado] = useState(false)
@@ -66,7 +67,7 @@ export default function Home() {
 
         setNomePainel(dados.nomePainel)
         setSubtitulo(dados.subtitulo)
-        setLogo(dados.logo || "/logos/logo.png")
+        setLogo(dados.logo || "")
 
         setFallback(
           dados.fallback || "/fallbacks/offline.jpg"
@@ -92,14 +93,16 @@ export default function Home() {
       
       <div className="absolute top-6 left-8 z-10 flex items-center gap-5">
 
-        <Image
-          src={logo}
-          alt="Logo ADUSEPS"
-          width={150}
-          height={150}
-          priority
-          className="object-contain"
-        />
+        {logo.trim() !== "" && (
+          <Image
+            src={logo}
+            alt="Logo ADUSEPS"
+            width={150}
+            height={150}
+            priority
+            className="object-contain"
+          />
+        )}
 
         <div className="flex flex-col">
           <h1 className="text-4xl font-black tracking-wider leading-none">

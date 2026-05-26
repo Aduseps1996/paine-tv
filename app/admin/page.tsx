@@ -41,6 +41,18 @@ type Noticia = {
     ordem: number
 }
 
+const limitarValor = (
+    valor: number,
+    minimo: number,
+    maximo: number,
+    padrao: number
+) => {
+    if (Number.isNaN(valor)) return padrao
+    if (valor < minimo) return minimo
+    if (valor > maximo) return maximo
+    return valor
+}
+
 export default function AdminPage() {
     const [midias, setMidias] = useState<Midia[]>([])
     const [noticias, setNoticias] = useState<Noticia[]>([])
@@ -57,13 +69,26 @@ export default function AdminPage() {
     const [nomePainel, setNomePainel] = useState("")
     const [subtitulo, setSubtitulo] = useState("")
     const [logo, setLogo] = useState("")
-    const [indicePreview, setIndicePreview] = useState(0)
-
     const [slogan, setSlogan] = useState("")
+
+    const [tamanhoFonteRodape, setTamanhoFonteRodape] = useState(28)
+    const [tamanhoFonteSlogan, setTamanhoFonteSlogan] = useState(18)
+    const [tamanhoFonteDataHora, setTamanhoFonteDataHora] = useState(18)
+    const [tamanhoFonteHora, setTamanhoFonteHora] = useState(24)
+    const [tamanhoIconeRodape, setTamanhoIconeRodape] = useState(22)
+    const [alturaBarraSuperior, setAlturaBarraSuperior] = useState(64)
+    const [alturaBarraNoticias, setAlturaBarraNoticias] = useState(44)
+    const [tamanhoLogoRodape, setTamanhoLogoRodape] = useState(44)
+
+    const [indicePreview, setIndicePreview] = useState(0)
     const [abaAtiva, setAbaAtiva] = useState("configuracoes")
 
     async function carregarMidias() {
-        const consulta = query(collection(db, "midias"), orderBy("ordem", "asc"))
+        const consulta = query(
+            collection(db, "midias"),
+            orderBy("ordem", "asc")
+        )
+
         const resultado = await getDocs(consulta)
 
         const lista = resultado.docs.map((documento) => ({
@@ -75,7 +100,11 @@ export default function AdminPage() {
     }
 
     async function carregarNoticias() {
-        const consulta = query(collection(db, "noticias"), orderBy("ordem", "asc"))
+        const consulta = query(
+            collection(db, "noticias"),
+            orderBy("ordem", "asc")
+        )
+
         const resultado = await getDocs(consulta)
 
         const lista = resultado.docs.map((documento) => ({
@@ -87,7 +116,9 @@ export default function AdminPage() {
     }
 
     async function carregarConfiguracoes() {
-        const documento = await getDoc(doc(db, "configuracoes", "geral"))
+        const documento = await getDoc(
+            doc(db, "configuracoes", "geral")
+        )
 
         if (documento.exists()) {
             const dados = documento.data()
@@ -96,20 +127,71 @@ export default function AdminPage() {
             setSubtitulo(dados.subtitulo || "")
             setLogo(dados.logo || "")
             setSlogan(dados.slogan || "")
+
+            setTamanhoFonteRodape(
+                limitarValor(Number(dados.tamanhoFonteRodape || 28), 12, 80, 28)
+            )
+
+            setTamanhoFonteSlogan(
+                limitarValor(Number(dados.tamanhoFonteSlogan || 18), 12, 80, 18)
+            )
+
+            setTamanhoFonteDataHora(
+                limitarValor(Number(dados.tamanhoFonteDataHora || 18), 12, 80, 18)
+            )
+
+            setTamanhoFonteHora(
+                limitarValor(Number(dados.tamanhoFonteHora || 24), 12, 80, 24)
+            )
+
+            setTamanhoIconeRodape(
+                limitarValor(Number(dados.tamanhoIconeRodape || 22), 12, 80, 22)
+            )
+
+            setAlturaBarraSuperior(
+                limitarValor(Number(dados.alturaBarraSuperior || 64), 40, 120, 64)
+            )
+
+            setAlturaBarraNoticias(
+                limitarValor(Number(dados.alturaBarraNoticias || 44), 30, 100, 44)
+            )
+
+            setTamanhoLogoRodape(
+                limitarValor(Number(dados.tamanhoLogoRodape || 44), 20, 100, 44)
+            )
         }
     }
 
     async function salvarConfiguracoes() {
+        const configuracoes = {
+            nomePainel,
+            subtitulo,
+            logo,
+            slogan,
+            tamanhoFonteRodape: limitarValor(tamanhoFonteRodape, 12, 80, 28),
+            tamanhoFonteSlogan: limitarValor(tamanhoFonteSlogan, 12, 80, 18),
+            tamanhoFonteDataHora: limitarValor(tamanhoFonteDataHora, 12, 80, 18),
+            tamanhoFonteHora: limitarValor(tamanhoFonteHora, 12, 80, 24),
+            tamanhoIconeRodape: limitarValor(tamanhoIconeRodape, 12, 80, 22),
+            alturaBarraSuperior: limitarValor(alturaBarraSuperior, 40, 120, 64),
+            alturaBarraNoticias: limitarValor(alturaBarraNoticias, 30, 100, 44),
+            tamanhoLogoRodape: limitarValor(tamanhoLogoRodape, 20, 100, 44)
+        }
+
         await setDoc(
             doc(db, "configuracoes", "geral"),
-            {
-                nomePainel,
-                subtitulo,
-                logo,
-                slogan
-            },
+            configuracoes,
             { merge: true }
         )
+
+        setTamanhoFonteRodape(configuracoes.tamanhoFonteRodape)
+        setTamanhoFonteSlogan(configuracoes.tamanhoFonteSlogan)
+        setTamanhoFonteDataHora(configuracoes.tamanhoFonteDataHora)
+        setTamanhoFonteHora(configuracoes.tamanhoFonteHora)
+        setTamanhoIconeRodape(configuracoes.tamanhoIconeRodape)
+        setAlturaBarraSuperior(configuracoes.alturaBarraSuperior)
+        setAlturaBarraNoticias(configuracoes.alturaBarraNoticias)
+        setTamanhoLogoRodape(configuracoes.tamanhoLogoRodape)
 
         alert("Configurações salvas!")
     }
@@ -119,7 +201,7 @@ export default function AdminPage() {
 
         await addDoc(collection(db, "midias"), {
             tipo,
-            arquivo,
+            arquivo: arquivo.trim(),
             ativo: true,
             ordem: midias.length + 1,
             duracao: 8,
@@ -137,7 +219,7 @@ export default function AdminPage() {
         if (novaNoticia.trim() === "") return
 
         await addDoc(collection(db, "noticias"), {
-            texto: novaNoticia,
+            texto: novaNoticia.trim(),
             ativo: true,
             ordem: noticias.length + 1,
             criadoEm: serverTimestamp()
@@ -187,10 +269,9 @@ export default function AdminPage() {
         return () => unsubscribe()
     }, [])
 
-    
     const midiasAtivas = midias
-    .filter((midia) => midia.ativo)
-    .sort((a, b) => a.ordem - b.ordem)
+        .filter((midia) => midia.ativo)
+        .sort((a, b) => a.ordem - b.ordem)
 
     const noticiasAtivas = noticias
         .filter((noticia) => noticia.ativo)
@@ -199,7 +280,6 @@ export default function AdminPage() {
     const midiaPreview = midiasAtivas[indicePreview]
 
     useEffect(() => {
-
         if (midiasAtivas.length === 0) return
 
         const midiaAtual = midiasAtivas[indicePreview]
@@ -211,28 +291,22 @@ export default function AdminPage() {
 
         if (midiaAtual.tipo !== "imagem") return
 
-            const intervalo = setInterval(() => {
+        const intervalo = setInterval(() => {
+            setIndicePreview((indiceAtual) => {
+                const proximoIndice = indiceAtual + 1
 
-                setIndicePreview((indiceAtual) => {
+                if (proximoIndice >= midiasAtivas.length) {
+                    return 0
+                }
 
-                    const proximoIndice = indiceAtual + 1
+                return proximoIndice
+            })
+        }, midiaAtual.duracao * 1000)
 
-                    if (proximoIndice >= midiasAtivas.length) {
-                        return 0
-                    }
-
-                    return proximoIndice
-
-                })
-
-            }, midiaAtual.duracao * 1000)
-
-            return () => clearInterval(intervalo)
-
-        }, [midiasAtivas.length, indicePreview])
+        return () => clearInterval(intervalo)
+    }, [midiasAtivas.length, indicePreview])
 
     if (!logado) {
-
         return (
             <main className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-8">
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 w-full max-w-md">
@@ -307,52 +381,46 @@ export default function AdminPage() {
             </p>
 
             <div className="flex flex-wrap gap-3 mb-6">
+                <button
+                    onClick={() => setAbaAtiva("configuracoes")}
+                    className={`px-5 py-3 rounded-xl font-bold transition ${abaAtiva === "configuracoes"
+                            ? "bg-blue-600 text-white"
+                            : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                        }`}
+                >
+                    Configurações
+                </button>
 
-            <button
-                onClick={() => setAbaAtiva("configuracoes")}
-                className={`px-5 py-3 rounded-xl font-bold transition ${
-                    abaAtiva === "configuracoes"
-                        ? "bg-blue-600 text-white"
-                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                }`}
-            >
-                Configurações
-            </button>
+                <button
+                    onClick={() => setAbaAtiva("previa")}
+                    className={`px-5 py-3 rounded-xl font-bold transition ${abaAtiva === "previa"
+                            ? "bg-blue-600 text-white"
+                            : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                        }`}
+                >
+                    Prévia da TV
+                </button>
 
-            <button
-                onClick={() => setAbaAtiva("previa")}
-                className={`px-5 py-3 rounded-xl font-bold transition ${
-                    abaAtiva === "previa"
-                        ? "bg-blue-600 text-white"
-                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                }`}
-            >
-                Prévia da TV
-            </button>
+                <button
+                    onClick={() => setAbaAtiva("midias")}
+                    className={`px-5 py-3 rounded-xl font-bold transition ${abaAtiva === "midias"
+                            ? "bg-blue-600 text-white"
+                            : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                        }`}
+                >
+                    Mídias
+                </button>
 
-            <button
-                onClick={() => setAbaAtiva("midias")}
-                className={`px-5 py-3 rounded-xl font-bold transition ${
-                    abaAtiva === "midias"
-                        ? "bg-blue-600 text-white"
-                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                }`}
-            >
-                Mídias
-            </button>
-
-            <button
-                onClick={() => setAbaAtiva("noticias")}
-                className={`px-5 py-3 rounded-xl font-bold transition ${
-                    abaAtiva === "noticias"
-                        ? "bg-blue-600 text-white"
-                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                }`}
-            >
-                Notícias
-            </button>
-
-        </div>
+                <button
+                    onClick={() => setAbaAtiva("noticias")}
+                    className={`px-5 py-3 rounded-xl font-bold transition ${abaAtiva === "noticias"
+                            ? "bg-blue-600 text-white"
+                            : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                        }`}
+                >
+                    Notícias
+                </button>
+            </div>
 
             {abaAtiva === "configuracoes" && (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
@@ -390,29 +458,218 @@ export default function AdminPage() {
                             placeholder="Slogan do rodapé"
                             value={slogan}
                             onChange={(e) => setSlogan(e.target.value)}
-                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none md:col-span-3"
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none md:col-span-2"
                         />
+
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
+                            <label className="block text-xs font-semibold text-zinc-400 mb-2">
+                                Fonte das notícias
+                            </label>
+
+                            <input
+                                type="number"
+                                min="12"
+                                max="80"
+                                value={tamanhoFonteRodape}
+                                onChange={(e) =>
+                                    setTamanhoFonteRodape(
+                                        limitarValor(Number(e.target.value), 12, 80, 28)
+                                    )
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                            />
+                        </div>
+
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
+                            <label className="block text-xs font-semibold text-zinc-400 mb-2">
+                                Fonte do slogan
+                            </label>
+
+                            <input
+                                type="number"
+                                min="12"
+                                max="80"
+                                value={tamanhoFonteSlogan}
+                                onChange={(e) =>
+                                    setTamanhoFonteSlogan(
+                                        limitarValor(Number(e.target.value), 12, 80, 18)
+                                    )
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                            />
+                        </div>
+
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
+                            <label className="block text-xs font-semibold text-zinc-400 mb-2">
+                                Fonte da data
+                            </label>
+
+                            <input
+                                type="number"
+                                min="12"
+                                max="80"
+                                value={tamanhoFonteDataHora}
+                                onChange={(e) =>
+                                    setTamanhoFonteDataHora(
+                                        limitarValor(Number(e.target.value), 12, 80, 18)
+                                    )
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                            />
+                        </div>
+
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
+                            <label className="block text-xs font-semibold text-zinc-400 mb-2">
+                                Fonte da hora
+                            </label>
+
+                            <input
+                                type="number"
+                                min="12"
+                                max="80"
+                                value={tamanhoFonteHora}
+                                onChange={(e) =>
+                                    setTamanhoFonteHora(
+                                        limitarValor(Number(e.target.value), 12, 80, 24)
+                                    )
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                            />
+                        </div>
+
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
+                            <label className="block text-xs font-semibold text-zinc-400 mb-2">
+                                Tamanho dos ícones
+                            </label>
+
+                            <input
+                                type="number"
+                                min="12"
+                                max="80"
+                                value={tamanhoIconeRodape}
+                                onChange={(e) =>
+                                    setTamanhoIconeRodape(
+                                        limitarValor(Number(e.target.value), 12, 80, 22)
+                                    )
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                            />
+                        </div>
+
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
+                            <label className="block text-xs font-semibold text-zinc-400 mb-2">
+                                Altura da barra superior
+                            </label>
+
+                            <input
+                                type="number"
+                                min="40"
+                                max="120"
+                                value={alturaBarraSuperior}
+                                onChange={(e) =>
+                                    setAlturaBarraSuperior(
+                                        limitarValor(Number(e.target.value), 40, 120, 64)
+                                    )
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                            />
+                        </div>
+
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
+                            <label className="block text-xs font-semibold text-zinc-400 mb-2">
+                                Altura da barra de notícias
+                            </label>
+
+                            <input
+                                type="number"
+                                min="30"
+                                max="100"
+                                value={alturaBarraNoticias}
+                                onChange={(e) =>
+                                    setAlturaBarraNoticias(
+                                        limitarValor(Number(e.target.value), 30, 100, 44)
+                                    )
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                            />
+                        </div>
+
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
+                            <label className="block text-xs font-semibold text-zinc-400 mb-2">
+                                Tamanho da logo no rodapé
+                            </label>
+
+                            <input
+                                type="number"
+                                min="20"
+                                max="100"
+                                value={tamanhoLogoRodape}
+                                onChange={(e) =>
+                                    setTamanhoLogoRodape(
+                                        limitarValor(Number(e.target.value), 20, 100, 44)
+                                    )
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 outline-none"
+                            />
+                        </div>
                     </div>
 
                     <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
                         <p className="text-sm text-zinc-400 mb-4">
-                            Pré-visualização
+                            Pré-visualização do rodapé
                         </p>
 
-                        <div className="flex items-center gap-5">
-                            <img
-                                src={logo || "/logos/logo.png"}
-                                alt="Prévia da logo"
-                                className="w-20 h-20 object-contain bg-white rounded-xl p-2"
-                            />
+                        <div className="rounded-2xl overflow-hidden border border-zinc-800">
+                            <div
+                                className="bg-[#0f2f70] border-t-4 border-[#f15434] flex items-center px-8 gap-6"
+                                style={{ height: `${alturaBarraSuperior}px` }}
+                            >
+                                <span
+                                    className="font-semibold"
+                                    style={{ fontSize: `${tamanhoFonteDataHora}px` }}
+                                >
+                                    26 de maio de 2026
+                                </span>
 
-                            <div>
-                                <h3 className="text-3xl font-black tracking-wider leading-none">
-                                    {nomePainel || "ADUSEPS"}
-                                </h3>
+                                <div className="h-8 w-px bg-white/25" />
 
-                                <p className="text-zinc-400 mt-2">
-                                    {subtitulo || "Painel Institucional"}
+                                <span
+                                    className="font-black"
+                                    style={{ fontSize: `${tamanhoFonteHora}px` }}
+                                >
+                                    14:30
+                                </span>
+
+                                <div className="h-8 w-px bg-white/25" />
+
+                                <p
+                                    className="font-medium text-white/90 tracking-wide flex-1"
+                                    style={{ fontSize: `${tamanhoFonteSlogan}px` }}
+                                >
+                                    {slogan || "Slogan do rodapé"}
+                                </p>
+
+                                <div className="h-8 w-px bg-white/25" />
+
+                                <img
+                                    src={logo || "/logos/logo.png"}
+                                    alt="Prévia da logo"
+                                    className="w-auto object-contain drop-shadow-md"
+                                    style={{ height: `${tamanhoLogoRodape}px` }}
+                                />
+                            </div>
+
+                            <div
+                                className="bg-[#2454a4] flex items-center overflow-hidden px-6"
+                                style={{ height: `${alturaBarraNoticias}px` }}
+                            >
+                                <p
+                                    className="font-medium whitespace-nowrap"
+                                    style={{ fontSize: `${tamanhoFonteRodape}px` }}
+                                >
+                                    {noticiasAtivas.length > 0
+                                        ? noticiasAtivas.map((noticia) => noticia.texto).join("   •   ")
+                                        : "Prévia das notícias do rodapé"}
                                 </p>
                             </div>
                         </div>
@@ -428,15 +685,12 @@ export default function AdminPage() {
             )}
 
             {abaAtiva === "previa" && (
-
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-
                     <h2 className="text-2xl font-bold mb-4">
                         Prévia da TV
                     </h2>
 
                     <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-zinc-700">
-
                         {midiaPreview && midiaPreview.tipo === "imagem" && (
                             <img
                                 src={midiaPreview.arquivo}
@@ -457,7 +711,6 @@ export default function AdminPage() {
                         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/80 to-transparent" />
 
                         <div className="absolute top-5 left-6 flex items-center gap-4">
-
                             <img
                                 src={logo || "/logos/logo.png"}
                                 alt="Logo"
@@ -465,7 +718,6 @@ export default function AdminPage() {
                             />
 
                             <div>
-
                                 <h3 className="text-2xl font-black tracking-wider leading-none">
                                     {nomePainel || "ADUSEPS"}
                                 </h3>
@@ -473,148 +725,117 @@ export default function AdminPage() {
                                 <p className="text-xs text-zinc-300 mt-1">
                                     {subtitulo || "Painel Institucional"}
                                 </p>
+                            </div>
+                        </div>
 
+                        <div
+                            className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden"
+                        >
+                            <div
+                                className="bg-[#0f2f70] border-t-4 border-[#f15434] flex items-center px-8 gap-6"
+                                style={{ height: `${alturaBarraSuperior}px` }}
+                            >
+                                <span
+                                    className="font-semibold"
+                                    style={{ fontSize: `${tamanhoFonteDataHora}px` }}
+                                >
+                                    26 de maio de 2026
+                                </span>
+
+                                <div className="h-8 w-px bg-white/25" />
+
+                                <span
+                                    className="font-black"
+                                    style={{ fontSize: `${tamanhoFonteHora}px` }}
+                                >
+                                    14:30
+                                </span>
+
+                                <div className="h-8 w-px bg-white/25" />
+
+                                <p
+                                    className="font-medium text-white/90 tracking-wide flex-1"
+                                    style={{ fontSize: `${tamanhoFonteSlogan}px` }}
+                                >
+                                    {slogan || "Slogan do rodapé"}
+                                </p>
+
+                                <div className="h-8 w-px bg-white/25" />
+
+                                <img
+                                    src={logo || "/logos/logo.png"}
+                                    alt="Logo ADUSEPS"
+                                    className="w-auto object-contain drop-shadow-md"
+                                    style={{ height: `${tamanhoLogoRodape}px` }}
+                                />
                             </div>
 
+                            <div
+                                className="bg-[#2454a4] flex items-center overflow-hidden px-6"
+                                style={{ height: `${alturaBarraNoticias}px` }}
+                            >
+                                <p
+                                    className="font-medium whitespace-nowrap"
+                                    style={{ fontSize: `${tamanhoFonteRodape}px` }}
+                                >
+                                    {noticiasAtivas.length > 0
+                                        ? noticiasAtivas.map((noticia) => noticia.texto).join("   •   ")
+                                        : "Prévia das notícias do rodapé"}
+                                </p>
+                            </div>
                         </div>
-
-                        <div className="absolute bottom-0 left-0 w-full bg-zinc-950 border-t-4 border-blue-600 h-14 flex items-center overflow-hidden">
-
-                            <p className="text-lg font-bold whitespace-nowrap px-6">
-
-                                {noticiasAtivas.length > 0
-                                    ? noticiasAtivas.map((noticia) => noticia.texto).join("   •   ")
-                                    : "Prévia das notícias do rodapé"}
-                            </p>
-
-                        </div>
-
                     </div>
-
                 </div>
             )}
 
             {abaAtiva === "midias" && (
-
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-                    <h2 className="text-2xl font-bold mb-4">
-                        Adicionar mídia
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-                        <input
-                            type="text"
-                            placeholder="URL da imagem ou vídeo"
-                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                            value={arquivo}
-                            onChange={(e) => setArquivo(e.target.value)}
-                        />
-
-                        <select
-                            value={tipo}
-                            onChange={(e) =>
-                                setTipo(e.target.value as "imagem" | "video")
-                            }
-                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                        >
-                            <option value="imagem">imagem</option>
-                            <option value="video">video</option>
-                        </select>
-
-                        <select
-                            value={template}
-                            onChange={(e) =>
-                                setTemplate(e.target.value as "cheio" | "informativo")
-                            }
-                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                        >
-                            <option value="cheio">Banner cheio</option>
-                            <option value="informativo">Informativo</option>
-                        </select>
-
-                        <button
-                            onClick={adicionarMidia}
-                            className="bg-blue-600 hover:bg-blue-700 transition rounded-xl font-bold"
-                        >
+                <>
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+                        <h2 className="text-2xl font-bold mb-4">
                             Adicionar mídia
-                        </button>
-                    </div>
+                        </h2>
 
-                    {arquivo.trim() !== "" && (
-                        <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input
+                                type="text"
+                                placeholder="URL da imagem ou vídeo"
+                                className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                value={arquivo}
+                                onChange={(e) => setArquivo(e.target.value)}
+                            />
 
-                            <p className="text-sm text-zinc-400 mb-4">
-                                Pré-visualização da mídia
-                            </p>
+                            <select
+                                value={tipo}
+                                onChange={(e) =>
+                                    setTipo(e.target.value as "imagem" | "video")
+                                }
+                                className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                            >
+                                <option value="imagem">imagem</option>
+                                <option value="video">video</option>
+                            </select>
 
-                            {tipo === "imagem" ? (
-                                <img
-                                    src={arquivo}
-                                    alt="Prévia da mídia"
-                                    className="w-full max-h-80 object-contain rounded-xl border border-zinc-700 bg-black"
-                                />
-                            ) : (
-                                <video
-                                    src={arquivo}
-                                    controls
-                                    muted
-                                    className="w-full max-h-80 rounded-xl border border-zinc-700 bg-black"
-                                />
-                            )}
+                            <select
+                                value={template}
+                                onChange={(e) =>
+                                    setTemplate(e.target.value as "cheio" | "informativo")
+                                }
+                                className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                            >
+                                <option value="cheio">Banner cheio</option>
+                                <option value="informativo">Informativo</option>
+                            </select>
 
+                            <button
+                                onClick={adicionarMidia}
+                                className="bg-blue-600 hover:bg-blue-700 transition rounded-xl font-bold"
+                            >
+                                Adicionar mídia
+                            </button>
                         </div>
-                    )}
-
-                </div>
-            )}
-
-            {abaAtiva === "noticias" && (
-
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-                    <h2 className="text-2xl font-bold mb-4">
-                        Adicionar notícia
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4">
-                        <input
-                            type="text"
-                            placeholder="Texto da notícia do rodapé"
-                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                            value={novaNoticia}
-                            onChange={(e) => setNovaNoticia(e.target.value)}
-                        />
-
-                        <button
-                            onClick={adicionarNoticia}
-                            className="bg-green-600 hover:bg-green-700 transition rounded-xl font-bold"
-                        >
-                            Adicionar notícia
-                        </button>
                     </div>
 
-                    
-                        {novaNoticia.trim() !== "" && (
-                            <div className="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
-
-                                <p className="text-sm text-zinc-400 mb-4">
-                                    Pré-visualização da notícia
-                                </p>
-
-                                <div className="bg-zinc-900 border-l-4 border-blue-600 rounded-xl px-6 py-4 overflow-hidden">
-                                    <p className="text-2xl font-bold whitespace-nowrap">
-                                        {novaNoticia}
-                                    </p>
-                                </div>
-
-                            </div>
-                        )}
-                </div>
-            )}
-
-            {(abaAtiva === "midias" || abaAtiva === "noticias") && (
-                <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                    <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
                         <h2 className="text-2xl font-bold mb-4">
                             Mídias cadastradas
                         </h2>
@@ -627,11 +848,8 @@ export default function AdminPage() {
                                 >
                                     <div className="flex items-center gap-2 mb-3">
                                         <div
-                                            className={`w-3 h-3 rounded-full ${
-                                                midia.ativo
-                                                    ? "bg-green-500"
-                                                    : "bg-red-500"
-                                            }`}
+                                            className={`w-3 h-3 rounded-full ${midia.ativo ? "bg-green-500" : "bg-red-500"
+                                                }`}
                                         />
 
                                         <span className="text-sm text-zinc-400">
@@ -666,7 +884,7 @@ export default function AdminPage() {
                                         Ordem: {midia.ordem} | Duração: {midia.duracao}s
                                     </p>
 
-                                    <div className="mt-3 flex items-center gap-2">
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
                                         <span className="text-sm text-zinc-400">
                                             Duração:
                                         </span>
@@ -692,7 +910,7 @@ export default function AdminPage() {
                                         </span>
                                     </div>
 
-                                    <div className="mt-3 flex items-center gap-2">
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
                                         <span className="text-sm text-zinc-400">
                                             Ordem:
                                         </span>
@@ -723,23 +941,48 @@ export default function AdminPage() {
 
                                     <button
                                         onClick={() =>
-                                            midia.id &&
-                                            alternarMidia(midia.id, midia.ativo)
+                                            midia.id && alternarMidia(midia.id, midia.ativo)
                                         }
-                                        className={`mt-3 ml-3 px-4 py-2 rounded-lg text-sm font-bold ${
-                                            midia.ativo
+                                        className={`mt-3 ml-3 px-4 py-2 rounded-lg text-sm font-bold ${midia.ativo
                                                 ? "bg-yellow-600 hover:bg-yellow-700"
                                                 : "bg-green-600 hover:bg-green-700"
-                                        }`}
+                                            }`}
                                     >
                                         {midia.ativo ? "Desativar" : "Ativar"}
                                     </button>
                                 </div>
                             ))}
                         </div>
+                    </section>
+                </>
+            )}
+
+            {abaAtiva === "noticias" && (
+                <>
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+                        <h2 className="text-2xl font-bold mb-4">
+                            Adicionar notícia
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4">
+                            <input
+                                type="text"
+                                placeholder="Texto da notícia do rodapé"
+                                className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                value={novaNoticia}
+                                onChange={(e) => setNovaNoticia(e.target.value)}
+                            />
+
+                            <button
+                                onClick={adicionarNoticia}
+                                className="bg-green-600 hover:bg-green-700 transition rounded-xl font-bold"
+                            >
+                                Adicionar notícia
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                    <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
                         <h2 className="text-2xl font-bold mb-4">
                             Notícias do rodapé
                         </h2>
@@ -752,11 +995,8 @@ export default function AdminPage() {
                                 >
                                     <div className="flex items-center gap-2 mb-3">
                                         <div
-                                            className={`w-3 h-3 rounded-full ${
-                                                noticia.ativo
-                                                    ? "bg-green-500"
-                                                    : "bg-red-500"
-                                            }`}
+                                            className={`w-3 h-3 rounded-full ${noticia.ativo ? "bg-green-500" : "bg-red-500"
+                                                }`}
                                         />
 
                                         <span className="text-sm text-zinc-400">
@@ -778,7 +1018,7 @@ export default function AdminPage() {
                                         className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 outline-none resize-none min-h-[100px]"
                                     />
 
-                                    <div className="mt-3 flex items-center gap-2">
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
                                         <span className="text-sm text-zinc-400">
                                             Ordem:
                                         </span>
@@ -801,9 +1041,7 @@ export default function AdminPage() {
                                     </div>
 
                                     <button
-                                        onClick={() =>
-                                            noticia.id && removerNoticia(noticia.id)
-                                        }
+                                        onClick={() => noticia.id && removerNoticia(noticia.id)}
                                         className="mt-3 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold"
                                     >
                                         Excluir
@@ -811,22 +1049,20 @@ export default function AdminPage() {
 
                                     <button
                                         onClick={() =>
-                                            noticia.id &&
-                                            alternarNoticia(noticia.id, noticia.ativo)
+                                            noticia.id && alternarNoticia(noticia.id, noticia.ativo)
                                         }
-                                        className={`mt-3 ml-3 px-4 py-2 rounded-lg text-sm font-bold ${
-                                            noticia.ativo
+                                        className={`mt-3 ml-3 px-4 py-2 rounded-lg text-sm font-bold ${noticia.ativo
                                                 ? "bg-yellow-600 hover:bg-yellow-700"
                                                 : "bg-green-600 hover:bg-green-700"
-                                        }`}
+                                            }`}
                                     >
                                         {noticia.ativo ? "Desativar" : "Ativar"}
                                     </button>
                                 </div>
                             ))}
                         </div>
-                    </div>
-                </section>
+                    </section>
+                </>
             )}
         </main>
     )
