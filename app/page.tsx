@@ -25,9 +25,19 @@ export default function Home() {
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
   const [logo, setLogo] = useState("")
 
-  const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
   const [slogan, setSlogan] = useState("Informação, acolhimento e compromisso com o associado.")
-  
+  const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
+  const tocarSomChamada = () => {
+    try {
+      const audio = new Audio("/sons/chamada.mp3")
+
+      audio.volume = 0.7
+
+      audio.play().catch(() => {})
+    } catch {}
+  }
+
+
   /*  
     STATE PARA TESTAR O FULLSCREEN APENAS EM DESENVOLVIMENTO, APAGAR QUANDO FOR PARA PRODUÇÃO
     const [fullscreenAtivado, setFullscreenAtivado] = useState(false)
@@ -90,6 +100,7 @@ export default function Home() {
         )
 
         setMostrarChamada(true)
+        tocarSomChamada()
 
         setTimeout(() => {
           setMostrarChamada(false)
@@ -141,6 +152,8 @@ export default function Home() {
         guiche={guicheAtual}
       />
 
+      
+
       {/* 
 
         BOTÃO FULLSCREEN (APENAS PARA DESENVOLVIMENTO)
@@ -164,6 +177,8 @@ export default function Home() {
           )
         }
       */}
+
+      
 
       <RodapeNoticias logo={logo} slogan={slogan} />
 
