@@ -182,8 +182,6 @@ export default function BannerRotativo({
                             }`}
                     />
 
-                    
-
                 ) : (
 
                     <video
@@ -214,8 +212,8 @@ export default function BannerRotativo({
                 )
             }
             
-            {/* Overlay para melhorar a legibilidade do conteúdo */ }
-            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-black/20 pointer-events-none" />
+            {/* Overlay para melhorar a legibilidade do conteúdo 
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-black/20 pointer-events-none" />*/ }
 
         </>
     )
