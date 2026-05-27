@@ -8,7 +8,8 @@ import Image from "next/image"
 
 import {
   doc,
-  onSnapshot
+  onSnapshot,
+  updateDoc
 } from "firebase/firestore"
 
 import { db } from "../lib/firebase"
@@ -81,7 +82,7 @@ export default function Home() {
 
         const dados = documento.data()
 
-        if (!dados) return
+        if (!dados || dados.ativo !== true) return
 
         setNomeAtual(
           (dados.nome || "SEM NOME").toUpperCase()
@@ -102,8 +103,17 @@ export default function Home() {
         setMostrarChamada(true)
         tocarSomChamada()
 
-        setTimeout(() => {
+        setTimeout(async () => {
+
           setMostrarChamada(false)
+
+          await updateDoc(
+            doc(db, "painel_chamadas", "atual"),
+            {
+              ativo: false
+            }
+          )
+
         }, 6000)
 
       }
@@ -118,32 +128,55 @@ export default function Home() {
 
       <BannerRotativo fallback={fallback} />
 
-      <div className="absolute top-0 left-0 w-full h-28 bg-gradient-to-b from-black/80 to-transparent z-10" />
+      <div className="absolute top-0 left-0 w-full h-36 bg-gradient-to-b from-black/75 via-black/35 to-transparent z-10" />
+      
+      {/* Overlay para melhorar a legibilidade do conteúdo */ }
+      <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/30 z-[1]" />
 
-      <div className="absolute top-6 left-8 z-10 flex items-center gap-5">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_45%,rgba(0,0,0,0.28)_100%)] z-[1]" />
 
-        {logo.trim() !== "" && (
-          <Image
-            src={logo}
-            alt="Logo ADUSEPS"
-            width={150}
-            height={150}
-            priority
-            className="object-contain"
-          />
-        )}
+      {(
+  logo.trim() !== "" ||
+  nomePainel.trim() !== "" ||
+  subtitulo.trim() !== ""
+) && (
 
-        <div className="flex flex-col">
-          <h1 className="text-4xl font-black tracking-wider leading-none">
+  <div className="absolute top-6 left-8 z-10 flex items-center gap-4 rounded-2xl border border-white/10 bg-black/15 px-4 py-3 backdrop-blur-sm shadow-[0_14px_35px_rgba(0,0,0,0.30)]">
+
+    {logo.trim() !== "" && (
+      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/95 p-2 shadow-md">
+        <Image
+          src={logo}
+          alt="Logo ADUSEPS"
+          width={120}
+          height={120}
+          priority
+          className="max-h-full max-w-full object-contain"
+        />
+      </div>
+    )}
+
+    {(nomePainel.trim() !== "" || subtitulo.trim() !== "") && (
+      <div className="flex flex-col">
+
+        {nomePainel.trim() !== "" && (
+          <h1 className="text-2xl font-black tracking-[0.06em] leading-none text-white drop-shadow-sm">
             {nomePainel}
           </h1>
+        )}
 
-          <span className="text-sm text-zinc-300 mt-1 tracking-wide">
+        {subtitulo.trim() !== "" && (
+          <span className="mt-2 text-sm font-medium text-white/75 tracking-[0.18em] uppercase">
             {subtitulo}
           </span>
-        </div>
+        )}
 
       </div>
+    )}
+
+  </div>
+
+)}
 
       <Chamada
         mostrar={mostrarChamada}
@@ -152,7 +185,7 @@ export default function Home() {
         guiche={guicheAtual}
       />
 
-      
+      {/* ADICIOANR BOTÃO PARA TESTE DE CHAMADA */}
 
       {/* 
 

@@ -15,12 +15,13 @@ export default function Chamada({
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center px-8 pointer-events-none animate-[fadeIn_300ms_ease-out]">
-      <div className="absolute inset-0 bg-black/35 backdrop-blur-[3px]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/55 backdrop-blur-[2px]" />
 
-      <div className="absolute w-[700px] h-[700px] rounded-full bg-[#34bcf8]/20 blur-3xl" />
+      <div className="absolute w-[850px] h-[850px] rounded-full bg-[#34bcf8]/15 blur-3xl" />
 
-      <div className="relative w-full max-w-4xl overflow-hidden rounded-[32px] border border-white/20 bg-[#0f2f70]/95 shadow-[0_35px_100px_rgba(0,0,0,0.65)] animate-[cardEntrada_420ms_ease-out]">
-        <div className="bg-[#f15434] px-8 py-4 text-center">
+      <div className="relative w-full max-w-4xl overflow-hidden rounded-[32px] border border-white/20 bg-gradient-to-br from-[#0f2f70]/95 via-[#123a86]/95 to-[#071b42]/95 shadow-[0_35px_100px_rgba(0,0,0,0.65)] animate-[cardEntrada_650ms_cubic-bezier(0.22,1,0.36,1)]">
+
+        <div className="bg-gradient-to-r from-[#f15434] to-[#d94125] px-8 py-4 text-center">
           <p className="text-xl font-black uppercase tracking-[0.28em] text-white">
             Chamando atendimento
           </p>
@@ -31,26 +32,36 @@ export default function Chamada({
             Associado
           </p>
 
-          <h1 className="text-6xl font-black leading-tight text-white">
+          <h1 className="
+            mx-auto
+            max-w-[900px]
+            text-5xl
+            xl:text-6xl
+            font-black
+            leading-[1.05]
+            text-white
+            break-words
+            line-clamp-2
+          ">
             {nome}
           </h1>
 
           <div className="mt-8 space-y-4">
             <div className="rounded-2xl border border-white/15 bg-white/10 px-8 py-5">
-              <p className="text-3xl font-black text-white">
+              <p className="text-2xl xl:text-3xl font-black text-white leading-tight break-words">
                 {matricula}
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/15 bg-white/10 px-8 py-5">
-              <p className="text-3xl font-black text-white">
+              <p className="text-2xl xl:text-3xl font-black text-white leading-tight break-words">
                 {guiche}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="h-2 bg-[#34bcf8]" />
+        <div className="h-2 bg-gradient-to-r from-[#34bcf8] via-white/70 to-[#34bcf8]" />
       </div>
     </div>
   )

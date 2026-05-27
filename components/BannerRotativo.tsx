@@ -21,17 +21,18 @@ type Midia = {
     template?: "cheio" | "informativo"
 }
 
-    export default function BannerRotativo({
-        fallback
-    }: {
-        fallback: string
-    }) {
+export default function BannerRotativo({
+    fallback
+}: {
+    fallback: string
+}) {
 
     const [midias, setMidias] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
     const [visivel, setVisivel] = useState(true)
 
     const midiaAtual = midias[indiceAtual]
+    const possuiRotacao = midias.length > 1
 
     function avancarMidia() {
         if (midias.length <= 1) return
@@ -125,9 +126,8 @@ type Midia = {
                     onError={(e) => {
                         e.currentTarget.src = fallback
                     }}
-                    className={`absolute top-0 left-0 w-full h-[calc(100vh-6.5rem)] object-cover transition-opacity duration-[1600ms] ease-in-out ${
-                        visivel ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={`absolute top-0 left-0 w-full h-[calc(100vh-6.5rem)] object-cover scale-[1.02] animate-[zoomBanner_22s_linear_infinite] brightness-[0.96] contrast-[1.04] saturate-[1.02] transition-opacity duration-[1600ms] ease-in-out ${visivel ? "opacity-100" : "opacity-0"
+                        }`}
                 />
 
                 <div className="absolute top-10 right-10 w-[420px] rounded-3xl overflow-hidden backdrop-blur-md bg-[#342c7c]/75 border border-white/10 shadow-2xl z-10">
@@ -162,11 +162,10 @@ type Midia = {
 
     }
 
-
     return (
         <>
-            
-         {/* Adiciono aqui */}
+
+            {/* Adiciono aqui */}
             {
                 midiaAtual.tipo === "imagem" ? (
 
@@ -176,10 +175,14 @@ type Midia = {
                         onError={(e) => {
                             e.currentTarget.src = fallback
                         }}
-                        className={`absolute top-0 left-0 w-full h-[calc(100vh-6.7rem)] object-cover transition-opacity duration-[1600ms] ease-in-out ${
-                            visivel ? "opacity-100" : "opacity-0"
-                        }`}
+                        className={`absolute top-0 left-0 w-full h-[calc(100vh-6.7rem)] object-cover ${possuiRotacao
+                                ? `transition-opacity duration-[1600ms] ease-in-out ${visivel ? "opacity-100" : "opacity-0"
+                                }`
+                                : ""
+                            }`}
                     />
+
+                    
 
                 ) : (
 
@@ -187,14 +190,16 @@ type Midia = {
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
-                        className={`absolute top-0 left-0 w-full h-[calc(100vh-6.7rem)] object-cover transition-opacity duration-[1600ms] ease-in-out ${
-                            visivel ? "opacity-100" : "opacity-0"
-                        }`}
+                        className={`absolute top-0 left-0 w-full h-[calc(100vh-6.7rem)] object-cover brightness-[0.96] contrast-[1.04] saturate-[1.02] ${possuiRotacao
+                                ? `transition-opacity duration-[1600ms] ease-in-out ${visivel ? "opacity-100" : "opacity-0"
+                                }`
+                                : ""
+                            }`}
 
                         onError={() => {
                             avancarMidia()
                         }}
-                        
+
                         onEnded={(e) => {
                             if (midias.length <= 1) {
                                 e.currentTarget.currentTime = 0
@@ -208,6 +213,10 @@ type Midia = {
 
                 )
             }
+            
+            {/* Overlay para melhorar a legibilidade do conteúdo */ }
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-black/20 pointer-events-none" />
+
         </>
     )
 }

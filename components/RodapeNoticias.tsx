@@ -137,9 +137,9 @@ export default function RodapeNoticias({
     })
 
     return (
-        <div className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden shadow-[0_-12px_35px_rgba(0,0,0,0.35)]">
+        <div className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden border-t border-white/10 backdrop-blur-sm shadow-[0_-18px_45px_rgba(0,0,0,0.45)]">
             <div
-                className="bg-[#0f2f70] border-t-4 border-[#f15434] flex items-center px-8 gap-6"
+                className="bg-[#0b2557]/95 border-t-4 border-[#f15434] flex items-center px-8 gap-6"
                 style={{ height: `${alturaBarraSuperior}px` }}
             >
                 <div className="flex items-center gap-3">
@@ -183,20 +183,23 @@ export default function RodapeNoticias({
 
                 <div className="h-8 w-px bg-white/25" />
 
-                <img
-                    src={logo || "/logos/logo.png"}
-                    alt="Logo ADUSEPS"
-                    className="w-auto object-contain drop-shadow-md"
-                    style={{ height: `${tamanhoLogoRodape}px` }}
-                />
+                {logo.trim() !== "" && (
+                    <img
+                        src={logo}
+                        alt="Logo ADUSEPS"
+                        className="w-auto object-contain drop-shadow-md"
+                        style={{ height: `${tamanhoLogoRodape}px` }}
+                    />
+                )}
+
             </div>
 
             <div
-                className="bg-[#2454a4] flex items-center overflow-hidden"
+                className="bg-[#183b78]/95 flex items-center overflow-hidden"
                 style={{ height: `${alturaBarraNoticias}px` }}
             >
                 <div
-                    className="whitespace-nowrap animate-[marquee_80s_linear_infinite] font-medium leading-none tracking-[0.12em] antialiased text-white"
+                    className="whitespace-nowrap animate-[marquee_65s_linear_infinite] font-medium leading-none tracking-[0.06em] antialiased text-white"
                     style={{ fontSize: `${tamanhoFonteRodape}px` }}
                 >
                     {noticias.map((noticia, index) => (
@@ -204,7 +207,7 @@ export default function RodapeNoticias({
                             key={noticia.id}
                             className="inline-flex items-center"
                         >
-                            <span className="mx-10">
+                            <span className="mx-8">
                                 {noticia.texto}
                             </span>
 
