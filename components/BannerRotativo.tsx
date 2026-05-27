@@ -34,6 +34,8 @@ type Midia = {
     const midiaAtual = midias[indiceAtual]
 
     function avancarMidia() {
+        if (midias.length <= 1) return
+
         setVisivel(false)
 
         setTimeout(() => {
@@ -86,19 +88,17 @@ type Midia = {
     }, [])
 
     useEffect(() => {
-
         if (!midiaAtual) return
+
+        if (midias.length <= 1) return
 
         if (midiaAtual.tipo !== "imagem") return
 
         const intervaloBanner = setInterval(() => {
-
             avancarMidia()
-
         }, midiaAtual.duracao * 1000)
 
         return () => clearInterval(intervaloBanner)
-
     }, [midiaAtual, midias.length])
 
     if (midias.length === 0 || !midiaAtual) {
@@ -194,20 +194,15 @@ type Midia = {
                         onError={() => {
                             avancarMidia()
                         }}
-                        onEnded={() => {
+                        
+                        onEnded={(e) => {
+                            if (midias.length <= 1) {
+                                e.currentTarget.currentTime = 0
+                                e.currentTarget.play()
+                                return
+                            }
 
-                            setIndiceAtual((valorAtual) => {
-
-                                const proximo = valorAtual + 1
-
-                                if (proximo >= midias.length) {
-                                    return 0
-                                }
-
-                                return proximo
-
-                            })
-
+                            avancarMidia()
                         }}
                     />
 
