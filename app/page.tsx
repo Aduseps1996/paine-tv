@@ -7,38 +7,11 @@ import RodapeNoticias from "../components/RodapeNoticias"
 import Image from "next/image"
 
 import {
-  collection,
   doc,
-  onSnapshot,
-  orderBy,
-  query
+  onSnapshot
 } from "firebase/firestore"
 
 import { db } from "../lib/firebase"
-
-type Atendimento = {
-  id?: string
-  pessoa_id: string
-  associado_id?: string | null
-  profissional_id?: string | null
-  status: string
-  inicio_atendimento?: any
-}
-
-type Pessoa = {
-  id?: string
-  nome: string
-}
-
-type Associado = {
-  id?: string
-  matricula: string
-}
-
-type Profissional = {
-  id?: string
-  nome: string
-}
 
 
 export default function Home() {
@@ -54,14 +27,11 @@ export default function Home() {
 
   const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
   const [slogan, setSlogan] = useState("Informação, acolhimento e compromisso com o associado.")
-  const [fullscreenAtivado, setFullscreenAtivado] = useState(false)
-
-  const [pessoas, setPessoas] = useState<Pessoa[]>([])
-  const [associados, setAssociados] = useState<Associado[]>([])
-  const [profissionais, setProfissionais] = useState<Profissional[]>([])
-  const [ultimoAtendimentoChamadoId, setUltimoAtendimentoChamadoId] = useState("")
-
-
+  
+  /*  
+    STATE PARA TESTAR O FULLSCREEN APENAS EM DESENVOLVIMENTO, APAGAR QUANDO FOR PARA PRODUÇÃO
+    const [fullscreenAtivado, setFullscreenAtivado] = useState(false)
+  */
   useEffect(() => {
 
     const unsubscribe = onSnapshot(
@@ -92,118 +62,45 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(db, "pessoas"),
-      (resultado) => {
-        const lista = resultado.docs.map((documento) => ({
-          id: documento.id,
-          ...documento.data()
-        })) as Pessoa[]
 
-        setPessoas(lista)
+    const unsubscribe = onSnapshot(
+      doc(db, "painel_chamadas", "atual"),
+      (documento) => {
+
+        if (!documento.exists()) return
+
+        const dados = documento.data()
+
+        if (!dados) return
+
+        setNomeAtual(
+          (dados.nome || "SEM NOME").toUpperCase()
+        )
+
+        setMatriculaAtual(
+          dados.matricula
+            ? `Matrícula ${dados.matricula}`
+            : "Sem matrícula"
+        )
+
+        setGuicheAtual(
+          dados.profissional
+            ? `Atendimento: ${dados.profissional}`
+            : "Atendimento"
+        )
+
+        setMostrarChamada(true)
+
+        setTimeout(() => {
+          setMostrarChamada(false)
+        }, 6000)
+
       }
     )
 
     return () => unsubscribe()
+
   }, [])
-
-  useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(db, "associados"),
-      (resultado) => {
-        const lista = resultado.docs.map((documento) => ({
-          id: documento.id,
-          ...documento.data()
-        })) as Associado[]
-
-        setAssociados(lista)
-      }
-    )
-
-    return () => unsubscribe()
-  }, [])
-
-  useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(db, "profissionais"),
-      (resultado) => {
-        const lista = resultado.docs.map((documento) => ({
-          id: documento.id,
-          ...documento.data()
-        })) as Profissional[]
-
-        setProfissionais(lista)
-      }
-    )
-
-    return () => unsubscribe()
-  }, [])
-
-  useEffect(() => {
-    const consulta = query(
-      collection(db, "atendimentos"),
-      orderBy("inicio_atendimento", "desc")
-    )
-
-    const unsubscribe = onSnapshot(consulta, (resultado) => {
-      const atendimentos = resultado.docs.map((documento) => ({
-        id: documento.id,
-        ...documento.data()
-      })) as Atendimento[]
-
-      const ultimoEmAtendimento = atendimentos.find(
-        (atendimento) =>
-          atendimento.status === "em_atendimento" &&
-          atendimento.inicio_atendimento
-      )
-
-      if (!ultimoEmAtendimento?.id) return
-
-      if (ultimoEmAtendimento.id === ultimoAtendimentoChamadoId) return
-
-      const pessoa = pessoas.find(
-        (item) => item.id === ultimoEmAtendimento.pessoa_id
-      )
-
-      const associado = associados.find(
-        (item) => item.id === ultimoEmAtendimento.associado_id
-      )
-
-      const profissional = profissionais.find(
-        (item) => item.id === ultimoEmAtendimento.profissional_id
-      )
-
-      setNomeAtual(
-        pessoa?.nome?.toUpperCase() || "PESSOA NÃO ENCONTRADA"
-      )
-
-      setMatriculaAtual(
-        associado?.matricula
-          ? `Matrícula ${associado.matricula}`
-          : "Sem matrícula"
-      )
-
-      setGuicheAtual(
-        profissional?.nome
-          ? `Atendimento: ${profissional.nome}`
-          : "Atendimento"
-      )
-
-      setUltimoAtendimentoChamadoId(ultimoEmAtendimento.id)
-      setMostrarChamada(true)
-
-      setTimeout(() => {
-        setMostrarChamada(false)
-      }, 6000)
-    })
-
-    return () => unsubscribe()
-  }, [
-    pessoas,
-    associados,
-    profissionais,
-    ultimoAtendimentoChamadoId
-  ])
 
   return (
     <main className="w-screen h-screen text-white relative overflow-hidden">
@@ -244,24 +141,29 @@ export default function Home() {
         guiche={guicheAtual}
       />
 
-      {
-        !fullscreenAtivado && (
+      {/* 
 
-          <button
-            onClick={() => {
+        BOTÃO FULLSCREEN (APENAS PARA DESENVOLVIMENTO)
+        APAGAR QUANDO FOR PARA PRODUÇÃO
+        {
+          !fullscreenAtivado && process.env.NODE_ENV === "development" && (
 
-              document.documentElement.requestFullscreen()
+            <button
+              onClick={() => {
 
-              setFullscreenAtivado(true)
+                document.documentElement.requestFullscreen()
 
-            }}
-            className="absolute top-6 right-8 z-50 bg-white text-black px-5 py-3 rounded-xl font-bold"
-          >
-            Tela cheia
-          </button>
+                setFullscreenAtivado(true)
 
-        )
-      }
+              }}
+              className="absolute top-6 right-8 z-50 bg-white text-black px-5 py-3 rounded-xl font-bold"
+            >
+              Tela cheia
+            </button>
+
+          )
+        }
+      */}
 
       <RodapeNoticias logo={logo} slogan={slogan} />
 
