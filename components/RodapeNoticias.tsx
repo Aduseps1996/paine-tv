@@ -143,6 +143,7 @@ export default function RodapeNoticias({
                 style={{ height: `${alturaBarraSuperior}px` }}
             >
                 <div className="flex items-center gap-3">
+                    {/* Icone rodapé calendario*/}
                     <CalendarDays
                         size={tamanhoIconeRodape}
                         className="text-[#f15434]"
@@ -159,6 +160,7 @@ export default function RodapeNoticias({
                 <div className="h-8 w-px bg-white/25" />
 
                 <div className="flex items-center gap-3">
+                    {/* Icone rodapé relógio*/}
                     <Clock3
                         size={tamanhoIconeRodape}
                         className="text-[#f15434]"
