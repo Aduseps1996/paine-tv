@@ -137,7 +137,7 @@ export default function RodapeNoticias({
     })
 
     return (
-        <div className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden border-t border-white/10 backdrop-blur-sm shadow-[0_-18px_45px_rgba(0,0,0,0.45)]">
+        <div className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden border-t border-white/10 bg-[#0b2557]/95 shadow-[0_-18px_45px_rgba(0,0,0,0.45)]">
             <div
                 className="bg-[#0b2557]/95 border-t-4 border-[#f15434] flex items-center px-8 gap-6"
                 style={{ height: `${alturaBarraSuperior}px` }}

@@ -155,7 +155,7 @@ export default function Home() {
       {/* Overlay para melhorar a legibilidade do conteúdo */}
       <div className="absolute inset-0 bg-black/5 z-[1]" />
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_45%,rgba(0,0,0,0.28)_100%)] z-[1]" />
+      <div className="absolute inset-0 z-[1]" />
 
       {(
         logo.trim() !== "" ||

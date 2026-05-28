@@ -15,9 +15,9 @@ export default function Chamada({
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center px-8 pointer-events-none animate-[fadeIn_300ms_ease-out]">
-      <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/55 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/55 backdrop-blur-[1px]" />
 
-      <div className="absolute w-[850px] h-[850px] rounded-full bg-[#34bcf8]/15 blur-3xl" />
+      <div className="absolute w-[850px] h-[850px] rounded-full bg-[#34bcf8]/15 blur-xl" />
 
       <div className="relative w-full max-w-4xl overflow-hidden rounded-[32px] border border-white/20 bg-gradient-to-br from-[#0f2f70]/95 via-[#123a86]/95 to-[#071b42]/95 shadow-[0_35px_100px_rgba(0,0,0,0.65)] animate-[cardEntrada_650ms_cubic-bezier(0.22,1,0.36,1)]">
 
