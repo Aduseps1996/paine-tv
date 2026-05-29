@@ -23,6 +23,7 @@ export default function Home() {
   const [guicheAtual, setGuicheAtual] = useState("Guichê 2")
   const [chamadaAtiva, setChamadaAtiva] = useState(false)
   const [ultimaChamadaId, setUltimaChamadaId] = useState("")
+  const [painelIniciadoEm] = useState(() => Date.now())
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
   const [logo, setLogo] = useState("")
@@ -84,11 +85,21 @@ export default function Home() {
 
         const dados = documento.data()
 
-        if (!dados || dados.ativo !== true) return
+if (!dados || dados.ativo !== true) return
 
-        if (dados.atendimento_id === ultimaChamadaId) return
+const criadoEmMs = dados.criado_em?.toMillis?.() || 0
 
-        setUltimaChamadaId(dados.atendimento_id)
+if (criadoEmMs < painelIniciadoEm) {
+  updateDoc(doc(db, "painel_chamadas", "atual"), {
+    ativo: false
+  })
+
+  return
+}
+
+if (dados.atendimento_id === ultimaChamadaId) return
+
+setUltimaChamadaId(dados.atendimento_id)
 
         setNomeAtual(
           (dados.nome || "SEM NOME").toUpperCase()
@@ -127,7 +138,7 @@ export default function Home() {
 
     return () => unsubscribe()
 
-  }, [ultimaChamadaId])
+  }, [ultimaChamadaId, painelIniciadoEm])
 
   /* Aviso offline */
   useEffect(() => {
@@ -248,4 +259,4 @@ export default function Home() {
 
     </main>
   )
-}
+} 
