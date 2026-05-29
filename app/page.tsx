@@ -22,6 +22,7 @@ export default function Home() {
   const [matriculaAtual, setMatriculaAtual] = useState("Matrícula 1548")
   const [guicheAtual, setGuicheAtual] = useState("Guichê 2")
   const [chamadaAtiva, setChamadaAtiva] = useState(false)
+  const [ultimaChamadaId, setUltimaChamadaId] = useState("")
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
   const [logo, setLogo] = useState("")
@@ -85,6 +86,10 @@ export default function Home() {
 
         if (!dados || dados.ativo !== true) return
 
+        if (dados.atendimento_id === ultimaChamadaId) return
+
+        setUltimaChamadaId(dados.atendimento_id)
+
         setNomeAtual(
           (dados.nome || "SEM NOME").toUpperCase()
         )
@@ -122,7 +127,7 @@ export default function Home() {
 
     return () => unsubscribe()
 
-  }, [])
+  }, [ultimaChamadaId])
 
   /* Aviso offline */
   useEffect(() => {
