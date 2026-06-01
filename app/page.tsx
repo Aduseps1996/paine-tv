@@ -179,10 +179,10 @@ setUltimaChamadaId(dados.atendimento_id)
         subtitulo.trim() !== ""
       ) && (
 
-          <div className="absolute top-6 left-8 z-10 flex items-center gap-4 rounded-2xl border border-white/10 bg-black/15 px-4 py-3 backdrop-blur-sm shadow-[0_14px_35px_rgba(0,0,0,0.30)]">
+          <div className="absolute top-[clamp(0.75rem,2vh,1.5rem)] left-[clamp(0.75rem,2vw,2rem)] z-10 flex items-center gap-[clamp(0.5rem,1.5vw,1rem)] rounded-2xl border border-white/10 bg-black/15 px-[clamp(0.75rem,2vw,1rem)] py-[clamp(0.5rem,1.5vh,0.75rem)] backdrop-blur-sm shadow-[0_14px_35px_rgba(0,0,0,0.30)]">
 
             {logo.trim() !== "" && (
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/95 p-2 shadow-md">
+              <div className="flex h-[clamp(2.5rem,5vw,3.5rem)] w-[clamp(2.5rem,5vw,3.5rem)] items-center justify-center rounded-xl bg-white/95 p-2 shadow-md">
                 <Image
                   src={logo}
                   alt="Logo ADUSEPS"
@@ -198,13 +198,13 @@ setUltimaChamadaId(dados.atendimento_id)
               <div className="flex flex-col">
 
                 {nomePainel.trim() !== "" && (
-                  <h1 className="text-2xl font-black tracking-[0.06em] leading-none text-white drop-shadow-sm">
+                  <h1 className="text-[clamp(1.2rem,2.5vw,2rem)] font-black tracking-[0.06em] leading-none text-white drop-shadow-sm">
                     {nomePainel}
                   </h1>
                 )}
 
                 {subtitulo.trim() !== "" && (
-                  <span className="mt-2 text-sm font-medium text-white/75 tracking-[0.18em] uppercase">
+                  <span className="mt-2 text-[clamp(0.65rem,1vw,0.9rem)] font-medium text-white/75 tracking-[0.18em] uppercase">
                     {subtitulo}
                   </span>
                 )}

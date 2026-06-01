@@ -137,9 +137,9 @@ export default function RodapeNoticias({
     })
 
     return (
-        <div className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden border-t border-white/10 bg-[#0b2557]/95 shadow-[0_-18px_45px_rgba(0,0,0,0.45)]">
+        <div className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden border-t border-white/10 shadow-[0_-18px_45px_rgba(0,0,0,0.45)]">
             <div
-                className="bg-[#0b2557]/95 border-t-4 border-[#f15434] flex items-center px-8 gap-6"
+                className="bg-[#0b2557]/95 border-t-4 border-[#f15434] flex items-center px-[clamp(0.75rem,2vw,2rem)] gap-[clamp(0.5rem,1.4vw,1.5rem)]"
                 style={{ height: `${alturaBarraSuperior}px` }}
             >
                 <div className="flex items-center gap-3">
@@ -157,7 +157,7 @@ export default function RodapeNoticias({
                     </span>
                 </div>
 
-                <div className="h-8 w-px bg-white/25" />
+                <div className="h-[clamp(1.25rem,4vh,2rem)] w-px bg-white/25" />
 
                 <div className="flex items-center gap-3">
                     {/* Icone rodapé relógio*/}
@@ -174,7 +174,7 @@ export default function RodapeNoticias({
                     </span>
                 </div>
 
-                <div className="h-8 w-px bg-white/25" />
+                <div className="h-[clamp(1.25rem,4vh,2rem)] w-px bg-white/25" />
 
                 <p
                     className="font-medium text-white/90 tracking-wide flex-1"
@@ -183,7 +183,7 @@ export default function RodapeNoticias({
                     {slogan}
                 </p>
 
-                <div className="h-8 w-px bg-white/25" />
+                <div className="h-[clamp(1.25rem,4vh,2rem)] w-px bg-white/25" />
 
                 {logo.trim() !== "" && (
                     <img
@@ -197,7 +197,7 @@ export default function RodapeNoticias({
             </div>
 
             <div
-                className="bg-[#183b78]/95 flex items-center overflow-hidden"
+                className="bg-[#183b78]/95 flex items-center overflow-hidden px-[clamp(0.5rem,1.5vw,1.5rem)]"
                 style={{ height: `${alturaBarraNoticias}px` }}
             >
                 <div
@@ -209,13 +209,13 @@ export default function RodapeNoticias({
                             key={noticia.id}
                             className="inline-flex items-center"
                         >
-                            <span className="mx-8">
+                            <span className="mx-[clamp(1rem,3vw,2rem)]">
                                 {noticia.texto}
                             </span>
 
                             {index < noticias.length - 1 && (
                                 <span
-                                    className="text-[#f15434] mx-6 opacity-90"
+                                    className="text-[#f15434] mx-[clamp(0.75rem,2vw,1.5rem)] opacity-90"
                                     style={{ fontSize: `${tamanhoFonteRodape}px` }}
                                 >
                                     •
