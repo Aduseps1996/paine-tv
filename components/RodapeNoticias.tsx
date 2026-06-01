@@ -157,86 +157,91 @@ export default function RodapeNoticias({
     })
 
     const mostrarTarjaFinal =
-    midiaAtual?.mostrarTarja ?? mostrarTarjaTv
+        midiaAtual?.mostrarTarja ?? mostrarTarjaTv
 
-const etiquetaTarjaFinal =
-    midiaAtual?.tarjaEtiqueta || "ADUSEPS INFORMA"
+    const etiquetaTarjaFinal =
+        midiaAtual?.tarjaEtiqueta || "ADUSEPS INFORMA"
 
-const tituloTarjaFinal =
-    midiaAtual?.tarjaTitulo || slogan || "Informação e compromisso com o associado"
+    const tituloTarjaFinal =
+        midiaAtual?.tarjaTitulo || slogan || "Informação e compromisso com o associado"
 
-const subtituloTarjaFinal =
-    midiaAtual?.tarjaSubtitulo || data
+    const subtituloTarjaFinal =
+        midiaAtual?.tarjaSubtitulo || data
 
-const tempoEntradaTarjaFinal =
-    Number(midiaAtual?.tempoEntradaTarja || tempoEntradaTarja)
+    const tempoEntradaTarjaFinal =
+        Number(midiaAtual?.tempoEntradaTarja || tempoEntradaTarja)
 
-const tempoVisivelTarjaFinal =
-    Number(midiaAtual?.tempoVisivelTarja || tempoVisivelTarja)
+    const tempoVisivelTarjaFinal =
+        Number(midiaAtual?.tempoVisivelTarja || tempoVisivelTarja)
 
-const tempoSaidaTarjaFinal =
-    Number(midiaAtual?.tempoSaidaTarja || tempoSaidaTarja)
+    const tempoSaidaTarjaFinal =
+        Number(midiaAtual?.tempoSaidaTarja || tempoSaidaTarja)
 
-const tempoOcultaTarjaFinal =
-    Number(
-        midiaAtual?.tempoOcultaTarja ||
-        tempoOcultaTarja
-    )
+    const tempoOcultaTarjaFinal =
+        Number(
+            midiaAtual?.tempoOcultaTarja ||
+            tempoOcultaTarja
+        )
+
+    const modeloTarjaFinal =
+        midiaAtual?.modeloTarja || "telejornal"
 
     useEffect(() => {
-    if (!mostrarTarjaFinal) {
-        setFaseTarja("oculta")
-        return
-    }
+        if (!mostrarTarjaFinal) {
+            setFaseTarja("oculta")
+            return
+        }
 
-    let ativo = true
-
-    function iniciarCiclo() {
-        if (!ativo) return
+        let ativo = true
 
         setFaseTarja("oculta")
 
-        setTimeout(() => {
+        function iniciarCiclo() {
             if (!ativo) return
 
-            setFaseTarja("entrando")
+            setFaseTarja("oculta")
 
             setTimeout(() => {
                 if (!ativo) return
 
-                setFaseTarja("visivel")
+                setFaseTarja("entrando")
 
                 setTimeout(() => {
                     if (!ativo) return
 
-                    setFaseTarja("saindo")
+                    setFaseTarja("visivel")
 
                     setTimeout(() => {
                         if (!ativo) return
 
-                        iniciarCiclo()
-                    }, tempoSaidaTarjaFinal * 1000)
+                        setFaseTarja("saindo")
 
-                }, tempoVisivelTarjaFinal * 1000)
+                        setTimeout(() => {
+                            if (!ativo) return
 
-            }, tempoEntradaTarjaFinal * 1000)
+                            iniciarCiclo()
+                        }, tempoSaidaTarjaFinal * 1000)
 
-        }, tempoOcultaTarjaFinal * 1000)
-    }
+                    }, tempoVisivelTarjaFinal * 1000)
 
-    iniciarCiclo()
+                }, tempoEntradaTarjaFinal * 1000)
 
-    return () => {
-        ativo = false
-    }
-}, [
-    mostrarTarjaFinal,
-    tempoEntradaTarjaFinal,
-    tempoVisivelTarjaFinal,
-    tempoSaidaTarjaFinal,
-    tempoOcultaTarjaFinal,
-    midiaAtual?.id
-])
+            }, 150)
+        }
+
+        iniciarCiclo()
+
+        return () => {
+            ativo = false
+        }
+    }, [
+        mostrarTarjaFinal,
+        tempoEntradaTarjaFinal,
+        tempoVisivelTarjaFinal,
+        tempoSaidaTarjaFinal,
+        tempoOcultaTarjaFinal,
+        midiaAtual?.id
+    ])
 
     return (
         <>
@@ -245,23 +250,22 @@ const tempoOcultaTarjaFinal =
                 className="absolute left-0 right-0 z-30 pointer-events-none"
                 /* Altura da tarja */
                 style={{
-                    bottom: `${alturaBarraNoticias + 25}px`
+                    bottom: `${alturaBarraNoticias + 35}px`
                 }}
             >
-                {mostrarTarjaFinal && (
+                {mostrarTarjaFinal && modeloTarjaFinal === "telejornal" && (
                     <div
-                        className={`relative mx-auto w-[94vw] transition-all ${
-                            faseTarja === "entrando" || faseTarja === "visivel"
-                                ? "translate-x-0 opacity-100"
-                                : "-translate-x-[120%] opacity-0"
-                        }`}
+                        className={`relative mx-auto w-[94vw] transition-all ${faseTarja === "entrando" || faseTarja === "visivel"
+                            ? "translate-x-0 opacity-100"
+                            : "-translate-x-[120%] opacity-0"
+                            }`}
                         style={{
-                           transitionDuration:
-    faseTarja === "entrando"
-        ? `${tempoEntradaTarjaFinal}s`
-        : faseTarja === "saindo"
-        ? `${tempoSaidaTarjaFinal}s`
-        : "0s"
+                            transitionDuration:
+                                faseTarja === "entrando"
+                                    ? `${tempoEntradaTarjaFinal}s`
+                                    : faseTarja === "saindo"
+                                        ? `${tempoSaidaTarjaFinal}s`
+                                        : "0s"
                         }}
                     >
 
@@ -283,7 +287,7 @@ const tempoOcultaTarjaFinal =
                             <div className="absolute right-[190px] top-0 h-full w-20 skew-x-[-28deg] bg-white/95" />
 
                             <div className="relative z-10 flex items-center justify-between gap-4 px-10 py-3">
-                                <div className="min-w-0 pl-4 pr-8">
+                                <div className="min-w-0 pl-6 pr-8">
                                     <h2
                                         className="truncate font-black uppercase leading-none text-[#071b42]"
                                         style={{
@@ -330,6 +334,150 @@ const tempoOcultaTarjaFinal =
 
                             <div className="h-1.5 bg-[#073bd9]" />
                         </div>
+                    </div>
+                )}
+
+                {mostrarTarjaFinal && modeloTarjaFinal === "compacta" && (
+                    <div
+                        className={`relative mx-auto w-[92vw] transition-all ${faseTarja === "entrando" || faseTarja === "visivel"
+                            ? "translate-x-0 opacity-100"
+                            : "-translate-x-[120%] opacity-0"
+                            }`}
+                        style={{
+                            transitionDuration:
+                                faseTarja === "entrando"
+                                    ? `${tempoEntradaTarjaFinal}s`
+                                    : faseTarja === "saindo"
+                                        ? `${tempoSaidaTarjaFinal}s`
+                                        : "0s"
+                        }}
+                    >
+                        <div className="rounded-2xl bg-black/75 backdrop-blur-md border border-white/10 px-8 py-3 shadow-2xl">
+
+                            <div className="flex items-center gap-4">
+
+                                <span className="text-[#34bcf8] font-black uppercase tracking-[0.18em] text-xs">
+                                    {etiquetaTarjaFinal}
+                                </span>
+
+                                <div className="h-4 w-px bg-white/20" />
+
+                                <span className="font-bold text-white text-xl truncate">
+                                    {tituloTarjaFinal}
+                                </span>
+
+                            </div>
+
+                            {subtituloTarjaFinal && (
+                                <p className="mt-1 text-white/70 text-sm truncate">
+                                    {subtituloTarjaFinal}
+                                </p>
+                            )}
+
+                        </div>
+                    </div>
+                )}
+
+                {mostrarTarjaFinal && modeloTarjaFinal === "live" && (
+                    <div
+                        className={`relative mx-auto w-[92vw] transition-all ${faseTarja === "entrando" || faseTarja === "visivel"
+                                ? "translate-x-0 opacity-100"
+                                : "-translate-x-[120%] opacity-0"
+                            }`}
+                        style={{
+                            transitionDuration:
+                                faseTarja === "entrando"
+                                    ? `${tempoEntradaTarjaFinal}s`
+                                    : faseTarja === "saindo"
+                                        ? `${tempoSaidaTarjaFinal}s`
+                                        : "0s"
+                        }}
+                    >
+                        <div className="relative flex items-stretch overflow-hidden rounded-xl border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.45)]">
+
+    {/* LIVE NEWS */}
+    <div className="relative z-20 flex w-[170px] shrink-0 flex-col items-center justify-center bg-gradient-to-br from-[#d53a3a] via-[#b61f1f] to-[#7f1111] px-5 py-3 text-white">
+
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),transparent_55%)]" />
+
+        <span className="relative text-[clamp(1.1rem,2vw,1.8rem)] font-light leading-none tracking-[0.08em]">
+            LIVE
+        </span>
+
+        <span className="relative mt-1 text-[clamp(0.75rem,1.3vw,1rem)] font-black uppercase tracking-[0.30em]">
+            NEWS
+        </span>
+        
+        {/* QR Code */}
+        {midiaAtual?.qrcode && midiaAtual.qrcode.trim() !== "" && (
+            <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(midiaAtual.qrcode)}`}
+                alt="QR Code"
+                className="relative mt-2 h-14 w-14 rounded-md bg-white p-1"
+            />
+        )}
+
+    </div>
+
+    {/* CORTE DIAGONAL */}
+    <div className="relative z-10 -ml-5 w-16 shrink-0 skew-x-[-32deg] bg-gradient-to-b from-[#111827] to-[#374151]" />
+
+    {/* CONTEÚDO */}
+    <div className="relative -ml-8 flex min-w-0 flex-1 flex-col justify-center bg-gradient-to-b from-white to-[#eef2f6] px-10 py-2">
+
+        <div className="absolute left-0 top-0 h-full w-[6px] bg-[#111827]" />
+
+        <h2
+            className="truncate font-black pl-4 uppercase leading-none text-[#0f172a]"
+            style={{
+                fontSize: `${Math.max(tamanhoFonteSlogan + 6, 22)}px`
+            }}
+        >
+            {tituloTarjaFinal}
+        </h2>
+
+        <div className="mt-2 flex items-center">
+            <div className="h-[2px] w-10 bg-[#d53a3a]" />
+
+            <div className="ml-3 rounded-md bg-[#dfe4ea] px-3 py-1">
+                <p
+                    className="truncate font-semibold text-[#334155]"
+                    style={{
+                        fontSize: `${Math.max(tamanhoFonteSlogan - 4, 12)}px`
+                    }}
+                >
+                    {subtituloTarjaFinal}
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    {/* HORA */}
+<div className="relative flex w-[145px] shrink-0 items-center justify-center overflow-hidden bg-[#061f55]">
+
+    <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#073bd9] to-[#03153d]" />
+
+    <div className="absolute left-0 top-0 h-full w-4 skew-x-[-18deg] bg-white/20" />
+
+    <div className="relative flex flex-col items-center leading-none">
+        <span className="text-[10px] font-black uppercase tracking-[0.28em] text-white/70">
+            AO VIVO
+        </span>
+
+        <span
+            className="mt-1 font-black text-white tracking-wide drop-shadow"
+            style={{
+                fontSize: `${tamanhoFonteHora}px`
+            }}
+        >
+            {hora}
+        </span>
+    </div>
+
+</div>
+
+</div>
                     </div>
                 )}
             </div>

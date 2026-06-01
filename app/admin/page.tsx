@@ -99,6 +99,8 @@ export default function AdminPage() {
         "cheio" | "informativo" | "institucional" | "urgente"
     >("cheio")
     const [novaNoticia, setNovaNoticia] = useState("")
+    const [modeloTarjaMidia, setModeloTarjaMidia] =
+    useState<"telejornal" | "compacta" | "live">("telejornal")
 
     // estado de autenticação do usuário
     const [email, setEmail] = useState("")
@@ -291,6 +293,7 @@ export default function AdminPage() {
             tempoVisivelTarja: tempoVisivelTarjaMidia,
             tempoSaidaTarja: tempoSaidaTarjaMidia,
             tempoOcultaTarja: tempoOcultaTarjaMidia,
+            modeloTarja: modeloTarjaMidia,
 
             criadoEm: serverTimestamp()
         })
@@ -314,6 +317,7 @@ export default function AdminPage() {
         setTempoVisivelTarjaMidia(8)
         setTempoSaidaTarjaMidia(1)
         setTempoOcultaTarjaMidia(10)
+        setModeloTarjaMidia("telejornal")
 
 
         carregarMidias()
@@ -585,6 +589,8 @@ export default function AdminPage() {
                     tempoSaidaTarjaMidia={tempoSaidaTarjaMidia}
                     tempoOcultaTarjaMidia={tempoOcultaTarjaMidia}
                     setTempoOcultaTarjaMidia={setTempoOcultaTarjaMidia}
+                    modeloTarjaMidia={modeloTarjaMidia}
+                    setModeloTarjaMidia={setModeloTarjaMidia}
 
                     setMostrarTarjaMidia={setMostrarTarjaMidia}
                     setTarjaEtiquetaMidia={setTarjaEtiquetaMidia}
