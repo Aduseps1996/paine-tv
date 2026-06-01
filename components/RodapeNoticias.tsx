@@ -46,8 +46,11 @@ export default function RodapeNoticias({
     const [tempoEntradaTarja, setTempoEntradaTarja] = useState(1)
     const [tempoVisivelTarja, setTempoVisivelTarja] = useState(8)
     const [tempoSaidaTarja, setTempoSaidaTarja] = useState(1)
+    const [tempoOcultaTarja, setTempoOcultaTarja] = useState(10)
 
-    const [faseTarja, setFaseTarja] = useState<"entrando" | "visivel" | "saindo">("saindo")
+    const [faseTarja, setFaseTarja] = useState<
+        "oculta" | "entrando" | "visivel" | "saindo"
+    >("oculta")
 
     function limitarValor(valor: unknown, minimo: number, maximo: number, padrao: number) {
         const numero = Number(valor)
@@ -133,6 +136,9 @@ export default function RodapeNoticias({
                 setTempoEntradaTarja(Number(dados.tempoEntradaTarja || 1))
                 setTempoVisivelTarja(Number(dados.tempoVisivelTarja || 8))
                 setTempoSaidaTarja(Number(dados.tempoSaidaTarja || 1))
+                setTempoOcultaTarja(
+                    Number(dados.tempoOcultaTarja || 10)
+                )
             }
         )
 
@@ -171,38 +177,66 @@ const tempoVisivelTarjaFinal =
 const tempoSaidaTarjaFinal =
     Number(midiaAtual?.tempoSaidaTarja || tempoSaidaTarja)
 
+const tempoOcultaTarjaFinal =
+    Number(
+        midiaAtual?.tempoOcultaTarja ||
+        tempoOcultaTarja
+    )
+
     useEffect(() => {
-        if (!mostrarTarjaTv) return
+    if (!mostrarTarjaFinal) {
+        setFaseTarja("oculta")
+        return
+    }
 
-        setFaseTarja("entrando")
+    let ativo = true
 
-        const tempoEntrada = tempoEntradaTarja * 1000
-        const tempoVisivel = tempoVisivelTarja * 1000
-        const tempoSaida = tempoSaidaTarja * 1000
+    function iniciarCiclo() {
+        if (!ativo) return
 
-        const timerVisivel = setTimeout(() => {
-            setFaseTarja("visivel")
-        }, tempoEntrada)
+        setFaseTarja("oculta")
 
-        const timerSaindo = setTimeout(() => {
-            setFaseTarja("saindo")
-        }, tempoEntrada + tempoVisivel)
+        setTimeout(() => {
+            if (!ativo) return
 
-        const timerReiniciar = setTimeout(() => {
             setFaseTarja("entrando")
-        }, tempoEntrada + tempoVisivel + tempoSaida)
 
-        return () => {
-            clearTimeout(timerVisivel)
-            clearTimeout(timerSaindo)
-            clearTimeout(timerReiniciar)
-        }
-    }, [
-        mostrarTarjaFinal,
-        tempoEntradaTarjaFinal,
-        tempoVisivelTarjaFinal,
-        tempoSaidaTarjaFinal
-    ])
+            setTimeout(() => {
+                if (!ativo) return
+
+                setFaseTarja("visivel")
+
+                setTimeout(() => {
+                    if (!ativo) return
+
+                    setFaseTarja("saindo")
+
+                    setTimeout(() => {
+                        if (!ativo) return
+
+                        iniciarCiclo()
+                    }, tempoSaidaTarjaFinal * 1000)
+
+                }, tempoVisivelTarjaFinal * 1000)
+
+            }, tempoEntradaTarjaFinal * 1000)
+
+        }, tempoOcultaTarjaFinal * 1000)
+    }
+
+    iniciarCiclo()
+
+    return () => {
+        ativo = false
+    }
+}, [
+    mostrarTarjaFinal,
+    tempoEntradaTarjaFinal,
+    tempoVisivelTarjaFinal,
+    tempoSaidaTarjaFinal,
+    tempoOcultaTarjaFinal,
+    midiaAtual?.id
+])
 
     return (
         <>
@@ -217,19 +251,17 @@ const tempoSaidaTarjaFinal =
                 {mostrarTarjaFinal && (
                     <div
                         className={`relative mx-auto w-[94vw] transition-all ${
-                            faseTarja === "entrando"
-                                ? "translate-x-0 opacity-100"
-                                : faseTarja === "visivel"
+                            faseTarja === "entrando" || faseTarja === "visivel"
                                 ? "translate-x-0 opacity-100"
                                 : "-translate-x-[120%] opacity-0"
                         }`}
                         style={{
                            transitionDuration:
-                            faseTarja === "entrando"
-                                ? `${tempoEntradaTarjaFinal}s`
-                                : faseTarja === "saindo"
-                                ? `${tempoSaidaTarjaFinal}s`
-                                : "0s"
+    faseTarja === "entrando"
+        ? `${tempoEntradaTarjaFinal}s`
+        : faseTarja === "saindo"
+        ? `${tempoSaidaTarjaFinal}s`
+        : "0s"
                         }}
                     >
 

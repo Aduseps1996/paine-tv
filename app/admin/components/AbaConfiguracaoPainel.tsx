@@ -8,6 +8,7 @@ type Props = {
     tempoEntradaTarja: number
     tempoVisivelTarja: number
     tempoSaidaTarja: number
+    tempoOcultaTarja: number
 
     setNomePainel: (valor: string) => void
     setSubtitulo: (valor: string) => void
@@ -18,6 +19,8 @@ type Props = {
     setTempoEntradaTarja: (valor: number) => void
     setTempoVisivelTarja: (valor: number) => void
     setTempoSaidaTarja: (valor: number) => void
+    setTempoOcultaTarja: (valor: number) => void
+    
 
     salvarConfiguracoes: () => void
 }
@@ -41,6 +44,8 @@ export default function AbaConfiguracaoPainel({
     setTempoEntradaTarja,
     setTempoVisivelTarja,
     setTempoSaidaTarja,
+    tempoOcultaTarja,
+    setTempoOcultaTarja,
     salvarConfiguracoes
 }: Props) {
 
@@ -161,6 +166,23 @@ export default function AbaConfiguracaoPainel({
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
             />
         </div>
+
+        <div className="flex flex-col gap-2">
+    <label className="text-sm font-medium text-zinc-300">
+        Tempo oculto
+    </label>
+
+    <input
+        type="number"
+        min="0"
+        step="1"
+        value={tempoOcultaTarja}
+        onChange={(e) =>
+            setTempoOcultaTarja(Number(e.target.value))
+        }
+        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+    />
+</div>
     </div>
 </div>
 

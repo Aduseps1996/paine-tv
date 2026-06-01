@@ -119,12 +119,14 @@ export default function AdminPage() {
     const [alturaBarraSuperior, setAlturaBarraSuperior] = useState(64)
     const [alturaBarraNoticias, setAlturaBarraNoticias] = useState(44)
     const [tamanhoLogoRodape, setTamanhoLogoRodape] = useState(44)
+    const [tempoOcultaTarja, setTempoOcultaTarja] = useState(10)
 
     // configurações de fallback e tarja de TV
     const [mostrarTarjaTv, setMostrarTarjaTv] = useState(true)
     const [tempoEntradaTarja, setTempoEntradaTarja] = useState(1)
     const [tempoVisivelTarja, setTempoVisivelTarja] = useState(8)
     const [tempoSaidaTarja, setTempoSaidaTarja] = useState(1)
+    const [tempoOcultaTarjaMidia, setTempoOcultaTarjaMidia] = useState(10)
 
     // controle de navegação entre abas e índice da pré-visualização
     const [indicePreview, setIndicePreview] = useState(0)
@@ -184,6 +186,7 @@ export default function AdminPage() {
             setTempoEntradaTarja(Number(dados.tempoEntradaTarja || 1))
             setTempoVisivelTarja(Number(dados.tempoVisivelTarja || 8))
             setTempoSaidaTarja(Number(dados.tempoSaidaTarja || 1))
+            setTempoOcultaTarja(Number(dados.tempoOcultaTarja || 10))
 
             setTamanhoFonteRodape(
                 limitarValor(Number(dados.tamanhoFonteRodape || 28), 12, 80, 28)
@@ -231,6 +234,7 @@ export default function AdminPage() {
             tempoEntradaTarja,
             tempoVisivelTarja,
             tempoSaidaTarja,
+            tempoOcultaTarja,
 
             tamanhoFonteRodape: limitarValor(tamanhoFonteRodape, 12, 80, 28),
             tamanhoFonteSlogan: limitarValor(tamanhoFonteSlogan, 12, 80, 18),
@@ -286,6 +290,7 @@ export default function AdminPage() {
             tempoEntradaTarja: tempoEntradaTarjaMidia,
             tempoVisivelTarja: tempoVisivelTarjaMidia,
             tempoSaidaTarja: tempoSaidaTarjaMidia,
+            tempoOcultaTarja: tempoOcultaTarjaMidia,
 
             criadoEm: serverTimestamp()
         })
@@ -308,6 +313,7 @@ export default function AdminPage() {
         setTempoEntradaTarjaMidia(1)
         setTempoVisivelTarjaMidia(8)
         setTempoSaidaTarjaMidia(1)
+        setTempoOcultaTarjaMidia(10)
 
 
         carregarMidias()
@@ -489,6 +495,8 @@ export default function AdminPage() {
                 setTempoEntradaTarja={setTempoEntradaTarja}
                 setTempoVisivelTarja={setTempoVisivelTarja}
                 setTempoSaidaTarja={setTempoSaidaTarja}
+                tempoOcultaTarja={tempoOcultaTarja}
+                setTempoOcultaTarja={setTempoOcultaTarja}
 
                 setNomePainel={setNomePainel}
                 setSubtitulo={setSubtitulo}
@@ -575,6 +583,8 @@ export default function AdminPage() {
                     tempoEntradaTarjaMidia={tempoEntradaTarjaMidia}
                     tempoVisivelTarjaMidia={tempoVisivelTarjaMidia}
                     tempoSaidaTarjaMidia={tempoSaidaTarjaMidia}
+                    tempoOcultaTarjaMidia={tempoOcultaTarjaMidia}
+                    setTempoOcultaTarjaMidia={setTempoOcultaTarjaMidia}
 
                     setMostrarTarjaMidia={setMostrarTarjaMidia}
                     setTarjaEtiquetaMidia={setTarjaEtiquetaMidia}

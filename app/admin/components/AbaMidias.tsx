@@ -20,6 +20,7 @@ type Props = {
     tempoEntradaTarjaMidia: number
     tempoVisivelTarjaMidia: number
     tempoSaidaTarjaMidia: number
+    tempoOcultaTarjaMidia: number
 
     setArquivo: (valor: string) => void
     setTipo: (valor: "imagem" | "video") => void
@@ -44,10 +45,12 @@ type Props = {
     setTempoEntradaTarjaMidia: (valor: number) => void
     setTempoVisivelTarjaMidia: (valor: number) => void
     setTempoSaidaTarjaMidia: (valor: number) => void
+    setTempoOcultaTarjaMidia: (valor: number) => void
 
     db: any
 }
 
+/* Desestruturação */
 export default function AbaMidias({
     midias,
     arquivo,
@@ -81,6 +84,7 @@ export default function AbaMidias({
     tempoEntradaTarjaMidia,
     tempoVisivelTarjaMidia,
     tempoSaidaTarjaMidia,
+    tempoOcultaTarjaMidia,
 
     setMostrarTarjaMidia,
     setTarjaEtiquetaMidia,
@@ -89,6 +93,7 @@ export default function AbaMidias({
     setTempoEntradaTarjaMidia,
     setTempoVisivelTarjaMidia,
     setTempoSaidaTarjaMidia,
+    setTempoOcultaTarjaMidia,
 
     db
 }: Props) {
@@ -284,6 +289,16 @@ export default function AbaMidias({
             }
             className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
         />
+
+        <input
+    type="number"
+    placeholder="Tempo oculto (s)"
+    value={tempoOcultaTarjaMidia}
+    onChange={(e) =>
+        setTempoOcultaTarjaMidia(Number(e.target.value))
+    }
+    className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+/>
 
     </div>
 </div>
