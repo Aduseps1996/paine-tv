@@ -133,8 +133,8 @@ setUltimaChamadaId(dados.atendimento_id)
               ativo: false
             }
           )
-
-        }, 6000)
+          /* Controle de tempo de chamada */
+        }, 15000)
 
       }
     )
