@@ -245,7 +245,7 @@ const tempoOcultaTarjaFinal =
                 className="absolute left-0 right-0 z-30 pointer-events-none"
                 /* Altura da tarja */
                 style={{
-                    bottom: `${alturaBarraNoticias + 35}px`
+                    bottom: `${alturaBarraNoticias + 25}px`
                 }}
             >
                 {mostrarTarjaFinal && (
@@ -266,13 +266,13 @@ const tempoOcultaTarjaFinal =
                     >
 
                         <div className="absolute -top-7 left-0 z-40 flex items-center">
-                            <div className="bg-[#073bd9] px-8 py-2 shadow-xl">
-                                <span className="text-sm font-black uppercase tracking-[0.22em] text-white">
+                            <div className="bg-[#073bd9] px-6 py-1.5 shadow-xl">
+                                <span className="text-xs font-black uppercase tracking-[0.18em] text-white">
                                     {etiquetaTarjaFinal}
                                 </span>
                             </div>
 
-                            <div className="h-0 w-0 border-y-[19px] border-l-[34px] border-y-transparent border-l-[#073bd9]" />
+                            <div className="h-0 w-0 border-y-[14px] border-l-[24px] border-y-transparent border-l-[#073bd9]" />
                         </div>
 
                         <div className="relative bg-white/95 shadow-[0_18px_50px_rgba(0,0,0,0.55)]">
@@ -282,12 +282,12 @@ const tempoOcultaTarjaFinal =
 
                             <div className="absolute right-[190px] top-0 h-full w-20 skew-x-[-28deg] bg-white/95" />
 
-                            <div className="relative z-10 flex items-center justify-between gap-4 px-14 py-5">
-                                <div className="min-w-0 pr-8">
+                            <div className="relative z-10 flex items-center justify-between gap-4 px-10 py-3">
+                                <div className="min-w-0 pl-4 pr-8">
                                     <h2
                                         className="truncate font-black uppercase leading-none text-[#071b42]"
                                         style={{
-                                            fontSize: `${Math.max(tamanhoFonteSlogan + 10, 28)}px`
+                                            fontSize: `${Math.max(tamanhoFonteSlogan + 6, 22)}px`
                                         }}
                                     >
                                         {tituloTarjaFinal}
@@ -296,7 +296,7 @@ const tempoOcultaTarjaFinal =
                                     <p
                                         className="mt-1 truncate font-semibold text-[#071b42]/70"
                                         style={{
-                                            fontSize: `${Math.max(tamanhoFonteSlogan - 2, 14)}px`
+                                            fontSize: `${Math.max(tamanhoFonteSlogan - 3, 12)}px`
                                         }}
                                     >
                                         {subtituloTarjaFinal}
