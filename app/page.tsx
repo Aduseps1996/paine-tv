@@ -31,6 +31,9 @@ export default function Home() {
   const [slogan, setSlogan] = useState("Informação, acolhimento e compromisso com o associado.")
   const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
   const [online, setOnline] = useState(true)
+
+  const [midiaAtualTv, setMidiaAtualTv] = useState<any>(null)
+
   const tocarSomChamada = () => {
     try {
       const audio = new Audio("/sons/chamada.mp3")
@@ -164,7 +167,10 @@ setUltimaChamadaId(dados.atendimento_id)
   return (
     <main className="w-screen h-screen text-white relative overflow-hidden">
 
-      <BannerRotativo fallback={fallback} />
+      <BannerRotativo
+        fallback={fallback}
+        onMidiaAtualChange={setMidiaAtualTv}
+      />
 
       <div className="absolute top-0 left-0 w-full h-36 bg-gradient-to-b from-black/75 via-black/35 to-transparent z-10" />
 
@@ -255,7 +261,11 @@ setUltimaChamadaId(dados.atendimento_id)
         </div>
       )}
 
-      <RodapeNoticias logo={logo} slogan={slogan} />
+      <RodapeNoticias
+        logo={logo}
+        slogan={slogan}
+        midiaAtual={midiaAtualTv}
+      />
 
     </main>
   )

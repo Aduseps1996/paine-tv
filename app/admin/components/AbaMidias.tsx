@@ -13,6 +13,14 @@ type Props = {
     categoriaMidia: string
     ctaMidia: string
 
+    mostrarTarjaMidia: boolean
+    tarjaEtiquetaMidia: string
+    tarjaTituloMidia: string
+    tarjaSubtituloMidia: string
+    tempoEntradaTarjaMidia: number
+    tempoVisivelTarjaMidia: number
+    tempoSaidaTarjaMidia: number
+
     setArquivo: (valor: string) => void
     setTipo: (valor: "imagem" | "video") => void
     setTemplate: (valor: "cheio" | "informativo" | "institucional" | "urgente") => void
@@ -29,6 +37,14 @@ type Props = {
     alternarMidia: (id: string, ativo: boolean) => void
     carregarMidias: () => void
 
+    setMostrarTarjaMidia: (valor: boolean) => void
+    setTarjaEtiquetaMidia: (valor: string) => void
+    setTarjaTituloMidia: (valor: string) => void
+    setTarjaSubtituloMidia: (valor: string) => void
+    setTempoEntradaTarjaMidia: (valor: number) => void
+    setTempoVisivelTarjaMidia: (valor: number) => void
+    setTempoSaidaTarjaMidia: (valor: number) => void
+
     db: any
 }
 
@@ -43,6 +59,7 @@ export default function AbaMidias({
     qrcodeMidia,
     categoriaMidia,
     ctaMidia,
+
     setArquivo,
     setTipo,
     setTemplate,
@@ -56,6 +73,23 @@ export default function AbaMidias({
     removerMidia,
     alternarMidia,
     carregarMidias,
+
+    mostrarTarjaMidia,
+    tarjaEtiquetaMidia,
+    tarjaTituloMidia,
+    tarjaSubtituloMidia,
+    tempoEntradaTarjaMidia,
+    tempoVisivelTarjaMidia,
+    tempoSaidaTarjaMidia,
+
+    setMostrarTarjaMidia,
+    setTarjaEtiquetaMidia,
+    setTarjaTituloMidia,
+    setTarjaSubtituloMidia,
+    setTempoEntradaTarjaMidia,
+    setTempoVisivelTarjaMidia,
+    setTempoSaidaTarjaMidia,
+
     db
 }: Props) {
     return (
@@ -118,6 +152,8 @@ export default function AbaMidias({
                         <option value="urgente">Urgente</option>
                     </select>
 
+  
+
                     <button
                         onClick={adicionarMidia}
                         className="bg-blue-600 hover:bg-blue-700 transition rounded-xl font-bold"
@@ -177,6 +213,80 @@ export default function AbaMidias({
                     )}
                 </div>
             </div>
+
+            <div className="mt-6 border-t border-zinc-800 pt-6">
+    <h3 className="text-xl font-bold mb-4">
+        Tarja da TV
+    </h3>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <label className="flex items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
+            <input
+                type="checkbox"
+                checked={mostrarTarjaMidia}
+                onChange={(e) => setMostrarTarjaMidia(e.target.checked)}
+            />
+
+            <span>Mostrar tarja neste banner</span>
+        </label>
+
+        <input
+            type="text"
+            placeholder="Etiqueta da tarja"
+            value={tarjaEtiquetaMidia}
+            onChange={(e) => setTarjaEtiquetaMidia(e.target.value)}
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+        />
+
+        <input
+            type="text"
+            placeholder="Título da tarja"
+            value={tarjaTituloMidia}
+            onChange={(e) => setTarjaTituloMidia(e.target.value)}
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+        />
+
+        <input
+            type="text"
+            placeholder="Subtítulo da tarja"
+            value={tarjaSubtituloMidia}
+            onChange={(e) => setTarjaSubtituloMidia(e.target.value)}
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+        />
+
+        <input
+            type="number"
+            placeholder="Tempo entrada (s)"
+            value={tempoEntradaTarjaMidia}
+            onChange={(e) =>
+                setTempoEntradaTarjaMidia(Number(e.target.value))
+            }
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+        />
+
+        <input
+            type="number"
+            placeholder="Tempo visível (s)"
+            value={tempoVisivelTarjaMidia}
+            onChange={(e) =>
+                setTempoVisivelTarjaMidia(Number(e.target.value))
+            }
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+        />
+
+        <input
+            type="number"
+            placeholder="Tempo saída (s)"
+            value={tempoSaidaTarjaMidia}
+            onChange={(e) =>
+                setTempoSaidaTarjaMidia(Number(e.target.value))
+            }
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+        />
+
+    </div>
+</div>
 
             <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-6">

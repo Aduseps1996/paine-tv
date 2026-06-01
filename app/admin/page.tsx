@@ -84,6 +84,14 @@ export default function AdminPage() {
     const [categoriaMidia, setCategoriaMidia] = useState("")
     const [ctaMidia, setCtaMidia] = useState("")
 
+    const [mostrarTarjaMidia, setMostrarTarjaMidia] = useState(true)
+    const [tarjaEtiquetaMidia, setTarjaEtiquetaMidia] = useState("ADUSEPS INFORMA")
+    const [tarjaTituloMidia, setTarjaTituloMidia] = useState("")
+    const [tarjaSubtituloMidia, setTarjaSubtituloMidia] = useState("")
+    const [tempoEntradaTarjaMidia, setTempoEntradaTarjaMidia] = useState(1)
+    const [tempoVisivelTarjaMidia, setTempoVisivelTarjaMidia] = useState(8)
+    const [tempoSaidaTarjaMidia, setTempoSaidaTarjaMidia] = useState(1)
+
     // campos do formulário para adicionar nova mídia e notícia
     const [arquivo, setArquivo] = useState("")
     const [tipo, setTipo] = useState<"imagem" | "video">("imagem")
@@ -111,6 +119,12 @@ export default function AdminPage() {
     const [alturaBarraSuperior, setAlturaBarraSuperior] = useState(64)
     const [alturaBarraNoticias, setAlturaBarraNoticias] = useState(44)
     const [tamanhoLogoRodape, setTamanhoLogoRodape] = useState(44)
+
+    // configurações de fallback e tarja de TV
+    const [mostrarTarjaTv, setMostrarTarjaTv] = useState(true)
+    const [tempoEntradaTarja, setTempoEntradaTarja] = useState(1)
+    const [tempoVisivelTarja, setTempoVisivelTarja] = useState(8)
+    const [tempoSaidaTarja, setTempoSaidaTarja] = useState(1)
 
     // controle de navegação entre abas e índice da pré-visualização
     const [indicePreview, setIndicePreview] = useState(0)
@@ -166,6 +180,11 @@ export default function AdminPage() {
             setLogo(dados.logo || "")
             setSlogan(dados.slogan || "")
 
+            setMostrarTarjaTv(dados.mostrarTarjaTv ?? true)
+            setTempoEntradaTarja(Number(dados.tempoEntradaTarja || 1))
+            setTempoVisivelTarja(Number(dados.tempoVisivelTarja || 8))
+            setTempoSaidaTarja(Number(dados.tempoSaidaTarja || 1))
+
             setTamanhoFonteRodape(
                 limitarValor(Number(dados.tamanhoFonteRodape || 28), 12, 80, 28)
             )
@@ -207,6 +226,12 @@ export default function AdminPage() {
             subtitulo,
             logo,
             slogan,
+
+            mostrarTarjaTv,
+            tempoEntradaTarja,
+            tempoVisivelTarja,
+            tempoSaidaTarja,
+
             tamanhoFonteRodape: limitarValor(tamanhoFonteRodape, 12, 80, 28),
             tamanhoFonteSlogan: limitarValor(tamanhoFonteSlogan, 12, 80, 18),
             tamanhoFonteDataHora: limitarValor(tamanhoFonteDataHora, 12, 80, 18),
@@ -254,6 +279,14 @@ export default function AdminPage() {
             categoria: categoriaMidia.trim(),
             cta: ctaMidia.trim(),
 
+            mostrarTarja: mostrarTarjaMidia,
+            tarjaEtiqueta: tarjaEtiquetaMidia.trim(),
+            tarjaTitulo: tarjaTituloMidia.trim(),
+            tarjaSubtitulo: tarjaSubtituloMidia.trim(),
+            tempoEntradaTarja: tempoEntradaTarjaMidia,
+            tempoVisivelTarja: tempoVisivelTarjaMidia,
+            tempoSaidaTarja: tempoSaidaTarjaMidia,
+
             criadoEm: serverTimestamp()
         })
 
@@ -267,6 +300,14 @@ export default function AdminPage() {
         setQrcodeMidia("")
         setCtaMidia("")
         setCategoriaMidia("")
+
+        setMostrarTarjaMidia(true)
+        setTarjaEtiquetaMidia("ADUSEPS INFORMA")
+        setTarjaTituloMidia("")
+        setTarjaSubtituloMidia("")
+        setTempoEntradaTarjaMidia(1)
+        setTempoVisivelTarjaMidia(8)
+        setTempoSaidaTarjaMidia(1)
 
 
         carregarMidias()
@@ -433,19 +474,29 @@ export default function AdminPage() {
             sair={() => signOut(auth)}
         >
 
-            {abaAtiva === "configuracao-painel" && (
-                <AbaConfiguracaoPainel
-                    nomePainel={nomePainel}
-                    subtitulo={subtitulo}
-                    logo={logo}
-                    slogan={slogan}
-                    setNomePainel={setNomePainel}
-                    setSubtitulo={setSubtitulo}
-                    setLogo={setLogo}
-                    setSlogan={setSlogan}
-                    salvarConfiguracoes={salvarConfiguracoes}
-                />
-            )}
+            <AbaConfiguracaoPainel
+                nomePainel={nomePainel}
+                subtitulo={subtitulo}
+                logo={logo}
+                slogan={slogan}
+
+                mostrarTarjaTv={mostrarTarjaTv}
+                tempoEntradaTarja={tempoEntradaTarja}
+                tempoVisivelTarja={tempoVisivelTarja}
+                tempoSaidaTarja={tempoSaidaTarja}
+
+                setMostrarTarjaTv={setMostrarTarjaTv}
+                setTempoEntradaTarja={setTempoEntradaTarja}
+                setTempoVisivelTarja={setTempoVisivelTarja}
+                setTempoSaidaTarja={setTempoSaidaTarja}
+
+                setNomePainel={setNomePainel}
+                setSubtitulo={setSubtitulo}
+                setLogo={setLogo}
+                setSlogan={setSlogan}
+
+                salvarConfiguracoes={salvarConfiguracoes}
+            />
 
             {abaAtiva === "configuracao-tipografia" && (
                 <AbaConfiguracaoTipografia
@@ -515,6 +566,23 @@ export default function AdminPage() {
                     alternarMidia={alternarMidia}
                     carregarMidias={carregarMidias}
                     db={db}
+
+
+                    mostrarTarjaMidia={mostrarTarjaMidia}
+                    tarjaEtiquetaMidia={tarjaEtiquetaMidia}
+                    tarjaTituloMidia={tarjaTituloMidia}
+                    tarjaSubtituloMidia={tarjaSubtituloMidia}
+                    tempoEntradaTarjaMidia={tempoEntradaTarjaMidia}
+                    tempoVisivelTarjaMidia={tempoVisivelTarjaMidia}
+                    tempoSaidaTarjaMidia={tempoSaidaTarjaMidia}
+
+                    setMostrarTarjaMidia={setMostrarTarjaMidia}
+                    setTarjaEtiquetaMidia={setTarjaEtiquetaMidia}
+                    setTarjaTituloMidia={setTarjaTituloMidia}
+                    setTarjaSubtituloMidia={setTarjaSubtituloMidia}
+                    setTempoEntradaTarjaMidia={setTempoEntradaTarjaMidia}
+                    setTempoVisivelTarjaMidia={setTempoVisivelTarjaMidia}
+                    setTempoSaidaTarjaMidia={setTempoSaidaTarjaMidia}
                 />
             )}
 

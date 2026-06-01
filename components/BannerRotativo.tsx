@@ -53,9 +53,11 @@ type Midia = {
  * - fallback: URL da imagem padrão para usar quando não há mídia disponível
  */
 export default function BannerRotativo({
-    fallback
+    fallback,
+    onMidiaAtualChange
 }: {
     fallback: string
+    onMidiaAtualChange?: (midia: any) => void
 }) {
 
     // --------------------------------------------------------------------------
@@ -84,6 +86,12 @@ export default function BannerRotativo({
     // --------------------------------------------------------------------------
     // EFEITOS
     // --------------------------------------------------------------------------
+
+    useEffect(() => {
+        if (midiaAtual) {
+            onMidiaAtualChange?.(midiaAtual)
+        }
+    }, [midiaAtual, onMidiaAtualChange])
 
     /**
      * Efeito: Resetar estado de erro ao trocar de mídia
