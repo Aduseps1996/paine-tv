@@ -91,7 +91,13 @@ export default function Home() {
 
         if (!dados || dados.ativo !== true) return
 
-        const criadoEmMs = dados.criado_em?.toMillis?.() || 0
+        const criadoEmMs =
+          dados.criado_em_ms ||
+          dados.criado_em?.toMillis?.()
+
+        if (!criadoEmMs) {
+          return
+        }
 
         if (criadoEmMs < painelIniciadoEm) {
           updateDoc(doc(db, "painel_chamadas", "atual"), {
@@ -101,15 +107,18 @@ export default function Home() {
           return
         }
 
+        const novaRepeticaoId = dados.repeticao_id || null
+
         if (
           dados.atendimento_id === ultimaChamadaId &&
-          dados.repeticao_id === ultimaRepeticaoId
+          novaRepeticaoId !== null &&
+          novaRepeticaoId === ultimaRepeticaoId
         ) {
           return
         }
 
         setUltimaChamadaId(dados.atendimento_id)
-        setUltimaRepeticaoId(dados.repeticao_id || null)
+        setUltimaRepeticaoId(novaRepeticaoId)
 
         setNomeAtual(
           (dados.nome || "SEM NOME").toUpperCase()
