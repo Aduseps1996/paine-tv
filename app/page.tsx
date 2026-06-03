@@ -23,6 +23,7 @@ export default function Home() {
   const [guicheAtual, setGuicheAtual] = useState("Guichê 2")
   const [chamadaAtiva, setChamadaAtiva] = useState(false)
   const [ultimaChamadaId, setUltimaChamadaId] = useState("")
+  const [ultimaRepeticaoId, setUltimaRepeticaoId] = useState<number | null>(null)
   const [painelIniciadoEm] = useState(() => Date.now())
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
@@ -88,21 +89,27 @@ export default function Home() {
 
         const dados = documento.data()
 
-if (!dados || dados.ativo !== true) return
+        if (!dados || dados.ativo !== true) return
 
-const criadoEmMs = dados.criado_em?.toMillis?.() || 0
+        const criadoEmMs = dados.criado_em?.toMillis?.() || 0
 
-if (criadoEmMs < painelIniciadoEm) {
-  updateDoc(doc(db, "painel_chamadas", "atual"), {
-    ativo: false
-  })
+        if (criadoEmMs < painelIniciadoEm) {
+          updateDoc(doc(db, "painel_chamadas", "atual"), {
+            ativo: false
+          })
 
-  return
-}
+          return
+        }
 
-if (dados.atendimento_id === ultimaChamadaId) return
+        if (
+          dados.atendimento_id === ultimaChamadaId &&
+          dados.repeticao_id === ultimaRepeticaoId
+        ) {
+          return
+        }
 
-setUltimaChamadaId(dados.atendimento_id)
+        setUltimaChamadaId(dados.atendimento_id)
+        setUltimaRepeticaoId(dados.repeticao_id || null)
 
         setNomeAtual(
           (dados.nome || "SEM NOME").toUpperCase()
@@ -141,7 +148,11 @@ setUltimaChamadaId(dados.atendimento_id)
 
     return () => unsubscribe()
 
-  }, [ultimaChamadaId, painelIniciadoEm])
+  }, [
+    ultimaChamadaId,
+    ultimaRepeticaoId,
+    painelIniciadoEm
+  ])
 
   /* Aviso offline */
   useEffect(() => {
