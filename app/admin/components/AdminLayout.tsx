@@ -12,6 +12,7 @@ type Props = {
   setAbaAtiva: (aba: AbaAdmin) => void
   children: React.ReactNode
   sair: () => void
+  usuarioLogado?: string
 }
 
 const abas = [
@@ -26,13 +27,14 @@ export default function AdminLayout({
   abaAtiva,
   setAbaAtiva,
   children,
-  sair
+  sair,
+  usuarioLogado = "Administrador"
 }: Props) {
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
-      <div className="flex min-h-screen">
-
-        <aside className="hidden md:flex w-72 flex-col border-r border-zinc-800 bg-zinc-900/90 p-6">
+    <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="flex">
+        {/* Sidebar Fixa */}
+        <aside className="fixed left-0 top-0 bottom-0 w-72 border-r border-zinc-800 bg-zinc-900/90 p-6 overflow-y-auto z-30 flex flex-col">
           <h1 className="text-2xl font-black">
             Painel TV
           </h1>
@@ -59,39 +61,29 @@ export default function AdminLayout({
 
           <button
             onClick={sair}
-            className="mt-auto rounded-xl bg-red-600 px-4 py-3 font-bold hover:bg-red-700"
+            className="mt-auto rounded-xl bg-red-600 px-4 py-3 font-bold hover:bg-red-700 transition w-full"
           >
             Sair
           </button>
         </aside>
 
-        <section className="flex-1 p-5 md:p-8">
-          <div className="mb-6 flex flex-wrap gap-2 md:hidden">
-            {abas.map((aba) => (
-              <button
-                key={aba.id}
-                onClick={() => setAbaAtiva(aba.id)}
-                className={`rounded-xl px-4 py-3 text-sm font-bold ${
-                  abaAtiva === aba.id
-                    ? "bg-blue-600"
-                    : "bg-zinc-800 text-zinc-300"
-                }`}
-              >
-                {aba.label}
-              </button>
-            ))}
+        {/* Header + Conteúdo */}
+        <div className="ml-72 flex-1 flex flex-col">
+          {/* Header Fixo */}
+          <header className="fixed top-0 right-0 left-72 h-16 bg-zinc-900 border-b border-zinc-800 flex items-center justify-end px-8 z-20">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-zinc-300">
+                Logado como: <span className="font-semibold text-white">{usuarioLogado}</span>
+              </span>
+            </div>
+          </header>
 
-            <button
-              onClick={sair}
-              className="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold"
-            >
-              Sair
-            </button>
-          </div>
-
-          {children}
-        </section>
+          {/* Conteúdo Principal */}
+          <main className="flex-1 overflow-y-auto p-8 pt-24">
+            {children}
+          </main>
+        </div>
       </div>
-    </main>
+    </div>
   )
 }

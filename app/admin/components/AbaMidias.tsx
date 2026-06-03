@@ -1,4 +1,5 @@
 import { doc, updateDoc } from "firebase/firestore"
+import { useState } from "react"
 
 type Props = {
     midias: any[]
@@ -21,12 +22,13 @@ type Props = {
     tempoVisivelTarjaMidia: number
     tempoSaidaTarjaMidia: number
     tempoOcultaTarjaMidia: number
+    tempoInicialTarjaMidia: number
 
     setArquivo: (valor: string) => void
     setTipo: (valor: "imagem" | "video") => void
     setTemplate: (valor: "cheio" | "informativo" | "institucional" | "urgente") => void
-    modeloTarjaMidia: "telejornal" | "compacta" | "live"
-    setModeloTarjaMidia: (valor: "telejornal" | "compacta" | "live") => void
+    modeloTarjaMidia: "telejornal" | "compacta" | "live" | "infobar"
+    setModeloTarjaMidia: (valor: "telejornal" | "compacta" | "live" | "infobar") => void
 
     setTituloMidia: (valor: string) => void
     setSubtituloMidia: (valor: string) => void
@@ -48,6 +50,7 @@ type Props = {
     setTempoVisivelTarjaMidia: (valor: number) => void
     setTempoSaidaTarjaMidia: (valor: number) => void
     setTempoOcultaTarjaMidia: (valor: number) => void
+    setTempoInicialTarjaMidia: (valor: number) => void
 
     db: any
 }
@@ -96,11 +99,16 @@ export default function AbaMidias({
     setTempoVisivelTarjaMidia,
     setTempoSaidaTarjaMidia,
     setTempoOcultaTarjaMidia,
+    tempoInicialTarjaMidia,
+    setTempoInicialTarjaMidia,
     modeloTarjaMidia,
     setModeloTarjaMidia,
 
     db
 }: Props) {
+    const [modalTarjaAberto, setModalTarjaAberto] = useState(false)
+    const [midiaEditando, setMidiaEditando] = useState<string | null>(null)
+
     return (
         <div className="space-y-6">
             <div>
@@ -192,7 +200,7 @@ export default function AbaMidias({
                                 placeholder="Subtítulo institucional"
                                 value={subtituloMidia}
                                 onChange={(e) => setSubtituloMidia(e.target.value)}
-                                className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none resize-none min-h-[120px]"
+                                className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none resize-none min-h-30"
                             />
 
                             <input
@@ -223,102 +231,6 @@ export default function AbaMidias({
                 </div>
             </div>
 
-            <div className="mt-6 border-t border-zinc-800 pt-6">
-                <h3 className="text-xl font-bold mb-4">
-                    Tarja da TV
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                    <label className="flex items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
-                        <input
-                            type="checkbox"
-                            checked={mostrarTarjaMidia}
-                            onChange={(e) => setMostrarTarjaMidia(e.target.checked)}
-                        />
-
-                        <span>Mostrar tarja neste banner</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        placeholder="Etiqueta da tarja"
-                        value={tarjaEtiquetaMidia}
-                        onChange={(e) => setTarjaEtiquetaMidia(e.target.value)}
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
-
-                    <input
-                        type="text"
-                        placeholder="Título da tarja"
-                        value={tarjaTituloMidia}
-                        onChange={(e) => setTarjaTituloMidia(e.target.value)}
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
-
-                    <input
-                        type="text"
-                        placeholder="Subtítulo da tarja"
-                        value={tarjaSubtituloMidia}
-                        onChange={(e) => setTarjaSubtituloMidia(e.target.value)}
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
-
-                    <input
-                        type="number"
-                        placeholder="Tempo entrada (s)"
-                        value={tempoEntradaTarjaMidia}
-                        onChange={(e) =>
-                            setTempoEntradaTarjaMidia(Number(e.target.value))
-                        }
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
-
-                    <input
-                        type="number"
-                        placeholder="Tempo visível (s)"
-                        value={tempoVisivelTarjaMidia}
-                        onChange={(e) =>
-                            setTempoVisivelTarjaMidia(Number(e.target.value))
-                        }
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
-
-                    <input
-                        type="number"
-                        placeholder="Tempo saída (s)"
-                        value={tempoSaidaTarjaMidia}
-                        onChange={(e) =>
-                            setTempoSaidaTarjaMidia(Number(e.target.value))
-                        }
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
-
-                    <input
-                        type="number"
-                        placeholder="Tempo oculto (s)"
-                        value={tempoOcultaTarjaMidia}
-                        onChange={(e) =>
-                            setTempoOcultaTarjaMidia(Number(e.target.value))
-                        }
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    />
-
-                    <select
-                        value={modeloTarjaMidia}
-                        onChange={(e) =>
-                            setModeloTarjaMidia(e.target.value as "telejornal" | "compacta" | "live")
-                        }
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    >
-                        <option value="telejornal">Tarja telejornal</option>
-                        <option value="compacta">Tarja compacta</option>
-                        <option value="live">Tarja Live News</option>
-                    </select>
-
-                </div>
-            </div>
-
             <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-6">
                     <div>
@@ -332,11 +244,11 @@ export default function AbaMidias({
                     </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-stretch">
                     {midias.map((midia) => (
                         <div
                             key={midia.id}
-                            className="rounded-2xl border border-zinc-700 bg-zinc-800/80 p-5 shadow-lg"
+                            className="flex h-full flex-col rounded-2xl border border-zinc-700 bg-zinc-800/80 p-5 shadow-lg"
                         >
                             <div className="flex items-center gap-2 mb-3">
                                 <div
@@ -362,52 +274,56 @@ export default function AbaMidias({
                                 {midia.arquivo}
                             </p>
 
-                            <div className="mt-3 overflow-hidden rounded-2xl border border-zinc-700 bg-black">
-                                {midia.tipo === "imagem" ? (
-                                    <img
-                                        src={midia.arquivo}
-                                        alt="Prévia da mídia"
-                                        className="h-48 w-full object-cover transition duration-500 hover:scale-105"
-                                    />
-                                ) : (
-                                    <video
-                                        src={midia.arquivo}
-                                        controls
-                                        muted
-                                        className="h-48 w-full object-cover"
-                                    />
-                                )}
+                            <div className="mt-3 overflow-hidden rounded-[1.8rem] border border-zinc-700 bg-black">
+                                <div className="relative aspect-video bg-black">
+                                    {midia.tipo === "imagem" ? (
+                                        <img
+                                            src={midia.arquivo}
+                                            alt="Prévia da mídia"
+                                            className="absolute inset-0 w-full h-full object-contain bg-black"
+                                        />
+                                    ) : (
+                                        <video
+                                            src={midia.arquivo}
+                                            controls
+                                            muted
+                                            className="absolute inset-0 w-full h-full object-contain bg-black"
+                                        />
+                                    )}
+                                </div>
                             </div>
 
                             <p className="text-zinc-500 text-xs mt-2">
                                 Ordem: {midia.ordem} | Duração: {midia.duracao}s
                             </p>
 
-                            <div className="mt-3 flex flex-wrap items-center gap-2">
-                                <span className="text-sm text-zinc-400">
-                                    Duração:
-                                </span>
+                            {midia.tipo === "imagem" && (
+                                <div className="mt-3 flex flex-wrap items-center gap-2">
+                                    <span className="text-sm text-zinc-400">
+                                        Duração:
+                                    </span>
 
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={midia.duracao}
-                                    onChange={(e) => {
-                                        if (!midia.id) return
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={midia.duracao}
+                                        onChange={(e) => {
+                                            if (!midia.id) return
 
-                                        updateDoc(doc(db, "midias", midia.id), {
-                                            duracao: Number(e.target.value)
-                                        })
+                                            updateDoc(doc(db, "midias", midia.id), {
+                                                duracao: Number(e.target.value)
+                                            })
 
-                                        carregarMidias()
-                                    }}
-                                    className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
-                                />
+                                            carregarMidias()
+                                        }}
+                                        className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
+                                    />
 
-                                <span className="text-sm text-zinc-400">
-                                    segundos
-                                </span>
-                            </div>
+                                    <span className="text-sm text-zinc-400">
+                                        segundos
+                                    </span>
+                                </div>
+                            )}
 
                             <div className="mt-3 flex flex-wrap items-center gap-2">
                                 <span className="text-sm text-zinc-400">
@@ -444,6 +360,18 @@ export default function AbaMidias({
                                     {midia.ativo ? "Desativar" : "Ativar"}
                                 </button>
 
+                                {midia.tipo === "video" && (
+                                    <button
+                                        onClick={() => {
+                                            setMidiaEditando(midia.id)
+                                            setModalTarjaAberto(true)
+                                        }}
+                                        className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-bold transition hover:bg-purple-700"
+                                    >
+                                        Adicionar tarja
+                                    </button>
+                                )}
+
                                 <button
                                     onClick={() => midia.id && removerMidia(midia.id)}
                                     className="rounded-lg bg-red-600 px-4 py-2 text-sm font-bold transition hover:bg-red-700"
@@ -455,6 +383,191 @@ export default function AbaMidias({
                     ))}
                 </div>
             </section>
+
+            {/* Modal Tarja */}
+            {modalTarjaAberto && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-2xl font-bold mb-6">
+                            Configurar tarja do vídeo
+                        </h2>
+
+                        <div className="space-y-4">
+                            <label className="flex items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
+                                <input
+                                    type="checkbox"
+                                    checked={mostrarTarjaMidia}
+                                    onChange={(e) => setMostrarTarjaMidia(e.target.checked)}
+                                />
+                                <span>Mostrar tarja neste vídeo</span>
+                            </label>
+
+                            <div>
+                                <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                    Etiqueta
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Ex: ADUSEPS INFORMA"
+                                    value={tarjaEtiquetaMidia}
+                                    onChange={(e) => setTarjaEtiquetaMidia(e.target.value)}
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                    Título
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Título da tarja"
+                                    value={tarjaTituloMidia}
+                                    onChange={(e) => setTarjaTituloMidia(e.target.value)}
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                    Subtítulo
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Subtítulo da tarja"
+                                    value={tarjaSubtituloMidia}
+                                    onChange={(e) => setTarjaSubtituloMidia(e.target.value)}
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                        Tempo de entrada (s)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0.2"
+                                        step="0.1"
+                                        value={tempoEntradaTarjaMidia}
+                                        onChange={(e) => setTempoEntradaTarjaMidia(Number(e.target.value))}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                        Tempo visível (s)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        step="0.5"
+                                        value={tempoVisivelTarjaMidia}
+                                        onChange={(e) => setTempoVisivelTarjaMidia(Number(e.target.value))}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                        Tempo de saída (s)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0.2"
+                                        step="0.1"
+                                        value={tempoSaidaTarjaMidia}
+                                        onChange={(e) => setTempoSaidaTarjaMidia(Number(e.target.value))}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                        Tempo oculto (s)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        value={tempoOcultaTarjaMidia}
+                                        onChange={(e) => setTempoOcultaTarjaMidia(Number(e.target.value))}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                        Tempo para primeira aparição (s)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.5"
+                                        value={tempoInicialTarjaMidia}
+                                        onChange={(e) => setTempoInicialTarjaMidia(Number(e.target.value))}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                    Modelo da tarja
+                                </label>
+                                <select
+                                    value={modeloTarjaMidia}
+                                    onChange={(e) => setModeloTarjaMidia(e.target.value as "telejornal" | "compacta" | "live")}
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                >
+                                    <option value="telejornal">Tarja telejornal</option>
+                                    <option value="compacta">Tarja compacta</option>
+                                    <option value="live">Tarja Live News</option>
+                                    <option value="infobar">Barra Informativa</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex gap-3">
+                            <button
+                                onClick={() => {
+                                    if (midiaEditando) {
+                                        updateDoc(doc(db, "midias", midiaEditando), {
+                                            mostrarTarja: mostrarTarjaMidia,
+                                            tarjaEtiqueta: tarjaEtiquetaMidia,
+                                            tarjaTitulo: tarjaTituloMidia,
+                                            tarjaSubtitulo: tarjaSubtituloMidia,
+                                            tempoEntradaTarja: tempoEntradaTarjaMidia,
+                                            tempoVisivelTarja: tempoVisivelTarjaMidia,
+                                            tempoSaidaTarja: tempoSaidaTarjaMidia,
+                                            tempoOcultaTarja: tempoOcultaTarjaMidia,
+                                            modeloTarja: modeloTarjaMidia
+                                        })
+                                        carregarMidias()
+                                    }
+                                    setModalTarjaAberto(false)
+                                    setMidiaEditando(null)
+                                }}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold transition"
+                            >
+                                Salvar tarja
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setModalTarjaAberto(false)
+                                    setMidiaEditando(null)
+                                }}
+                                className="flex-1 bg-zinc-800 hover:bg-zinc-700 px-6 py-3 rounded-xl font-bold transition"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -91,6 +91,7 @@ export default function AdminPage() {
     const [tempoEntradaTarjaMidia, setTempoEntradaTarjaMidia] = useState(1)
     const [tempoVisivelTarjaMidia, setTempoVisivelTarjaMidia] = useState(8)
     const [tempoSaidaTarjaMidia, setTempoSaidaTarjaMidia] = useState(1)
+    const [tempoInicialTarjaMidia, setTempoInicialTarjaMidia] = useState(1)
 
     // campos do formulário para adicionar nova mídia e notícia
     const [arquivo, setArquivo] = useState("")
@@ -100,7 +101,7 @@ export default function AdminPage() {
     >("cheio")
     const [novaNoticia, setNovaNoticia] = useState("")
     const [modeloTarjaMidia, setModeloTarjaMidia] =
-    useState<"telejornal" | "compacta" | "live">("telejornal")
+    useState<"telejornal" | "compacta" | "live" | "infobar">("telejornal")
 
     // estado de autenticação do usuário
     const [email, setEmail] = useState("")
@@ -293,6 +294,7 @@ export default function AdminPage() {
             tempoVisivelTarja: tempoVisivelTarjaMidia,
             tempoSaidaTarja: tempoSaidaTarjaMidia,
             tempoOcultaTarja: tempoOcultaTarjaMidia,
+            tempoInicialTarja: tempoInicialTarjaMidia,
             modeloTarja: modeloTarjaMidia,
 
             criadoEm: serverTimestamp()
@@ -316,6 +318,7 @@ export default function AdminPage() {
         setTempoEntradaTarjaMidia(1)
         setTempoVisivelTarjaMidia(8)
         setTempoSaidaTarjaMidia(1)
+        setTempoInicialTarjaMidia(1)
         setTempoOcultaTarjaMidia(10)
         setModeloTarjaMidia("telejornal")
 
@@ -390,7 +393,19 @@ export default function AdminPage() {
         .filter((noticia) => noticia.ativo)
         .sort((a, b) => a.ordem - b.ordem)
 
+    const activeIds = midiasAtivas.map((midia) => midia.id).join(",")
     const midiaPreview = midiasAtivas[indicePreview]
+
+    useEffect(() => {
+        if (midiasAtivas.length === 0) {
+            setIndicePreview(0)
+            return
+        }
+
+        if (indicePreview >= midiasAtivas.length) {
+            setIndicePreview(0)
+        }
+    }, [activeIds, indicePreview, midiasAtivas.length])
 
     // Efeito que alterna a pré-visualização de imagens automaticamente
     useEffect(() => {
@@ -418,7 +433,7 @@ export default function AdminPage() {
         }, midiaAtual.duracao * 1000)
 
         return () => clearInterval(intervalo)
-    }, [midiasAtivas, indicePreview])
+    }, [activeIds, indicePreview])
 
     // Se o usuário não estiver logado, mostra o formulário de login
     if (!logado) {
@@ -484,31 +499,33 @@ export default function AdminPage() {
             sair={() => signOut(auth)}
         >
 
-            <AbaConfiguracaoPainel
-                nomePainel={nomePainel}
-                subtitulo={subtitulo}
-                logo={logo}
-                slogan={slogan}
+            {abaAtiva === "configuracao-painel" && (
+                <AbaConfiguracaoPainel
+                    nomePainel={nomePainel}
+                    subtitulo={subtitulo}
+                    logo={logo}
+                    slogan={slogan}
 
-                mostrarTarjaTv={mostrarTarjaTv}
-                tempoEntradaTarja={tempoEntradaTarja}
-                tempoVisivelTarja={tempoVisivelTarja}
-                tempoSaidaTarja={tempoSaidaTarja}
+                    mostrarTarjaTv={mostrarTarjaTv}
+                    tempoEntradaTarja={tempoEntradaTarja}
+                    tempoVisivelTarja={tempoVisivelTarja}
+                    tempoSaidaTarja={tempoSaidaTarja}
 
-                setMostrarTarjaTv={setMostrarTarjaTv}
-                setTempoEntradaTarja={setTempoEntradaTarja}
-                setTempoVisivelTarja={setTempoVisivelTarja}
-                setTempoSaidaTarja={setTempoSaidaTarja}
-                tempoOcultaTarja={tempoOcultaTarja}
-                setTempoOcultaTarja={setTempoOcultaTarja}
+                    setMostrarTarjaTv={setMostrarTarjaTv}
+                    setTempoEntradaTarja={setTempoEntradaTarja}
+                    setTempoVisivelTarja={setTempoVisivelTarja}
+                    setTempoSaidaTarja={setTempoSaidaTarja}
+                    tempoOcultaTarja={tempoOcultaTarja}
+                    setTempoOcultaTarja={setTempoOcultaTarja}
 
-                setNomePainel={setNomePainel}
-                setSubtitulo={setSubtitulo}
-                setLogo={setLogo}
-                setSlogan={setSlogan}
+                    setNomePainel={setNomePainel}
+                    setSubtitulo={setSubtitulo}
+                    setLogo={setLogo}
+                    setSlogan={setSlogan}
 
-                salvarConfiguracoes={salvarConfiguracoes}
-            />
+                    salvarConfiguracoes={salvarConfiguracoes}
+                />
+            )}
 
             {abaAtiva === "configuracao-tipografia" && (
                 <AbaConfiguracaoTipografia
@@ -589,6 +606,8 @@ export default function AdminPage() {
                     tempoSaidaTarjaMidia={tempoSaidaTarjaMidia}
                     tempoOcultaTarjaMidia={tempoOcultaTarjaMidia}
                     setTempoOcultaTarjaMidia={setTempoOcultaTarjaMidia}
+                    tempoInicialTarjaMidia={tempoInicialTarjaMidia}
+                    setTempoInicialTarjaMidia={setTempoInicialTarjaMidia}
                     modeloTarjaMidia={modeloTarjaMidia}
                     setModeloTarjaMidia={setModeloTarjaMidia}
 
