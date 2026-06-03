@@ -134,7 +134,7 @@ export default function AbaMidias({
     }, [midiaEditando, midias])
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3 sm:space-y-6">
             <div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
                     Mídias do painel
@@ -154,7 +154,7 @@ export default function AbaMidias({
                     Adicione banners, vídeos e campanhas para exibição no painel.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <input
                         type="text"
                         placeholder="URL da imagem ou vídeo"
@@ -197,7 +197,7 @@ export default function AbaMidias({
 
                     <button
                         onClick={adicionarMidia}
-                        className="bg-blue-600 hover:bg-blue-700 transition rounded-xl font-bold"
+                        className="bg-blue-600 hover:bg-blue-700 transition rounded-lg font-bold text-sm py-2"
                     >
                         Adicionar mídia
                     </button>
@@ -268,7 +268,7 @@ export default function AbaMidias({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-stretch">
                     {midias.map((midia) => (
                         <div
                             key={midia.id}
@@ -562,7 +562,7 @@ export default function AbaMidias({
                                     placeholder="Link para QR Code"
                                     value={tarjaQrcodeMidia}
                                     onChange={(e) => setTarjaQrcodeMidia(e.target.value)}
-                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base outline-none"
                                 />
                             </div>
                         </div>

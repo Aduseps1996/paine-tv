@@ -28,7 +28,7 @@ export default function AbaNoticias({
 
     return (
 
-        <div className="space-y-6">
+        <div className="space-y-3 sm:space-y-6">
 
             <div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
@@ -49,7 +49,7 @@ export default function AbaNoticias({
                     Adicione uma nova mensagem para aparecer no rodapé do painel.
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px] gap-2 sm:gap-4">
                     <input
                         type="text"
                         placeholder="Texto da notícia do rodapé"

@@ -44,7 +44,7 @@ export default function AbaConfiguracaoTipografia({
 
     return (
 
-        <div className="space-y-6">
+        <div className="space-y-3 sm:space-y-6">
 
             <div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
