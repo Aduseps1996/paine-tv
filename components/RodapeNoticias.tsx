@@ -537,11 +537,108 @@ export default function RodapeNoticias({
 
                 {/* CLIMA */}
                 {mostrarTarjaFinal && modeloTarjaFinal === "infobar" && (
+                    <div
+                        className={`relative mx-auto w-[94vw] transition-all ${faseTarja === "entrando" || faseTarja === "visivel"
+                                ? "translate-y-0 opacity-100 scale-100"
+                                : "translate-y-8 opacity-0 scale-[0.98]"
+                            }`}
+                        style={{
+                            transitionDuration:
+                                faseTarja === "entrando"
+                                    ? `${tempoEntradaTarjaFinal}s`
+                                    : faseTarja === "saindo"
+                                        ? `${tempoSaidaTarjaFinal}s`
+                                        : "0s"
+                        }}
+                    >
+                        <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-[#061a3d]/90 shadow-[0_18px_60px_rgba(0,0,0,0.60)] backdrop-blur-xl">
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(13,92,255,0.45),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.12),transparent_45%)]" />
+
+                            <div className="relative flex h-[76px] items-center">
+
+                                {/* HORA */}
+                                <div className="relative flex h-full w-[145px] shrink-0 flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#0d5cff] via-[#073bd9] to-[#03153d] text-white">
+                                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),transparent_55%)]" />
+                                    <div className="absolute -right-4 top-0 h-full w-10 skew-x-[-18deg] bg-white/15" />
+
+                                    <span className="relative text-[10px] font-black uppercase tracking-[0.30em] text-white/70">
+                                        Agora
+                                    </span>
+
+                                    <span
+                                        className="relative font-black leading-none drop-shadow"
+                                        style={{ fontSize: `${Math.max(tamanhoFonteHora + 2, 26)}px` }}
+                                    >
+                                        {hora}
+                                    </span>
+                                </div>
+
+                                {/* ETIQUETA */}
+                                <div className="relative flex h-full shrink-0 items-center overflow-hidden bg-gradient-to-br from-[#ff6b3d] via-[#f15434] to-[#b72718] px-5">
+                                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.25),transparent_55%)]" />
+
+                                    <span className="relative text-xs font-black uppercase tracking-[0.22em] text-white drop-shadow">
+                                        {etiquetaTarjaFinal}
+                                    </span>
+                                </div>
+
+                                {/* TEXTO */}
+                                <div className="relative flex min-w-0 flex-1 flex-col justify-center px-7">
+                                    <div className="absolute left-0 top-1/2 h-10 w-px -translate-y-1/2 bg-white/15" />
+
+                                    <h2
+                                        className="truncate font-black uppercase leading-none text-white drop-shadow"
+                                        style={{
+                                            fontSize: `${Math.max(tamanhoFonteSlogan + 5, 23)}px`
+                                        }}
+                                    >
+                                        {tituloTarjaFinal}
+                                    </h2>
+
+                                    {subtituloTarjaFinal && (
+                                        <p
+                                            className="mt-1 truncate font-semibold text-white/70"
+                                            style={{
+                                                fontSize: `${Math.max(tamanhoFonteSlogan - 4, 13)}px`
+                                            }}
+                                        >
+                                            {subtituloTarjaFinal}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* CLIMA */}
+                                <div className="relative flex h-full w-[180px] shrink-0 flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#10264d] via-[#0b2a5c] to-[#061a3d] text-white">
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(52,188,248,0.35),transparent_45%)]" />
+                                    <div className="absolute -left-4 top-0 h-full w-10 skew-x-[-18deg] bg-white/10" />
+
+                                    <span className="relative text-[10px] font-black uppercase tracking-[0.28em] text-white/65">
+                                        Recife
+                                    </span>
+
+                                    <span className="relative mt-1 text-2xl font-black leading-none drop-shadow">
+                                        {erroClima || temperaturaAtual === null
+                                            ? "--"
+                                            : `${obterIconeClima(codigoClimaAtual)} ${temperaturaAtual}°C`}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="relative h-1.5 overflow-hidden bg-[#061a3d]">
+                                <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-[#073bd9] via-[#34bcf8] to-[#f15434]" />
+                                <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-[#f15434] via-[#073bd9] to-[#34bcf8]" />
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {/* CLIMA DIGITAL SIGN */}
+                {mostrarTarjaFinal && modeloTarjaFinal === "digital" && (
     <div
-        className={`relative mx-auto w-[94vw] transition-all ${
+        className={`fixed left-0 top-0 z-40 h-screen w-[50vw] transition-all ${
             faseTarja === "entrando" || faseTarja === "visivel"
-                ? "translate-y-0 opacity-100 scale-100"
-                : "translate-y-8 opacity-0 scale-[0.98]"
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-full opacity-0"
         }`}
         style={{
             transitionDuration:
@@ -552,55 +649,49 @@ export default function RodapeNoticias({
                         : "0s"
         }}
     >
-        <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-[#061a3d]/90 shadow-[0_18px_60px_rgba(0,0,0,0.60)] backdrop-blur-xl">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(13,92,255,0.45),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.12),transparent_45%)]" />
+        <div className="relative h-full w-full overflow-hidden bg-[#020b1d]/95 shadow-[30px_0_90px_rgba(0,0,0,0.75)] backdrop-blur-xl">
+            {/* FUNDO MODERNO */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(13,92,255,0.55),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,75,35,0.35),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.10),transparent_45%)]" />
+            <div className="absolute inset-0 opacity-25 bg-[linear-gradient(120deg,transparent_0%,rgba(255,255,255,0.10)_50%,transparent_100%)]" />
+            <div className="absolute right-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#073bd9] via-[#34bcf8] to-[#f15434] shadow-[0_0_35px_rgba(52,188,248,0.9)]" />
 
-            <div className="relative flex h-[76px] items-center">
+            <div className="relative flex h-full flex-col px-14 pt-6 pb-16 text-white">
 
-                {/* HORA */}
-                <div className="relative flex h-full w-[145px] shrink-0 flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#0d5cff] via-[#073bd9] to-[#03153d] text-white">
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),transparent_55%)]" />
-                    <div className="absolute -right-4 top-0 h-full w-10 skew-x-[-18deg] bg-white/15" />
-
-                    <span className="relative text-[10px] font-black uppercase tracking-[0.30em] text-white/70">
-                        Agora
-                    </span>
-
-                    <span
-                        className="relative font-black leading-none drop-shadow"
-                        style={{ fontSize: `${Math.max(tamanhoFonteHora + 2, 26)}px` }}
-                    >
-                        {hora}
-                    </span>
+                {/* LOGO */}
+                <div className="flex items-center justify-between">
+                    {logo.trim() !== "" && (
+                        <img
+                            src={logo}
+                            alt="Logo ADUSEPS"
+                            className="h-16 w-auto object-contain"
+                        />
+                    )}
                 </div>
 
-                {/* ETIQUETA */}
-                <div className="relative flex h-full shrink-0 items-center overflow-hidden bg-gradient-to-br from-[#ff6b3d] via-[#f15434] to-[#b72718] px-5">
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.25),transparent_55%)]" />
-
-                    <span className="relative text-xs font-black uppercase tracking-[0.22em] text-white drop-shadow">
-                        {etiquetaTarjaFinal}
-                    </span>
-                </div>
-
-                {/* TEXTO */}
-                <div className="relative flex min-w-0 flex-1 flex-col justify-center px-7">
-                    <div className="absolute left-0 top-1/2 h-10 w-px -translate-y-1/2 bg-white/15" />
+                {/* CONTEÚDO PRINCIPAL */}
+                <div className="mt-4 text-center">
+                    <div className="mb-7 inline-flex rounded-md bg-gradient-to-r from-[#bb2c63] to-[#f15434] px-6 py-2 shadow-lg">
+                        <span className="text-sm font-black uppercase tracking-[0.25em] text-white">
+                            {etiquetaTarjaFinal}
+                        </span>
+                    </div>
 
                     <h2
-                        className="truncate font-black uppercase leading-none text-white drop-shadow"
+                        className="font-black uppercase leading-[0.92] tracking-wide text-white drop-shadow-[0_8px_20px_rgba(0,0,0,0.55)]"
                         style={{
-                            fontSize: `${Math.max(tamanhoFonteSlogan + 5, 23)}px`
+                            fontSize: `${Math.max(tamanhoFonteSlogan + 34, 62)}px`
                         }}
                     >
                         {tituloTarjaFinal}
                     </h2>
 
+                    <div className="mx-auto mt-5 h-[2px] w-[70%] bg-gradient-to-r from-transparent via-[#0d5cff] to-transparent" />
+
                     {subtituloTarjaFinal && (
                         <p
-                            className="mt-1 truncate font-semibold text-white/70"
+                            className="mx-auto mt-6 max-w-[620px] font-medium leading-tight text-white/82"
                             style={{
-                                fontSize: `${Math.max(tamanhoFonteSlogan - 4, 13)}px`
+                                fontSize: `${Math.max(tamanhoFonteSlogan + 6, 26)}px`
                             }}
                         >
                             {subtituloTarjaFinal}
@@ -608,27 +699,86 @@ export default function RodapeNoticias({
                     )}
                 </div>
 
-                {/* CLIMA */}
-                <div className="relative flex h-full w-[180px] shrink-0 flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#10264d] via-[#0b2a5c] to-[#061a3d] text-white">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(52,188,248,0.35),transparent_45%)]" />
-                    <div className="absolute -left-4 top-0 h-full w-10 skew-x-[-18deg] bg-white/10" />
+                {/* QR CODE + FRASE */}
+                <div className="mt-auto flex flex-col items-center justify-center pt-8 pb-2">
+                    {midiaAtual?.qrcode && midiaAtual.qrcode.trim() !== "" ? (
+                        <div className="relative rounded-[1.7rem] bg-white p-4 shadow-[0_0_35px_rgba(13,92,255,0.75)]">
+                            <div className="absolute -inset-2 rounded-[2rem] border border-[#34bcf8]/60" />
 
-                    <span className="relative text-[10px] font-black uppercase tracking-[0.28em] text-white/65">
-                        Recife
-                    </span>
+                            <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(midiaAtual.qrcode)}`}
+                                alt="QR Code"
+                                className="relative h-56 w-56"
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex h-56 w-56 items-center justify-center rounded-[1.7rem] border border-white/15 bg-white/10 text-center shadow-[0_0_35px_rgba(13,92,255,0.35)]">
+                            <span className="px-6 text-sm font-black uppercase tracking-[0.20em] text-white/45">
+                                QR Code opcional
+                            </span>
+                        </div>
+                    )}
 
-                    <span className="relative mt-1 text-2xl font-black leading-none drop-shadow">
-                        {erroClima || temperaturaAtual === null
-                            ? "--"
-                            : `${obterIconeClima(codigoClimaAtual)} ${temperaturaAtual}°C`}
-                    </span>
+                    <div className="mt-5 flex items-center gap-3">
+                        <span className="text-4xl">📷</span>
+
+                        <div className="text-left">
+                            <p className="text-sm font-black uppercase tracking-[0.16em] text-white">
+                                Nos siga no Instagram
+                            </p>
+
+                            <p className="text-xl font-black text-[#f15434]">
+                                @aduseps
+                            </p>
+                        </div>
+                    </div>
                 </div>
+
+                {/* RODAPÉ: HORA ESQUERDA / CLIMA DIREITA */}
+                <div className="rounded-2xl border border-white/15 bg-white/8 px-6 py-4 shadow-[0_0_30px_rgba(13,92,255,0.25)] backdrop-blur-md">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#0d5cff]/60 text-3xl text-[#0d5cff]">
+                                🕘
+                            </div>
+
+                            <div>
+                                <span
+                                    className="block font-black leading-none text-white"
+                                    style={{
+                                        fontSize: `${Math.max(tamanhoFonteHora + 12, 44)}px`
+                                    }}
+                                >
+                                    {hora}
+                                </span>
+
+                                <span className="text-sm font-black uppercase tracking-[0.12em] text-[#2b8cff]">
+                                    Horário atual
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="h-14 w-px bg-white/25" />
+
+                        <div className="flex items-center gap-4 text-right">
+                            <div>
+                                <span className="block text-4xl font-black leading-none text-white">
+                                    {erroClima || temperaturaAtual === null
+                                        ? "--"
+                                        : `${obterIconeClima(codigoClimaAtual)} ${temperaturaAtual}°C`}
+                                </span>
+
+                                <span className="text-sm font-black uppercase tracking-[0.12em] text-[#2b8cff]">
+                                    Recife / PE
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <div className="relative h-1.5 overflow-hidden bg-[#061a3d]">
-                <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-[#073bd9] via-[#34bcf8] to-[#f15434]" />
-                <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-[#f15434] via-[#073bd9] to-[#34bcf8]" />
-            </div>
+            <div className="absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-[#073bd9] via-[#bb2c63] to-[#f15434]" />
         </div>
     </div>
 )}

@@ -92,6 +92,7 @@ export default function AdminPage() {
     const [tempoVisivelTarjaMidia, setTempoVisivelTarjaMidia] = useState(8)
     const [tempoSaidaTarjaMidia, setTempoSaidaTarjaMidia] = useState(1)
     const [tempoInicialTarjaMidia, setTempoInicialTarjaMidia] = useState(1)
+    const [tarjaQrcodeMidia, setTarjaQrcodeMidia] = useState("")
 
     // campos do formulário para adicionar nova mídia e notícia
     const [arquivo, setArquivo] = useState("")
@@ -101,7 +102,7 @@ export default function AdminPage() {
     >("cheio")
     const [novaNoticia, setNovaNoticia] = useState("")
     const [modeloTarjaMidia, setModeloTarjaMidia] =
-    useState<"telejornal" | "compacta" | "live" | "infobar">("telejornal")
+    useState<"telejornal" | "compacta" | "live" | "infobar" | "digital">("telejornal")
 
     // estado de autenticação do usuário
     const [email, setEmail] = useState("")
@@ -610,6 +611,8 @@ export default function AdminPage() {
                     setTempoInicialTarjaMidia={setTempoInicialTarjaMidia}
                     modeloTarjaMidia={modeloTarjaMidia}
                     setModeloTarjaMidia={setModeloTarjaMidia}
+                    tarjaQrcodeMidia={tarjaQrcodeMidia}
+                    setTarjaQrcodeMidia={setTarjaQrcodeMidia}
 
                     setMostrarTarjaMidia={setMostrarTarjaMidia}
                     setTarjaEtiquetaMidia={setTarjaEtiquetaMidia}

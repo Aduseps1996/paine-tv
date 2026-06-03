@@ -1,5 +1,5 @@
 import { doc, updateDoc } from "firebase/firestore"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 type Props = {
     midias: any[]
@@ -23,11 +23,13 @@ type Props = {
     tempoSaidaTarjaMidia: number
     tempoOcultaTarjaMidia: number
     tempoInicialTarjaMidia: number
+    tarjaQrcodeMidia: string
+    setTarjaQrcodeMidia: (valor: string) => void
 
     setArquivo: (valor: string) => void
     setTipo: (valor: "imagem" | "video") => void
     setTemplate: (valor: "cheio" | "informativo" | "institucional" | "urgente") => void
-    modeloTarjaMidia: "telejornal" | "compacta" | "live" | "infobar"
+    modeloTarjaMidia: "telejornal" | "compacta" | "live" | "infobar" | "digital"
     setModeloTarjaMidia: (valor: "telejornal" | "compacta" | "live" | "infobar") => void
 
     setTituloMidia: (valor: string) => void
@@ -103,16 +105,38 @@ export default function AbaMidias({
     setTempoInicialTarjaMidia,
     modeloTarjaMidia,
     setModeloTarjaMidia,
+    tarjaQrcodeMidia,
+    setTarjaQrcodeMidia,
 
     db
 }: Props) {
     const [modalTarjaAberto, setModalTarjaAberto] = useState(false)
     const [midiaEditando, setMidiaEditando] = useState<string | null>(null)
 
+    useEffect(() => {
+        if (!midiaEditando) return
+
+        const m = midias.find((x) => x.id === midiaEditando)
+
+        if (!m) return
+
+        setMostrarTarjaMidia(m.mostrarTarja ?? true)
+        setTarjaEtiquetaMidia(m.tarjaEtiqueta || "ADUSEPS INFORMA")
+        setTarjaTituloMidia(m.tarjaTitulo || "")
+        setTarjaSubtituloMidia(m.tarjaSubtitulo || "")
+        setTempoEntradaTarjaMidia(Number(m.tempoEntradaTarja || 1))
+        setTempoVisivelTarjaMidia(Number(m.tempoVisivelTarja || 8))
+        setTempoSaidaTarjaMidia(Number(m.tempoSaidaTarja || 1))
+        setTempoOcultaTarjaMidia(Number(m.tempoOcultaTarja || 10))
+        setTempoInicialTarjaMidia(Number(m.tempoInicialTarja || 1))
+        setModeloTarjaMidia(m.modeloTarja || "telejornal")
+        setTarjaQrcodeMidia(m.qrcode || "")
+    }, [midiaEditando, midias])
+
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-4xl font-black">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
                     Mídias do painel
                 </h1>
 
@@ -130,7 +154,7 @@ export default function AbaMidias({
                     Adicione banners, vídeos e campanhas para exibição no painel.
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <input
                         type="text"
                         placeholder="URL da imagem ou vídeo"
@@ -244,7 +268,7 @@ export default function AbaMidias({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-stretch">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
                     {midias.map((midia) => (
                         <div
                             key={midia.id}
@@ -387,7 +411,7 @@ export default function AbaMidias({
             {/* Modal Tarja */}
             {modalTarjaAberto && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <h2 className="text-2xl font-bold mb-6">
                             Configurar tarja do vídeo
                         </h2>
@@ -441,7 +465,7 @@ export default function AbaMidias({
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-sm font-medium text-zinc-300 mb-2 block">
                                         Tempo de entrada (s)
@@ -526,7 +550,20 @@ export default function AbaMidias({
                                     <option value="compacta">Tarja compacta</option>
                                     <option value="live">Tarja Live News</option>
                                     <option value="infobar">Barra Informativa</option>
+                                    <option value="digital">Banner Digital Sign</option>
                                 </select>
+                            </div>
+                            <div className="mt-4">
+                                <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                    Link para QR Code
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Link para QR Code"
+                                    value={tarjaQrcodeMidia}
+                                    onChange={(e) => setTarjaQrcodeMidia(e.target.value)}
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                />
                             </div>
                         </div>
 
@@ -543,7 +580,8 @@ export default function AbaMidias({
                                             tempoVisivelTarja: tempoVisivelTarjaMidia,
                                             tempoSaidaTarja: tempoSaidaTarjaMidia,
                                             tempoOcultaTarja: tempoOcultaTarjaMidia,
-                                            modeloTarja: modeloTarjaMidia
+                                            modeloTarja: modeloTarjaMidia,
+                                            qrcode: tarjaQrcodeMidia
                                         })
                                         carregarMidias()
                                     }

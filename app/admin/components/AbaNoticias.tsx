@@ -31,7 +31,7 @@ export default function AbaNoticias({
         <div className="space-y-6">
 
             <div>
-                <h1 className="text-4xl font-black">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
                     Notícias do rodapé
                 </h1>
 
