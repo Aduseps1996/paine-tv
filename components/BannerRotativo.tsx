@@ -51,6 +51,7 @@ export default function BannerRotativo({
     const possuiRotacao = midias.length > 1
     const midiaAtual = midias[indiceAtual]
     const [agoraPainel, setAgoraPainel] = useState(new Date())
+    const [audioYoutubeAtivo, setAudioYoutubeAtivo] = useState(false)
 
     useEffect(() => {
         const intervalo = setInterval(() => {
@@ -114,41 +115,67 @@ export default function BannerRotativo({
         return agora >= inicio && agora <= fim
     }
 
-    function montarListaInteligente(lista: Midia[]) {
-    const fila = lista.map((midia) => ({
-        midia,
-        peso: Math.max(1, Number(midia.pesoExibicao || 1)),
-        usados: 0
-    }))
+    function obterYoutubeEmbedUrl(link: string, audioAtivo: boolean) {
+        if (!link) return ""
 
-    const total = fila.reduce((soma, item) => soma + item.peso, 0)
-    const resultado: Midia[] = []
+        let videoId = ""
 
-    while (resultado.length < total) {
-        const ultimoId = resultado[resultado.length - 1]?.id
+        if (link.includes("watch?v=")) {
+            videoId = link.split("watch?v=")[1].split("&")[0]
+        }
 
-        const candidatos = fila
-            .filter((item) => item.usados < item.peso)
-            .filter((item) => item.midia.id !== ultimoId)
-            .sort((a, b) => {
-                const restanteA = a.peso - a.usados
-                const restanteB = b.peso - b.usados
+        if (link.includes("youtu.be/")) {
+            videoId = link.split("youtu.be/")[1].split("?")[0]
+        }
 
-                return restanteB - restanteA
-            })
+        if (link.includes("/live/")) {
+            videoId = link.split("/live/")[1].split("?")[0]
+        }
 
-        const escolhido =
-            candidatos[0] ||
-            fila.find((item) => item.usados < item.peso)
+        if (link.includes("/embed/")) {
+            videoId = link.split("/embed/")[1].split("?")[0]
+        }
 
-        if (!escolhido) break
+        if (!videoId) return ""
 
-        resultado.push(escolhido.midia)
-        escolhido.usados++
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${audioAtivo ? "0" : "1"}&playsinline=1&rel=0`
     }
 
-    return resultado
-}
+    function montarListaInteligente(lista: Midia[]) {
+        const fila = lista.map((midia) => ({
+            midia,
+            peso: Math.max(1, Number(midia.pesoExibicao || 1)),
+            usados: 0
+        }))
+
+        const total = fila.reduce((soma, item) => soma + item.peso, 0)
+        const resultado: Midia[] = []
+
+        while (resultado.length < total) {
+            const ultimoId = resultado[resultado.length - 1]?.id
+
+            const candidatos = fila
+                .filter((item) => item.usados < item.peso)
+                .filter((item) => item.midia.id !== ultimoId)
+                .sort((a, b) => {
+                    const restanteA = a.peso - a.usados
+                    const restanteB = b.peso - b.usados
+
+                    return restanteB - restanteA
+                })
+
+            const escolhido =
+                candidatos[0] ||
+                fila.find((item) => item.usados < item.peso)
+
+            if (!escolhido) break
+
+            resultado.push(escolhido.midia)
+            escolhido.usados++
+        }
+
+        return resultado
+    }
 
     useEffect(() => {
         const consulta = query(
@@ -162,9 +189,34 @@ export default function BannerRotativo({
                 ...doc.data()
             })) as Midia[]
 
-            const listaAtiva = lista.filter((midia) => midiaPodeSerExibida(midia))
+            const listaYoutubeAtiva = lista.filter((midia) => {
+                return (
+                    midia.ativo === true &&
+                    midia.tipoExibicaoProgramada === "youtube" &&
+                    midia.exibicaoProgramada === true &&
+                    midia.linkYoutubeExibicao &&
+                    midiaPodeSerExibida(midia)
+                )
+            })
 
-            const listaComPeso = montarListaInteligente(listaAtiva)
+            const listaMidiasAtivas = lista.filter((midia) => {
+                return (
+                    midia.ativo === true &&
+                    midia.tipoExibicaoProgramada !== "youtube" &&
+                    midiaPodeSerExibida(midia)
+                )
+            })
+
+            const listaBase =
+                listaYoutubeAtiva.length > 0
+                    ? listaYoutubeAtiva
+                    : listaMidiasAtivas
+
+            const listaComPeso = montarListaInteligente(listaBase)
+
+            setMidias(listaComPeso)
+            setIndiceAtual(0)
+
 
             setMidias(listaComPeso)
 
@@ -203,6 +255,45 @@ export default function BannerRotativo({
     }
 
     const templateAtual = midiaAtual.template || "cheio"
+
+    if (midiaAtual.tipoExibicaoProgramada === "youtube") {
+        const youtubeUrl = obterYoutubeEmbedUrl(
+            midiaAtual.linkYoutubeExibicao || "",
+            audioYoutubeAtivo
+        )
+
+        if (!youtubeUrl) {
+            return (
+                <img
+                    src={fallback}
+                    alt="Imagem padrão"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+            )
+        }
+
+        return (
+            <div className="absolute inset-x-0 top-0 bottom-[clamp(88px,10vh,132px)] bg-black">
+                <iframe
+                    key={`${midiaAtual.id}-${audioYoutubeAtivo ? "audio" : "mudo"}`}
+                    src={youtubeUrl}
+                    title="Transmissão ao vivo"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full border-0 bg-black"
+                />
+
+                {!audioYoutubeAtivo && (
+                    <button
+                        onClick={() => setAudioYoutubeAtivo(true)}
+                        className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full bg-red-600 px-8 py-4 text-lg font-black text-white shadow-2xl transition hover:bg-red-700"
+                    >
+                        🔊 Ativar áudio da transmissão
+                    </button>
+                )}
+            </div>
+        )
+    }
 
     const areaMidia =
         "absolute inset-x-0 top-0 bottom-[clamp(88px,10vh,132px)] h-auto w-full object-cover"

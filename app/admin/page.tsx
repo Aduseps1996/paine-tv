@@ -35,7 +35,7 @@ import { db, auth } from "../../lib/firebase"
 // Tipos usados para modelar os dados de mídia e notícias no painel.
 type Midia = {
     id?: string
-    tipo: "imagem" | "video"
+    tipo: "imagem" | "video" | "youtube"
     arquivo: string
     ativo: boolean
     ordem: number
@@ -84,7 +84,7 @@ export default function AdminPage() {
     const [categoriaMidia, setCategoriaMidia] = useState("")
     const [ctaMidia, setCtaMidia] = useState("")
 
-    const [mostrarTarjaMidia, setMostrarTarjaMidia] = useState(true)
+    const [mostrarTarjaMidia, setMostrarTarjaMidia] = useState(false)
     const [tarjaEtiquetaMidia, setTarjaEtiquetaMidia] = useState("ADUSEPS INFORMA")
     const [tarjaTituloMidia, setTarjaTituloMidia] = useState("")
     const [tarjaSubtituloMidia, setTarjaSubtituloMidia] = useState("")
@@ -96,7 +96,7 @@ export default function AdminPage() {
 
     // campos do formulário para adicionar nova mídia e notícia
     const [arquivo, setArquivo] = useState("")
-    const [tipo, setTipo] = useState<"imagem" | "video">("imagem")
+    const [tipo, setTipo] = useState<"imagem" | "video" | "youtube">("imagem")
     const [template, setTemplate] = useState<
         "cheio" | "informativo" | "institucional" | "urgente"
     >("cheio")
@@ -137,6 +137,10 @@ export default function AdminPage() {
     const [abaAtiva, setAbaAtiva] = useState<
         "inicio" | "midias" | "noticias" | "configuracao-painel" | "configuracao-tipografia"
     >("inicio")
+
+    const [programarExibicaoNovaMidia, setProgramarExibicaoNovaMidia] = useState(false)
+    const [inicioExibicaoNovaMidia, setInicioExibicaoNovaMidia] = useState("")
+    const [fimExibicaoNovaMidia, setFimExibicaoNovaMidia] = useState("")
 
     // Funções de carregamento de dados do Firebase
     async function carregarMidias() {
@@ -287,7 +291,6 @@ export default function AdminPage() {
             categoria: categoriaMidia.trim(),
             cta: ctaMidia.trim(),
 
-            mostrarTarja: mostrarTarjaMidia,
             tarjaEtiqueta: tarjaEtiquetaMidia.trim(),
             tarjaTitulo: tarjaTituloMidia.trim(),
             tarjaSubtitulo: tarjaSubtituloMidia.trim(),
@@ -297,6 +300,15 @@ export default function AdminPage() {
             tempoOcultaTarja: tempoOcultaTarjaMidia,
             tempoInicialTarja: tempoInicialTarjaMidia,
             modeloTarja: modeloTarjaMidia,
+
+            exibicaoProgramada: tipo === "youtube" ? true : programarExibicaoNovaMidia,
+            tipoExibicaoProgramada: tipo === "youtube" ? "youtube" : "midia",
+            inicioExibicao: inicioExibicaoNovaMidia,
+            fimExibicao: fimExibicaoNovaMidia,
+            linkYoutubeExibicao: tipo === "youtube" ? arquivo.trim() : "",
+
+            mostrarTarja: false,
+            pesoExibicao: 1,
 
             criadoEm: serverTimestamp()
         })
@@ -312,7 +324,7 @@ export default function AdminPage() {
         setCtaMidia("")
         setCategoriaMidia("")
 
-        setMostrarTarjaMidia(true)
+        setMostrarTarjaMidia(false)
         setTarjaEtiquetaMidia("ADUSEPS INFORMA")
         setTarjaTituloMidia("")
         setTarjaSubtituloMidia("")
@@ -322,6 +334,11 @@ export default function AdminPage() {
         setTempoInicialTarjaMidia(1)
         setTempoOcultaTarjaMidia(10)
         setModeloTarjaMidia("telejornal")
+
+        setProgramarExibicaoNovaMidia(false)
+        setInicioExibicaoNovaMidia("")
+        setFimExibicaoNovaMidia("")
+        setMostrarTarjaMidia(false)
 
 
         carregarMidias()
@@ -596,6 +613,13 @@ export default function AdminPage() {
                     alternarMidia={alternarMidia}
                     carregarMidias={carregarMidias}
                     db={db}
+
+                    programarExibicaoNovaMidia={programarExibicaoNovaMidia}
+                    setProgramarExibicaoNovaMidia={setProgramarExibicaoNovaMidia}
+                    inicioExibicaoNovaMidia={inicioExibicaoNovaMidia}
+                    setInicioExibicaoNovaMidia={setInicioExibicaoNovaMidia}
+                    fimExibicaoNovaMidia={fimExibicaoNovaMidia}
+                    setFimExibicaoNovaMidia={setFimExibicaoNovaMidia}
 
 
                     mostrarTarjaMidia={mostrarTarjaMidia}

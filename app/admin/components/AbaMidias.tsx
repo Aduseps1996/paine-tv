@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 type Props = {
     midias: any[]
     arquivo: string
-    tipo: "imagem" | "video"
+    tipo: "imagem" | "video" | "youtube"
     template: "cheio" | "informativo" | "institucional" | "urgente"
 
     tituloMidia: string
@@ -13,6 +13,13 @@ type Props = {
     qrcodeMidia: string
     categoriaMidia: string
     ctaMidia: string
+
+    programarExibicaoNovaMidia: boolean
+    setProgramarExibicaoNovaMidia: (valor: boolean) => void
+    inicioExibicaoNovaMidia: string
+    setInicioExibicaoNovaMidia: (valor: string) => void
+    fimExibicaoNovaMidia: string
+    setFimExibicaoNovaMidia: (valor: string) => void
 
     mostrarTarjaMidia: boolean
     tarjaEtiquetaMidia: string
@@ -27,8 +34,11 @@ type Props = {
     setTarjaQrcodeMidia: (valor: string) => void
 
     setArquivo: (valor: string) => void
-    setTipo: (valor: "imagem" | "video") => void
-    setTemplate: (valor: "cheio" | "informativo" | "institucional" | "urgente") => void
+    setTipo: (valor: "imagem" | "video" | "youtube") => void
+    setTemplate: (
+        valor: "cheio" | "informativo" | "institucional" | "urgente"
+    ) => void
+
     modeloTarjaMidia: "telejornal" | "compacta" | "live" | "infobar" | "digital"
     setModeloTarjaMidia: (
         valor: "telejornal" | "compacta" | "live" | "infobar" | "digital"
@@ -71,6 +81,13 @@ export default function AbaMidias({
     qrcodeMidia,
     categoriaMidia,
     ctaMidia,
+
+    programarExibicaoNovaMidia,
+    setProgramarExibicaoNovaMidia,
+    inicioExibicaoNovaMidia,
+    setInicioExibicaoNovaMidia,
+    fimExibicaoNovaMidia,
+    setFimExibicaoNovaMidia,
 
     setArquivo,
     setTipo,
@@ -130,7 +147,7 @@ export default function AbaMidias({
 
         if (!m) return
 
-        setMostrarTarjaMidia(m.mostrarTarja ?? true)
+        setMostrarTarjaMidia(m.mostrarTarja ?? false)
         setTarjaEtiquetaMidia(m.tarjaEtiqueta || "ADUSEPS INFORMA")
         setTarjaTituloMidia(m.tarjaTitulo || "")
         setTarjaSubtituloMidia(m.tarjaSubtitulo || "")
@@ -179,7 +196,11 @@ export default function AbaMidias({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <input
                         type="text"
-                        placeholder="URL da imagem ou vídeo"
+                        placeholder={
+                            tipo === "youtube"
+                                ? "Link do YouTube / live"
+                                : "URL da imagem ou vídeo"
+                        }
                         className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
                         value={arquivo}
                         onChange={(e) => setArquivo(e.target.value)}
@@ -188,33 +209,82 @@ export default function AbaMidias({
                     <select
                         value={tipo}
                         onChange={(e) =>
-                            setTipo(e.target.value as "imagem" | "video")
+                            setTipo(e.target.value as "imagem" | "video" | "youtube")
                         }
                         className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
                     >
                         <option value="imagem">imagem</option>
                         <option value="video">video</option>
+                        <option value="youtube">youtube / live</option>
                     </select>
 
-                    <select
-                        value={template}
-                        onChange={(e) =>
-                            setTemplate(
-                                e.target.value as
-                                | "cheio"
-                                | "informativo"
-                                | "institucional"
-                                | "urgente"
-                            )
-                        }
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                    >
-                        <option value="cheio">Banner cheio</option>
-                        <option value="informativo">Informativo</option>
-                        <option value="institucional">Institucional</option>
-                        <option value="urgente">Urgente</option>
-                    </select>
+                    {tipo !== "youtube" && (
+                        <select
+                            value={template}
+                            onChange={(e) =>
+                                setTemplate(
+                                    e.target.value as
+                                    | "cheio"
+                                    | "informativo"
+                                    | "institucional"
+                                    | "urgente"
+                                )
+                            }
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                        >
+                            <option value="cheio">Banner cheio</option>
+                            <option value="informativo">Informativo</option>
+                            <option value="institucional">Institucional</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    )}
 
+                    <div className="sm:col-span-2 rounded-2xl border border-zinc-700 bg-zinc-800/70 p-4 space-y-4">
+    <label className="flex items-center gap-3">
+        <input
+            type="checkbox"
+            checked={tipo === "youtube" ? true : programarExibicaoNovaMidia}
+            disabled={tipo === "youtube"}
+            onChange={(e) => setProgramarExibicaoNovaMidia(e.target.checked)}
+        />
+
+        <span className="font-bold">
+            {tipo === "youtube"
+                ? "YouTube / Live exige programação"
+                : "Programar exibição desta mídia"}
+        </span>
+    </label>
+
+    {(programarExibicaoNovaMidia || tipo === "youtube") && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label className="text-sm text-zinc-300 mb-2 block">
+                    Início da exibição
+                </label>
+
+                <input
+                    type="datetime-local"
+                    value={inicioExibicaoNovaMidia}
+                    onChange={(e) => setInicioExibicaoNovaMidia(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                />
+            </div>
+
+            <div>
+                <label className="text-sm text-zinc-300 mb-2 block">
+                    Fim da exibição
+                </label>
+
+                <input
+                    type="datetime-local"
+                    value={fimExibicaoNovaMidia}
+                    onChange={(e) => setFimExibicaoNovaMidia(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                />
+            </div>
+        </div>
+    )}
+</div>
 
 
                     <button
@@ -304,8 +374,8 @@ export default function AbaMidias({
 
                                 <span
                                     className={`rounded-full px-3 py-1 text-xs font-bold ${midia.ativo
-                                            ? "bg-green-500/15 text-green-400"
-                                            : "bg-red-500/15 text-red-400"
+                                        ? "bg-green-500/15 text-green-400"
+                                        : "bg-red-500/15 text-red-400"
                                         }`}
                                 >
                                     {midia.ativo ? "Ativo" : "Inativo"}
@@ -404,31 +474,31 @@ export default function AbaMidias({
                             </div>
 
                             <div className="mt-3 flex flex-wrap items-center gap-2">
-    <span className="text-sm text-zinc-400">
-        Repetição:
-    </span>
+                                <span className="text-sm text-zinc-400">
+                                    Repetição:
+                                </span>
 
-    <input
-        type="number"
-        min="1"
-        max="10"
-        value={midia.pesoExibicao || 1}
-        onChange={(e) => {
-            if (!midia.id) return
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    value={midia.pesoExibicao || 1}
+                                    onChange={(e) => {
+                                        if (!midia.id) return
 
-            updateDoc(doc(db, "midias", midia.id), {
-                pesoExibicao: Number(e.target.value)
-            })
+                                        updateDoc(doc(db, "midias", midia.id), {
+                                            pesoExibicao: Number(e.target.value)
+                                        })
 
-            carregarMidias()
-        }}
-        className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
-    />
+                                        carregarMidias()
+                                    }}
+                                    className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
+                                />
 
-    <span className="text-sm text-zinc-400">
-        vezes
-    </span>
-</div>
+                                <span className="text-sm text-zinc-400">
+                                    vezes
+                                </span>
+                            </div>
 
                             <div className="mt-4 flex flex-wrap gap-3">
                                 <button
@@ -450,17 +520,17 @@ export default function AbaMidias({
                                     Exibição de mídia
                                 </button>
 
-                                {midia.tipo === "video" && (
-                                    <button
-                                        onClick={() => {
-                                            setMidiaEditando(midia.id)
-                                            setModalTarjaAberto(true)
-                                        }}
-                                        className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-bold transition hover:bg-purple-700"
-                                    >
-                                        Adicionar tarja
-                                    </button>
-                                )}
+                            
+                                <button
+                                    onClick={() => {
+                                        setMidiaEditando(midia.id)
+                                        setModalTarjaAberto(true)
+                                    }}
+                                    className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-bold transition hover:bg-purple-700"
+                                >
+                                    Adicionar tarja
+                                </button>
+                            
 
                                 <button
                                     onClick={() => midia.id && removerMidia(midia.id)}

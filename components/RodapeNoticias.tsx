@@ -161,7 +161,7 @@ export default function RodapeNoticias({
     })
 
     const mostrarTarjaFinal =
-        midiaAtual?.mostrarTarja ?? mostrarTarjaTv
+        Boolean(midiaAtual?.mostrarTarja)
 
     const etiquetaTarjaFinal =
         midiaAtual?.tarjaEtiqueta || "ADUSEPS INFORMA"
