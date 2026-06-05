@@ -337,7 +337,7 @@ if (tipo !== "youtube" && programarExibicaoNovaMidia) {
             fimExibicao: fimExibicaoNovaMidia,
             linkYoutubeExibicao: tipo === "youtube" ? arquivo.trim() : "",
 
-            mostrarTarja: false,
+            mostrarTarja: mostrarTarjaMidia,
             pesoExibicao: 1,
 
             criadoEm: serverTimestamp()

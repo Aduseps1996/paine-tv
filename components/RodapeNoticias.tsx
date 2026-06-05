@@ -56,6 +56,8 @@ export default function RodapeNoticias({
         "oculta" | "entrando" | "visivel" | "saindo"
     >("oculta")
 
+    const [mostrarQrTelejornal, setMostrarQrTelejornal] = useState(false)
+
     function limitarValor(valor: unknown, minimo: number, maximo: number, padrao: number) {
         const numero = Number(valor)
 
@@ -192,68 +194,87 @@ export default function RodapeNoticias({
         midiaAtual?.modeloTarja ?? "telejornal"
 
     useEffect(() => {
-    if (!mostrarTarjaFinal) {
+        if (
+            !mostrarTarjaFinal ||
+            modeloTarjaFinal !== "telejornal"
+        ) {
+            setMostrarQrTelejornal(false)
+            return
+        }
+
+        setMostrarQrTelejornal(false)
+
+        const timer = setTimeout(() => {
+            setMostrarQrTelejornal(true)
+        }, 5000)
+
+        return () => clearTimeout(timer)
+
+    }, [mostrarTarjaFinal, modeloTarjaFinal, midiaAtual?.id])
+
+    useEffect(() => {
+        if (!mostrarTarjaFinal) {
+            setFaseTarja("oculta")
+            return
+        }
+
+        let ativo = true
+
         setFaseTarja("oculta")
-        return
-    }
 
-    let ativo = true
-
-    setFaseTarja("oculta")
-
-    function iniciarCiclo() {
-        if (!ativo) return
-
-        setFaseTarja("oculta")
-
-        setTimeout(() => {
+        function iniciarCiclo() {
             if (!ativo) return
 
-            setFaseTarja("entrando")
+            setFaseTarja("oculta")
 
             setTimeout(() => {
                 if (!ativo) return
 
-                setFaseTarja("visivel")
+                setFaseTarja("entrando")
 
                 setTimeout(() => {
                     if (!ativo) return
 
-                    setFaseTarja("saindo")
+                    setFaseTarja("visivel")
 
                     setTimeout(() => {
                         if (!ativo) return
 
-                        setFaseTarja("oculta")
+                        setFaseTarja("saindo")
 
                         setTimeout(() => {
                             if (!ativo) return
 
-                            iniciarCiclo()
-                        }, tempoOcultaTarjaFinal * 1000)
+                            setFaseTarja("oculta")
 
-                    }, tempoSaidaTarjaFinal * 1000)
+                            setTimeout(() => {
+                                if (!ativo) return
 
-                }, tempoVisivelTarjaFinal * 1000)
+                                iniciarCiclo()
+                            }, tempoOcultaTarjaFinal * 1000)
 
-            }, tempoEntradaTarjaFinal * 1000)
+                        }, tempoSaidaTarjaFinal * 1000)
 
-        }, 150)
-    }
+                    }, tempoVisivelTarjaFinal * 1000)
 
-    iniciarCiclo()
+                }, tempoEntradaTarjaFinal * 1000)
 
-    return () => {
-        ativo = false
-    }
-}, [
-    mostrarTarjaFinal,
-    tempoEntradaTarjaFinal,
-    tempoVisivelTarjaFinal,
-    tempoSaidaTarjaFinal,
-    tempoOcultaTarjaFinal,
-    midiaAtual?.id
-])
+            }, 150)
+        }
+
+        iniciarCiclo()
+
+        return () => {
+            ativo = false
+        }
+    }, [
+        mostrarTarjaFinal,
+        tempoEntradaTarjaFinal,
+        tempoVisivelTarjaFinal,
+        tempoSaidaTarjaFinal,
+        tempoOcultaTarjaFinal,
+        midiaAtual?.id
+    ])
 
     useEffect(() => {
         async function buscarClima() {
@@ -311,8 +332,8 @@ export default function RodapeNoticias({
                 {mostrarTarjaFinal && modeloTarjaFinal === "telejornal" && (
                     <div
                         className={`relative mx-auto w-[94vw] transition-all ${faseTarja === "entrando" || faseTarja === "visivel"
-                            ? "translate-x-0 opacity-100"
-                            : "-translate-x-[120%] opacity-0"
+                                ? "translate-x-0 opacity-100"
+                                : "-translate-x-[120%] opacity-0"
                             }`}
                         style={{
                             transitionDuration:
@@ -323,48 +344,83 @@ export default function RodapeNoticias({
                                         : "0s"
                         }}
                     >
+                        {/* Etiqueta superior */}
+                        <div className="absolute -top-6 left-8 z-40">
 
-                        <div className="absolute -top-7 left-0 z-40 flex items-center">
-                            <div className="bg-[#073bd9] px-6 py-1.5 shadow-xl">
-                                <span className="text-xs font-black uppercase tracking-[0.18em] text-white">
-                                    {etiquetaTarjaFinal}
-                                </span>
-                            </div>
+    {/* QR por trás */}
+<div
+    className={`absolute left-4 bottom-full z-0 transition-all duration-1000 ${
+        mostrarQrTelejornal
+            ? "translate-y-0 opacity-100"
+            : "translate-y-full opacity-0"
+    }`}
+>
+    {midiaAtual?.qrcode && (
+        <div className="rounded-xl bg-white p-2 shadow-xl">
+            <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(
+                    midiaAtual.qrcode
+                )}`}
+                alt="QR Code"
+                className="h-32 w-32"
+            />
+        </div>
+    )}
+</div>
 
-                            <div className="h-0 w-0 border-y-[14px] border-l-[24px] border-y-transparent border-l-[#073bd9]" />
-                        </div>
+    {/* Faixa azul */}
+    <div className="relative z-20 rounded-t-md bg-[#073bd9] px-5 py-1.5 shadow-xl">
+        <span className="text-xs font-black uppercase tracking-[0.22em] text-white">
+            {mostrarQrTelejornal
+                ? "VEJA MAIS NO NOSSO INSTAGRAM"
+                : etiquetaTarjaFinal}
+        </span>
+    </div>
 
-                        <div className="relative bg-white/95 shadow-[0_18px_50px_rgba(0,0,0,0.55)]">
-                            <div className="absolute left-0 top-0 h-full w-10 bg-[#4a4a4a]" />
+</div>
 
-                            <div className="absolute right-0 top-0 h-full w-[220px] bg-[#073bd9]" />
+                        {/* Tarja principal */}
+                        <div className="relative overflow-hidden rounded-xl border border-white/25 bg-white/95 shadow-[0_22px_70px_rgba(0,0,0,0.55)] backdrop-blur-md">
 
-                            <div className="absolute right-[190px] top-0 h-full w-20 skew-x-[-28deg] bg-white/95" />
+                            {/* detalhe azul no fundo */}
+                            <div className="absolute inset-y-0 right-0 w-[300px] bg-gradient-to-l from-[#073bd9] to-[#0d5cff]" />
 
-                            <div className="relative z-10 flex items-center justify-between gap-4 px-10 py-3">
-                                <div className="min-w-0 pl-6 pr-8">
+                            {/* corte diagonal */}
+                            <div className="absolute right-[235px] top-0 h-full w-24 skew-x-[-24deg] bg-white/95" />
+
+                            {/* brilho sutil */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/10" />
+
+                            {/* barra lateral */}
+                            <div className="absolute left-0 top-0 h-full w-2 bg-[#073bd9]" />
+
+                            <div className="relative z-10 flex items-center justify-between gap-6 px-9 py-4">
+
+                                {/* Texto */}
+                                <div className="min-w-0 flex-1 pl-4 pr-6">
                                     <h2
-                                        className="truncate font-black uppercase leading-none text-[#071b42]"
+                                        className="truncate font-black uppercase leading-none tracking-tight text-[#071b42]"
                                         style={{
-                                            fontSize: `${Math.max(tamanhoFonteSlogan + 6, 22)}px`
+                                            fontSize: `${Math.max(tamanhoFonteSlogan + 8, 26)}px`
                                         }}
                                     >
                                         {tituloTarjaFinal}
                                     </h2>
 
                                     <p
-                                        className="mt-1 truncate font-semibold text-[#071b42]/70"
+                                        className="mt-2 truncate font-semibold text-[#334155]"
                                         style={{
-                                            fontSize: `${Math.max(tamanhoFonteSlogan - 3, 12)}px`
+                                            fontSize: `${Math.max(tamanhoFonteSlogan - 2, 14)}px`
                                         }}
                                     >
                                         {subtituloTarjaFinal}
                                     </p>
                                 </div>
 
-                                <div className="relative z-20 flex shrink-0 items-center gap-3">
+                                {/* Logo + hora */}
+                                <div className="relative z-20 flex shrink-0 items-center gap-4">
                                     {logo.trim() !== "" && (
-                                        <div className="rounded-md bg-white px-2 py-1 shadow-md">
+                                        <div className="rounded-lg bg-white px-3 py-2 shadow-lg ring-1 ring-black/10">
                                             <img
                                                 src={logo}
                                                 alt="Logo ADUSEPS"
@@ -374,9 +430,9 @@ export default function RodapeNoticias({
                                         </div>
                                     )}
 
-                                    <div className="min-w-[90px] text-center">
+                                    <div className="min-w-[105px] rounded-lg bg-white/15 px-3 py-2 text-center shadow-inner backdrop-blur">
                                         <span
-                                            className="font-black text-white"
+                                            className="font-black tracking-tight text-white drop-shadow"
                                             style={{
                                                 fontSize: `${tamanhoFonteHora}px`
                                             }}
@@ -387,7 +443,8 @@ export default function RodapeNoticias({
                                 </div>
                             </div>
 
-                            <div className="h-1.5 bg-[#073bd9]" />
+                            {/* linha inferior */}
+                            <div className="h-1.5 bg-gradient-to-r from-[#073bd9] via-[#0d5cff] to-[#073bd9]" />
                         </div>
                     </div>
                 )}
@@ -638,8 +695,8 @@ export default function RodapeNoticias({
                 {mostrarTarjaFinal && modeloTarjaFinal === "digital" && (
                     <div
                         className={`fixed left-0 top-0 z-40 h-[100dvh] w-[min(50vw,900px)] transition-all ${faseTarja === "entrando" || faseTarja === "visivel"
-                                ? "translate-x-0 opacity-100"
-                                : "-translate-x-full opacity-0"
+                            ? "translate-x-0 opacity-100"
+                            : "-translate-x-full opacity-0"
                             }`}
                         style={{
                             transitionDuration:
