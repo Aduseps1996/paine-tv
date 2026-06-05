@@ -13,7 +13,7 @@ import { db } from "../lib/firebase"
 
 type Midia = {
     id?: string
-    tipo: "imagem" | "video"
+    tipo: "imagem" | "video" | "youtube"
     arquivo: string
     ativo: boolean
     ordem: number
@@ -49,7 +49,9 @@ export default function BannerRotativo({
     const [erroMidia, setErroMidia] = useState(false)
 
     const possuiRotacao = midias.length > 1
+
     const midiaAtual = midias[indiceAtual]
+
     const [agoraPainel, setAgoraPainel] = useState(new Date())
     const [audioYoutubeAtivo, setAudioYoutubeAtivo] = useState(false)
 
@@ -92,19 +94,15 @@ export default function BannerRotativo({
     }
 
     function midiaPodeSerExibida(midia: Midia) {
-        if (!midia.ativo) {
+        if (!midia.ativo) return false
+
+        if (midia.tipoExibicaoProgramada === "youtube" && midia.tipo !== "youtube") {
             return false
         }
 
-        // Se não foi programada, roda normal
-        if (!midia.exibicaoProgramada) {
-            return true
-        }
+        if (!midia.exibicaoProgramada) return true
 
-        // Se marcou como programada mas não colocou início/fim, não exibe
-        if (!midia.inicioExibicao || !midia.fimExibicao) {
-            return false
-        }
+        if (!midia.inicioExibicao || !midia.fimExibicao) return false
 
         const agora = agoraPainel
         const inicio = new Date(midia.inicioExibicao)
@@ -226,9 +224,11 @@ export default function BannerRotativo({
         )
     }
 
+    const chaveMidiaAtual = `${midiaAtual.id || "sem-id"}-${midiaAtual.ativo}-${midiaAtual.tipo}-${midiaAtual.arquivo}`
+
     const templateAtual = midiaAtual.template || "cheio"
 
-    if (midiaAtual.tipoExibicaoProgramada === "youtube") {
+    if (midiaAtual.tipo === "youtube") {
         const youtubeUrl = obterYoutubeEmbedUrl(
             midiaAtual.linkYoutubeExibicao || "",
             audioYoutubeAtivo
@@ -245,7 +245,10 @@ export default function BannerRotativo({
         }
 
         return (
-            <div className="absolute inset-x-0 top-0 bottom-[clamp(88px,10vh,132px)] bg-black">
+            <div
+                key={chaveMidiaAtual}
+                className="absolute inset-x-0 top-0 bottom-[clamp(88px,10vh,132px)] bg-black"
+            >
                 <iframe
                     key={`${midiaAtual.id}-${audioYoutubeAtivo ? "audio" : "mudo"}`}
                     src={youtubeUrl}
