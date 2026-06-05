@@ -732,6 +732,7 @@ export default function AbaMidias({
                                             tempoVisivelTarja: tempoVisivelTarjaMidia,
                                             tempoSaidaTarja: tempoSaidaTarjaMidia,
                                             tempoOcultaTarja: tempoOcultaTarjaMidia,
+                                            tempoInicialTarja: tempoInicialTarjaMidia,
                                             modeloTarja: modeloTarjaMidia,
                                             qrcode: tarjaQrcodeMidia
                                         })

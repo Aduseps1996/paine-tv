@@ -185,10 +185,13 @@ export default function RodapeNoticias({
         Number(midiaAtual?.tempoSaidaTarja || tempoSaidaTarja)
 
     const tempoOcultaTarjaFinal =
-        Number(
-            midiaAtual?.tempoOcultaTarja ||
-            tempoOcultaTarja
-        )
+    Number(
+        midiaAtual?.tempoOcultaTarja ||
+        tempoOcultaTarja
+    )
+
+    const tempoInicialTarjaFinal =
+        Number(midiaAtual?.tempoInicialTarja || 1)
 
     const modeloTarjaFinal =
         midiaAtual?.modeloTarja ?? "telejornal"
@@ -259,7 +262,7 @@ export default function RodapeNoticias({
 
                 }, tempoEntradaTarjaFinal * 1000)
 
-            }, 150)
+            }, tempoInicialTarjaFinal * 1000)
         }
 
         iniciarCiclo()
@@ -273,6 +276,7 @@ export default function RodapeNoticias({
         tempoVisivelTarjaFinal,
         tempoSaidaTarjaFinal,
         tempoOcultaTarjaFinal,
+        tempoInicialTarjaFinal,
         midiaAtual?.id
     ])
 
