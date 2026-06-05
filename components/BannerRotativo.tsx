@@ -18,6 +18,9 @@ type Midia = {
     ativo: boolean
     ordem: number
     duracao: number
+
+    pesoExibicao?: number
+
     template?: "cheio" | "informativo" | "institucional" | "urgente"
     titulo?: string
     subtitulo?: string
@@ -25,6 +28,12 @@ type Midia = {
     qrcode?: string
     categoria?: string
     cta?: string
+
+    exibicaoProgramada?: boolean
+    tipoExibicaoProgramada?: "midia" | "youtube"
+    inicioExibicao?: string
+    fimExibicao?: string
+    linkYoutubeExibicao?: string
 }
 
 export default function BannerRotativo({
@@ -41,6 +50,15 @@ export default function BannerRotativo({
 
     const possuiRotacao = midias.length > 1
     const midiaAtual = midias[indiceAtual]
+    const [agoraPainel, setAgoraPainel] = useState(new Date())
+
+    useEffect(() => {
+        const intervalo = setInterval(() => {
+            setAgoraPainel(new Date())
+        }, 30000)
+
+        return () => clearInterval(intervalo)
+    }, [])
 
     useEffect(() => {
         if (midiaAtual) {
@@ -72,6 +90,66 @@ export default function BannerRotativo({
         }, 250)
     }
 
+    function midiaPodeSerExibida(midia: Midia) {
+        if (!midia.ativo) {
+            return false
+        }
+
+        if (!midia.exibicaoProgramada) {
+            return true
+        }
+
+        if (!midia.inicioExibicao || !midia.fimExibicao) {
+            return true
+        }
+
+        const agora = agoraPainel
+        const inicio = new Date(midia.inicioExibicao)
+        const fim = new Date(midia.fimExibicao)
+
+        if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
+            return true
+        }
+
+        return agora >= inicio && agora <= fim
+    }
+
+    function montarListaInteligente(lista: Midia[]) {
+    const fila = lista.map((midia) => ({
+        midia,
+        peso: Math.max(1, Number(midia.pesoExibicao || 1)),
+        usados: 0
+    }))
+
+    const total = fila.reduce((soma, item) => soma + item.peso, 0)
+    const resultado: Midia[] = []
+
+    while (resultado.length < total) {
+        const ultimoId = resultado[resultado.length - 1]?.id
+
+        const candidatos = fila
+            .filter((item) => item.usados < item.peso)
+            .filter((item) => item.midia.id !== ultimoId)
+            .sort((a, b) => {
+                const restanteA = a.peso - a.usados
+                const restanteB = b.peso - b.usados
+
+                return restanteB - restanteA
+            })
+
+        const escolhido =
+            candidatos[0] ||
+            fila.find((item) => item.usados < item.peso)
+
+        if (!escolhido) break
+
+        resultado.push(escolhido.midia)
+        escolhido.usados++
+    }
+
+    return resultado
+}
+
     useEffect(() => {
         const consulta = query(
             collection(db, "midias"),
@@ -84,12 +162,14 @@ export default function BannerRotativo({
                 ...doc.data()
             })) as Midia[]
 
-            const listaAtiva = lista.filter((midia) => midia.ativo === true)
+            const listaAtiva = lista.filter((midia) => midiaPodeSerExibida(midia))
 
-            setMidias(listaAtiva)
+            const listaComPeso = montarListaInteligente(listaAtiva)
+
+            setMidias(listaComPeso)
 
             setIndiceAtual((indiceAtual) => {
-                if (indiceAtual >= listaAtiva.length) {
+                if (indiceAtual >= listaComPeso.length) {
                     return 0
                 }
 
@@ -98,7 +178,7 @@ export default function BannerRotativo({
         })
 
         return () => unsubscribe()
-    }, [])
+    }, [agoraPainel])
 
     useEffect(() => {
         if (!midiaAtual) return
@@ -131,8 +211,7 @@ export default function BannerRotativo({
         "absolute top-0 left-0 w-full h-[calc(100vh-6.5rem)] object-cover"
 
     const transicaoMidia = possuiRotacao
-        ? `transition-opacity duration-300 ease-in-out ${
-            visivel ? "opacity-100" : "opacity-0"
+        ? `transition-opacity duration-300 ease-in-out ${visivel ? "opacity-100" : "opacity-0"
         }`
         : ""
 

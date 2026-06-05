@@ -30,7 +30,9 @@ type Props = {
     setTipo: (valor: "imagem" | "video") => void
     setTemplate: (valor: "cheio" | "informativo" | "institucional" | "urgente") => void
     modeloTarjaMidia: "telejornal" | "compacta" | "live" | "infobar" | "digital"
-    setModeloTarjaMidia: (valor: "telejornal" | "compacta" | "live" | "infobar") => void
+    setModeloTarjaMidia: (
+        valor: "telejornal" | "compacta" | "live" | "infobar" | "digital"
+    ) => void
 
     setTituloMidia: (valor: string) => void
     setSubtituloMidia: (valor: string) => void
@@ -112,6 +114,14 @@ export default function AbaMidias({
 }: Props) {
     const [modalTarjaAberto, setModalTarjaAberto] = useState(false)
     const [midiaEditando, setMidiaEditando] = useState<string | null>(null)
+    const [modalExibicaoAberto, setModalExibicaoAberto] = useState(false)
+    const [midiaExibicaoEditando, setMidiaExibicaoEditando] = useState<string | null>(null)
+
+    const [exibicaoProgramada, setExibicaoProgramada] = useState(false)
+    const [tipoExibicaoProgramada, setTipoExibicaoProgramada] = useState<"midia" | "youtube">("midia")
+    const [inicioExibicao, setInicioExibicao] = useState("")
+    const [fimExibicao, setFimExibicao] = useState("")
+    const [linkYoutubeExibicao, setLinkYoutubeExibicao] = useState("")
 
     useEffect(() => {
         if (!midiaEditando) return
@@ -132,6 +142,18 @@ export default function AbaMidias({
         setModeloTarjaMidia(m.modeloTarja || "telejornal")
         setTarjaQrcodeMidia(m.qrcode || "")
     }, [midiaEditando, midias])
+
+    function abrirModalExibicao(midia: any) {
+        setMidiaExibicaoEditando(midia.id)
+
+        setExibicaoProgramada(midia.exibicaoProgramada ?? false)
+        setTipoExibicaoProgramada(midia.tipoExibicaoProgramada || "midia")
+        setInicioExibicao(midia.inicioExibicao || "")
+        setFimExibicao(midia.fimExibicao || "")
+        setLinkYoutubeExibicao(midia.linkYoutubeExibicao || "")
+
+        setModalExibicaoAberto(true)
+    }
 
     return (
         <div className="space-y-3 sm:space-y-6">
@@ -274,7 +296,7 @@ export default function AbaMidias({
                             key={midia.id}
                             className="flex h-full flex-col rounded-2xl border border-zinc-700 bg-zinc-800/80 p-5 shadow-lg"
                         >
-                            <div className="flex items-center gap-2 mb-3">
+                            <div className="flex items-center gap-2 mb-3 flex-wrap">
                                 <div
                                     className={`w-3 h-3 rounded-full ${midia.ativo ? "bg-green-500" : "bg-red-500"
                                         }`}
@@ -288,6 +310,16 @@ export default function AbaMidias({
                                 >
                                     {midia.ativo ? "Ativo" : "Inativo"}
                                 </span>
+
+                                {midia.exibicaoProgramada ? (
+                                    <span className="rounded-full px-3 py-1 text-xs font-bold bg-blue-500/15 text-blue-400">
+                                        Programada
+                                    </span>
+                                ) : (
+                                    <span className="rounded-full px-3 py-1 text-xs font-bold bg-zinc-700 text-zinc-300">
+                                        Contínua
+                                    </span>
+                                )}
                             </div>
 
                             <p className="font-bold">
@@ -371,17 +403,51 @@ export default function AbaMidias({
                                 />
                             </div>
 
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+    <span className="text-sm text-zinc-400">
+        Repetição:
+    </span>
+
+    <input
+        type="number"
+        min="1"
+        max="10"
+        value={midia.pesoExibicao || 1}
+        onChange={(e) => {
+            if (!midia.id) return
+
+            updateDoc(doc(db, "midias", midia.id), {
+                pesoExibicao: Number(e.target.value)
+            })
+
+            carregarMidias()
+        }}
+        className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
+    />
+
+    <span className="text-sm text-zinc-400">
+        vezes
+    </span>
+</div>
+
                             <div className="mt-4 flex flex-wrap gap-3">
                                 <button
                                     onClick={() =>
                                         midia.id && alternarMidia(midia.id, midia.ativo)
                                     }
                                     className={`rounded-lg px-4 py-2 text-sm font-bold transition ${midia.ativo
-                                            ? "bg-yellow-600 hover:bg-yellow-700"
-                                            : "bg-green-600 hover:bg-green-700"
+                                        ? "bg-yellow-600 hover:bg-yellow-700"
+                                        : "bg-green-600 hover:bg-green-700"
                                         }`}
                                 >
                                     {midia.ativo ? "Desativar" : "Ativar"}
+                                </button>
+
+                                <button
+                                    onClick={() => abrirModalExibicao(midia)}
+                                    className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold transition hover:bg-sky-700"
+                                >
+                                    Exibição de mídia
                                 </button>
 
                                 {midia.tipo === "video" && (
@@ -543,7 +609,11 @@ export default function AbaMidias({
                                 </label>
                                 <select
                                     value={modeloTarjaMidia}
-                                    onChange={(e) => setModeloTarjaMidia(e.target.value as "telejornal" | "compacta" | "live")}
+                                    onChange={(e) =>
+                                        setModeloTarjaMidia(
+                                            e.target.value as "telejornal" | "compacta" | "live" | "infobar" | "digital"
+                                        )
+                                    }
                                     className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
                                 >
                                     <option value="telejornal">Tarja telejornal</option>
@@ -597,6 +667,147 @@ export default function AbaMidias({
                                 onClick={() => {
                                     setModalTarjaAberto(false)
                                     setMidiaEditando(null)
+                                }}
+                                className="flex-1 bg-zinc-800 hover:bg-zinc-700 px-6 py-3 rounded-xl font-bold transition"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Exibição de Mídia */}
+            {modalExibicaoAberto && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-2xl font-bold mb-2">
+                            Exibição de mídia
+                        </h2>
+
+                        <p className="text-zinc-400 mb-6">
+                            Configure quando esta mídia ou transmissão será exibida no painel.
+                        </p>
+
+                        <div className="space-y-4">
+                            <label className="flex items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
+                                <input
+                                    type="checkbox"
+                                    checked={exibicaoProgramada}
+                                    onChange={(e) => setExibicaoProgramada(e.target.checked)}
+                                />
+
+                                <span>Usar exibição programada</span>
+                            </label>
+
+                            <div>
+                                <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                    Tipo de exibição
+                                </label>
+
+                                <select
+                                    value={tipoExibicaoProgramada}
+                                    onChange={(e) => {
+                                        const valor = e.target.value as "midia" | "youtube"
+
+                                        setTipoExibicaoProgramada(valor)
+
+                                        if (valor === "midia") {
+                                            setLinkYoutubeExibicao("")
+                                        }
+                                    }}
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                >
+                                    <option value="midia">Mídia cadastrada</option>
+                                    <option value="youtube">YouTube</option>
+                                </select>
+                            </div>
+
+                            {tipoExibicaoProgramada === "youtube" && (
+                                <div>
+                                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                        Link do YouTube
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        placeholder="Cole aqui o link da live ou vídeo do YouTube"
+                                        value={linkYoutubeExibicao}
+                                        onChange={(e) => setLinkYoutubeExibicao(e.target.value)}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                        Início da exibição
+                                    </label>
+
+                                    <input
+                                        type="datetime-local"
+                                        value={inicioExibicao}
+                                        onChange={(e) => setInicioExibicao(e.target.value)}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
+                                        Fim da exibição
+                                    </label>
+
+                                    <input
+                                        type="datetime-local"
+                                        value={fimExibicao}
+                                        onChange={(e) => setFimExibicao(e.target.value)}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl border border-zinc-700 bg-zinc-800/70 p-4 text-sm text-zinc-300">
+                                <p className="font-bold text-white mb-1">
+                                    Como funciona:
+                                </p>
+
+                                <p>
+                                    Se estiver programado, esta mídia só será exibida dentro do período escolhido.
+                                    Fora do horário, o painel volta para as outras mídias ativas.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex gap-3">
+                            <button
+                                onClick={async () => {
+                                    if (!midiaExibicaoEditando) return
+
+                                    await updateDoc(doc(db, "midias", midiaExibicaoEditando), {
+                                        exibicaoProgramada,
+                                        tipoExibicaoProgramada,
+                                        inicioExibicao,
+                                        fimExibicao,
+                                        linkYoutubeExibicao: tipoExibicaoProgramada === "youtube"
+                                            ? linkYoutubeExibicao
+                                            : ""
+                                    })
+
+                                    carregarMidias()
+
+                                    setModalExibicaoAberto(false)
+                                    setMidiaExibicaoEditando(null)
+                                }}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold transition"
+                            >
+                                Salvar exibição
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setModalExibicaoAberto(false)
+                                    setMidiaExibicaoEditando(null)
                                 }}
                                 className="flex-1 bg-zinc-800 hover:bg-zinc-700 px-6 py-3 rounded-xl font-bold transition"
                             >
