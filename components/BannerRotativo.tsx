@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import {
     collection,
@@ -34,6 +34,17 @@ type Midia = {
     inicioExibicao?: string
     fimExibicao?: string
     linkYoutubeExibicao?: string
+
+    mostrarTarja?: boolean
+    tarjaEtiqueta?: string
+    tarjaTitulo?: string
+    tarjaSubtitulo?: string
+    tempoEntradaTarja?: number
+    tempoVisivelTarja?: number
+    tempoSaidaTarja?: number
+    tempoOcultaTarja?: number
+    tempoInicialTarja?: number
+    modeloTarja?: "telejornal" | "compacta" | "live" | "infobar" | "digital"
 }
 
 export default function BannerRotativo({
@@ -43,68 +54,46 @@ export default function BannerRotativo({
     fallback: string
     onMidiaAtualChange?: (midia: any) => void
 }) {
-    const [midias, setMidias] = useState<Midia[]>([])
+    const [midiasBase, setMidiasBase] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
     const [visivel, setVisivel] = useState(true)
     const [erroMidia, setErroMidia] = useState(false)
-
-    const possuiRotacao = midias.length > 1
-
-    const midiaAtual = midias[indiceAtual]
-
     const [agoraPainel, setAgoraPainel] = useState(new Date())
     const [audioYoutubeAtivo, setAudioYoutubeAtivo] = useState(false)
 
     useEffect(() => {
         const intervalo = setInterval(() => {
             setAgoraPainel(new Date())
-        }, 30000)
+        }, 10000)
 
         return () => clearInterval(intervalo)
     }, [])
 
     useEffect(() => {
-        if (midiaAtual) {
-            onMidiaAtualChange?.(midiaAtual)
-        }
-    }, [midiaAtual, onMidiaAtualChange])
+        const consulta = query(
+            collection(db, "midias"),
+            orderBy("ordem", "asc")
+        )
 
-    useEffect(() => {
-        setErroMidia(false)
-        setVisivel(false)
+        const unsubscribe = onSnapshot(consulta, (resultado) => {
+            const lista = resultado.docs.map((documento) => ({
+                id: documento.id,
+                ...documento.data()
+            })) as Midia[]
 
-        const tempo = setTimeout(() => {
-            setVisivel(true)
-        }, 80)
+            setMidiasBase(lista)
+        })
 
-        return () => clearTimeout(tempo)
-    }, [indiceAtual])
+        return () => unsubscribe()
+    }, [])
 
-    function avancarMidia() {
-        if (midias.length <= 1) return
+    function midiaEstaDentroDoHorario(midia: Midia) {
+        if (!midia.exibicaoProgramada) return true
 
-        setVisivel(false)
-
-        setTimeout(() => {
-            setIndiceAtual((valorAtual) => {
-                const proximo = valorAtual + 1
-                return proximo >= midias.length ? 0 : proximo
-            })
-        }, 250)
-    }
-
-    function midiaPodeSerExibida(midia: Midia) {
-        if (!midia.ativo) return false
-
-        if (midia.tipoExibicaoProgramada === "youtube" && midia.tipo !== "youtube") {
+        if (!midia.inicioExibicao || !midia.fimExibicao) {
             return false
         }
 
-        if (!midia.exibicaoProgramada) return true
-
-        if (!midia.inicioExibicao || !midia.fimExibicao) return false
-
-        const agora = agoraPainel
         const inicio = new Date(midia.inicioExibicao)
         const fim = new Date(midia.fimExibicao)
 
@@ -112,33 +101,32 @@ export default function BannerRotativo({
             return false
         }
 
-        return agora >= inicio && agora <= fim
+        return agoraPainel >= inicio && agoraPainel <= fim
     }
 
-    function obterYoutubeEmbedUrl(link: string, audioAtivo: boolean) {
-        if (!link) return ""
+    function midiaPodeSerExibida(midia: Midia) {
+        if (!midia.ativo) return false
 
-        let videoId = ""
+        if (midia.tipo === "youtube") {
+            if (!midia.linkYoutubeExibicao && !midia.arquivo) {
+                return false
+            }
 
-        if (link.includes("watch?v=")) {
-            videoId = link.split("watch?v=")[1].split("&")[0]
+            if (!midia.exibicaoProgramada) {
+                return false
+            }
+
+            return midiaEstaDentroDoHorario(midia)
         }
 
-        if (link.includes("youtu.be/")) {
-            videoId = link.split("youtu.be/")[1].split("?")[0]
+        if (
+            midia.tipoExibicaoProgramada === "youtube" &&
+            !midia.linkYoutubeExibicao
+        ) {
+            return false
         }
 
-        if (link.includes("/live/")) {
-            videoId = link.split("/live/")[1].split("?")[0]
-        }
-
-        if (link.includes("/embed/")) {
-            videoId = link.split("/embed/")[1].split("?")[0]
-        }
-
-        if (!videoId) return ""
-
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${audioAtivo ? "0" : "1"}&playsinline=1&rel=0`
+        return midiaEstaDentroDoHorario(midia)
     }
 
     function montarListaInteligente(lista: Midia[]) {
@@ -177,39 +165,115 @@ export default function BannerRotativo({
         return resultado
     }
 
-    useEffect(() => {
-        const consulta = query(
-            collection(db, "midias"),
-            orderBy("ordem", "asc")
-        )
-
-        const unsubscribe = onSnapshot(consulta, (resultado) => {
-            const lista = resultado.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data()
-            })) as Midia[]
-
-            const listaAtiva = lista.filter((midia) => {
-                return midiaPodeSerExibida(midia)
-            })
-
-            const listaComPeso = montarListaInteligente(listaAtiva)
-
-            setMidias(listaComPeso)
-            setIndiceAtual(0)
+    const midias = useMemo(() => {
+        const listaAtiva = midiasBase.filter((midia) => {
+            return midiaPodeSerExibida(midia)
         })
 
-        return () => unsubscribe()
-    }, [agoraPainel])
+        const youtubeAtivo = listaAtiva.find((midia) => {
+            return (
+                midia.ativo === true &&
+                midia.exibicaoProgramada === true &&
+                midia.tipoExibicaoProgramada === "youtube" &&
+                (midia.linkYoutubeExibicao || midia.tipo === "youtube")
+            )
+        })
+
+        if (youtubeAtivo) {
+            return [youtubeAtivo]
+        }
+
+        return montarListaInteligente(
+            listaAtiva.filter((midia) => midia.tipo !== "youtube")
+        )
+    }, [midiasBase, agoraPainel])
+
+    const assinaturaMidias = midias
+        .map((midia) => `${midia.id}-${midia.tipo}-${midia.arquivo}-${midia.linkYoutubeExibicao}`)
+        .join("|")
+
+    const possuiRotacao = midias.length > 1
+    const midiaAtual = midias[indiceAtual]
+
+    useEffect(() => {
+        if (midias.length === 0) {
+            setIndiceAtual(0)
+            return
+        }
+
+        if (indiceAtual >= midias.length) {
+            setIndiceAtual(0)
+        }
+    }, [midias.length, indiceAtual])
+
+    useEffect(() => {
+        setErroMidia(false)
+        setVisivel(false)
+
+        const tempo = setTimeout(() => {
+            setVisivel(true)
+        }, 80)
+
+        return () => clearTimeout(tempo)
+    }, [indiceAtual, assinaturaMidias])
+
+    useEffect(() => {
+        if (midiaAtual) {
+            onMidiaAtualChange?.(midiaAtual)
+        } else {
+            onMidiaAtualChange?.(null)
+        }
+    }, [midiaAtual, onMidiaAtualChange])
+
+    function avancarMidia() {
+        if (midias.length <= 1) return
+
+        setVisivel(false)
+
+        setTimeout(() => {
+            setIndiceAtual((valorAtual) => {
+                const proximo = valorAtual + 1
+                return proximo >= midias.length ? 0 : proximo
+            })
+        }, 250)
+    }
+
+    function obterYoutubeEmbedUrl(link: string, audioAtivo: boolean) {
+        if (!link) return ""
+
+        let videoId = ""
+
+        if (link.includes("watch?v=")) {
+            videoId = link.split("watch?v=")[1].split("&")[0]
+        }
+
+        if (link.includes("youtu.be/")) {
+            videoId = link.split("youtu.be/")[1].split("?")[0]
+        }
+
+        if (link.includes("/live/")) {
+            videoId = link.split("/live/")[1].split("?")[0]
+        }
+
+        if (link.includes("/embed/")) {
+            videoId = link.split("/embed/")[1].split("?")[0]
+        }
+
+        if (!videoId) return ""
+
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${audioAtivo ? "0" : "1"}&playsinline=1&rel=0`
+    }
 
     useEffect(() => {
         if (!midiaAtual) return
         if (midias.length <= 1) return
         if (midiaAtual.tipo !== "imagem") return
 
+        const duracaoSegura = Math.max(1, Number(midiaAtual.duracao || 8))
+
         const intervaloBanner = setInterval(() => {
             avancarMidia()
-        }, midiaAtual.duracao * 1000)
+        }, duracaoSegura * 1000)
 
         return () => clearInterval(intervaloBanner)
     }, [midiaAtual, midias.length])
@@ -224,13 +288,17 @@ export default function BannerRotativo({
         )
     }
 
-    const chaveMidiaAtual = `${midiaAtual.id || "sem-id"}-${midiaAtual.ativo}-${midiaAtual.tipo}-${midiaAtual.arquivo}`
+    const chaveMidiaAtual = `${midiaAtual.id || "sem-id"}-${midiaAtual.ativo}-${midiaAtual.tipo}-${midiaAtual.arquivo}-${midiaAtual.linkYoutubeExibicao || ""}-${midiaAtual.inicioExibicao || ""}-${midiaAtual.fimExibicao || ""}`
 
     const templateAtual = midiaAtual.template || "cheio"
 
-    if (midiaAtual.tipo === "youtube") {
+    const ehYoutube =
+        midiaAtual.tipo === "youtube" ||
+        midiaAtual.tipoExibicaoProgramada === "youtube"
+
+    if (ehYoutube) {
         const youtubeUrl = obterYoutubeEmbedUrl(
-            midiaAtual.linkYoutubeExibicao || "",
+            midiaAtual.linkYoutubeExibicao || midiaAtual.arquivo || "",
             audioYoutubeAtivo
         )
 
@@ -250,7 +318,7 @@ export default function BannerRotativo({
                 className="absolute inset-x-0 top-0 bottom-[clamp(88px,10vh,132px)] bg-black"
             >
                 <iframe
-                    key={`${midiaAtual.id}-${audioYoutubeAtivo ? "audio" : "mudo"}`}
+                    key={chaveMidiaAtual}
                     src={youtubeUrl}
                     title="Transmissão ao vivo"
                     allow="autoplay; encrypted-media; picture-in-picture"
@@ -277,8 +345,7 @@ export default function BannerRotativo({
         "absolute top-0 left-0 w-full h-[calc(100vh-6.5rem)] object-cover"
 
     const transicaoMidia = possuiRotacao
-        ? `transition-opacity duration-300 ease-in-out ${visivel ? "opacity-100" : "opacity-0"
-        }`
+        ? `transition-opacity duration-300 ease-in-out ${visivel ? "opacity-100" : "opacity-0"}`
         : ""
 
     const animacaoImagemInformativa = possuiRotacao
@@ -294,7 +361,7 @@ export default function BannerRotativo({
             <div className="absolute inset-0">
                 {midiaAtual.tipo === "imagem" ? (
                     <img
-                        key={midiaAtual.id || midiaAtual.arquivo}
+                        key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         alt="Banner institucional"
                         onError={(e) => {
@@ -304,7 +371,7 @@ export default function BannerRotativo({
                     />
                 ) : (
                     <video
-                        key={midiaAtual.id || midiaAtual.arquivo}
+                        key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
@@ -359,7 +426,7 @@ export default function BannerRotativo({
             <div className="absolute inset-0 overflow-hidden">
                 {midiaAtual.tipo === "imagem" ? (
                     <img
-                        key={midiaAtual.id || midiaAtual.arquivo}
+                        key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         alt="Banner institucional"
                         onError={(e) => {
@@ -369,7 +436,7 @@ export default function BannerRotativo({
                     />
                 ) : (
                     <video
-                        key={midiaAtual.id || midiaAtual.arquivo}
+                        key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
@@ -452,7 +519,7 @@ export default function BannerRotativo({
             <div className="absolute inset-0 overflow-hidden">
                 {midiaAtual.tipo === "imagem" ? (
                     <img
-                        key={midiaAtual.id || midiaAtual.arquivo}
+                        key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         alt="Banner urgente"
                         onError={(e) => {
@@ -462,7 +529,7 @@ export default function BannerRotativo({
                     />
                 ) : (
                     <video
-                        key={midiaAtual.id || midiaAtual.arquivo}
+                        key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
@@ -522,7 +589,7 @@ export default function BannerRotativo({
         <>
             {midiaAtual.tipo === "imagem" ? (
                 <img
-                    key={midiaAtual.id || midiaAtual.arquivo}
+                    key={chaveMidiaAtual}
                     src={midiaAtual.arquivo}
                     alt="Banner"
                     onError={(e) => {
@@ -532,7 +599,7 @@ export default function BannerRotativo({
                 />
             ) : (
                 <video
-                    key={midiaAtual.id || midiaAtual.arquivo}
+                    key={chaveMidiaAtual}
                     src={midiaAtual.arquivo}
                     autoPlay
                     muted

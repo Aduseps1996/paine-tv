@@ -135,7 +135,6 @@ export default function AbaMidias({
     const [midiaExibicaoEditando, setMidiaExibicaoEditando] = useState<string | null>(null)
 
     const [exibicaoProgramada, setExibicaoProgramada] = useState(false)
-    const [tipoExibicaoProgramada, setTipoExibicaoProgramada] = useState<"midia" | "youtube">("midia")
     const [inicioExibicao, setInicioExibicao] = useState("")
     const [fimExibicao, setFimExibicao] = useState("")
     const [linkYoutubeExibicao, setLinkYoutubeExibicao] = useState("")
@@ -401,19 +400,33 @@ export default function AbaMidias({
 
                             <div className="mt-3 overflow-hidden rounded-[1.8rem] border border-zinc-700 bg-black">
                                 <div className="relative aspect-video bg-black">
-                                    {midia.tipo === "imagem" ? (
-                                        <img
-                                            src={midia.arquivo}
-                                            alt="Prévia da mídia"
-                                            className="absolute inset-0 w-full h-full object-contain bg-black"
-                                        />
-                                    ) : (
+                                    {midia.tipo === "imagem" && (
+    <img
+        src={midia.arquivo}
+        alt="Prévia da mídia"
+        className="absolute inset-0 w-full h-full object-contain bg-black"
+    />
+                                    )}
+
+                                    {midia.tipo === "video" && (
                                         <video
                                             src={midia.arquivo}
                                             controls
                                             muted
                                             className="absolute inset-0 w-full h-full object-contain bg-black"
                                         />
+                                    )}
+
+                                    {midia.tipo === "youtube" && (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black text-center">
+                                            <span className="text-red-500 text-xl font-black">
+                                                YOUTUBE / LIVE
+                                            </span>
+
+                                            <span className="mt-2 max-w-[90%] break-all text-xs text-zinc-400">
+                                                {midia.linkYoutubeExibicao || midia.arquivo}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -751,7 +764,7 @@ export default function AbaMidias({
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
                     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <h2 className="text-2xl font-bold mb-2">
-                            Exibição de mídia
+                            Editar programação
                         </h2>
 
                         <p className="text-zinc-400 mb-6">
@@ -759,16 +772,17 @@ export default function AbaMidias({
                         </p>
 
                         <div className="space-y-4">
-                            <label className="flex items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
-                                <input
-                                    type="checkbox"
-                                    checked={exibicaoProgramada}
-                                    onChange={(e) => setExibicaoProgramada(e.target.checked)}
-                                />
+                            {midias.find((m) => m.id === midiaExibicaoEditando)?.tipo !== "youtube" && (
+                                <label className="flex items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={exibicaoProgramada}
+                                        onChange={(e) => setExibicaoProgramada(e.target.checked)}
+                                    />
 
-                                <span>Usar exibição programada</span>
-                            </label>
-
+                                    <span>Usar exibição programada</span>
+                                </label>
+                            )}
 
                             {midias.find((m) => m.id === midiaExibicaoEditando)?.tipo === "youtube" && (
                                 <div>
@@ -834,13 +848,57 @@ export default function AbaMidias({
                                     const midiaSelecionada = midias.find((m) => m.id === midiaExibicaoEditando)
                                     const ehYoutube = midiaSelecionada?.tipo === "youtube"
 
+                                    if (ehYoutube) {
+                                        if (!linkYoutubeExibicao.trim()) {
+                                            alert("Informe o link do YouTube.")
+                                            return
+                                        }
+
+                                        if (!inicioExibicao || !fimExibicao) {
+                                            alert("Informe a data/hora de início e fim da transmissão.")
+                                            return
+                                        }
+
+                                        const inicio = new Date(inicioExibicao)
+                                        const fim = new Date(fimExibicao)
+
+                                        if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
+                                            alert("Data/hora inválida.")
+                                            return
+                                        }
+
+                                        if (fim <= inicio) {
+                                            alert("O fim da exibição precisa ser maior que o início.")
+                                            return
+                                        }
+                                    }
+
+                                    if (!ehYoutube && exibicaoProgramada) {
+                                        if (!inicioExibicao || !fimExibicao) {
+                                            alert("Informe o início e o fim da exibição.")
+                                            return
+                                        }
+
+                                        const inicio = new Date(inicioExibicao)
+                                        const fim = new Date(fimExibicao)
+
+                                        if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
+                                            alert("Data/hora inválida.")
+                                            return
+                                        }
+
+                                        if (fim <= inicio) {
+                                            alert("O fim da exibição precisa ser maior que o início.")
+                                            return
+                                        }
+                                    }
+
                                     await updateDoc(doc(db, "midias", midiaExibicaoEditando), {
                                         exibicaoProgramada: ehYoutube ? true : exibicaoProgramada,
                                         tipoExibicaoProgramada: ehYoutube ? "youtube" : "midia",
                                         inicioExibicao,
                                         fimExibicao,
-                                        linkYoutubeExibicao: ehYoutube ? linkYoutubeExibicao : "",
-                                        arquivo: ehYoutube ? linkYoutubeExibicao : midiaSelecionada?.arquivo
+                                        linkYoutubeExibicao: ehYoutube ? linkYoutubeExibicao : ""
                                     })
 
                                     carregarMidias()

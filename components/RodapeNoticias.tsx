@@ -69,7 +69,7 @@ export default function RodapeNoticias({
     useEffect(() => {
         const relogio = setInterval(() => {
             setAgora(new Date())
-        }, 1000)
+        }, 30000)
 
         return () => clearInterval(relogio)
     }, [])
@@ -161,7 +161,8 @@ export default function RodapeNoticias({
     })
 
     const mostrarTarjaFinal =
-        Boolean(midiaAtual?.mostrarTarja)
+        Boolean(midiaAtual?.mostrarTarja) &&
+        Boolean(midiaAtual?.ativo)
 
     const etiquetaTarjaFinal =
         midiaAtual?.tarjaEtiqueta || "ADUSEPS INFORMA"
@@ -188,71 +189,71 @@ export default function RodapeNoticias({
         )
 
     const modeloTarjaFinal =
-        midiaAtual?.modeloTarja || "telejornal"
+        midiaAtual?.modeloTarja ?? "telejornal"
 
     useEffect(() => {
-        if (!mostrarTarjaFinal) {
-            setFaseTarja("oculta")
-            return
-        }
+    if (!mostrarTarjaFinal) {
+        setFaseTarja("oculta")
+        return
+    }
 
-        let ativo = true
+    let ativo = true
+
+    setFaseTarja("oculta")
+
+    function iniciarCiclo() {
+        if (!ativo) return
 
         setFaseTarja("oculta")
 
-        function iniciarCiclo() {
+        setTimeout(() => {
             if (!ativo) return
 
-            setFaseTarja("oculta")
+            setFaseTarja("entrando")
 
             setTimeout(() => {
                 if (!ativo) return
 
-                setFaseTarja("entrando")
+                setFaseTarja("visivel")
 
                 setTimeout(() => {
                     if (!ativo) return
 
-                    setFaseTarja("visivel")
+                    setFaseTarja("saindo")
 
                     setTimeout(() => {
                         if (!ativo) return
 
-                        setFaseTarja("saindo")
+                        setFaseTarja("oculta")
 
                         setTimeout(() => {
                             if (!ativo) return
 
-                            setFaseTarja("oculta")
+                            iniciarCiclo()
+                        }, tempoOcultaTarjaFinal * 1000)
 
-                            setTimeout(() => {
-                                if (!ativo) return
+                    }, tempoSaidaTarjaFinal * 1000)
 
-                                iniciarCiclo()
-                            }, tempoOcultaTarjaFinal * 1000)
+                }, tempoVisivelTarjaFinal * 1000)
 
-                        }, tempoSaidaTarjaFinal * 1000)
+            }, tempoEntradaTarjaFinal * 1000)
 
-                    }, tempoVisivelTarjaFinal * 1000)
+        }, 150)
+    }
 
-                }, tempoEntradaTarjaFinal * 1000)
+    iniciarCiclo()
 
-            }, 150)
-        }
-
-        iniciarCiclo()
-
-        return () => {
-            ativo = false
-        }
-    }, [
-        mostrarTarjaFinal,
-        tempoEntradaTarjaFinal,
-        tempoVisivelTarjaFinal,
-        tempoSaidaTarjaFinal,
-        tempoOcultaTarjaFinal,
-        midiaAtual?.id
-    ])
+    return () => {
+        ativo = false
+    }
+}, [
+    mostrarTarjaFinal,
+    tempoEntradaTarjaFinal,
+    tempoVisivelTarjaFinal,
+    tempoSaidaTarjaFinal,
+    tempoOcultaTarjaFinal,
+    midiaAtual?.id
+])
 
     useEffect(() => {
         async function buscarClima() {

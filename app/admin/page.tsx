@@ -276,6 +276,36 @@ export default function AdminPage() {
     async function adicionarMidia() {
         if (arquivo.trim() === "") return
 
+        if (tipo === "youtube") {
+    if (!inicioExibicaoNovaMidia || !fimExibicaoNovaMidia) {
+        alert("Informe a data/hora de início e fim da transmissão.")
+        return
+    }
+
+    const inicio = new Date(inicioExibicaoNovaMidia)
+    const fim = new Date(fimExibicaoNovaMidia)
+
+    if (fim <= inicio) {
+        alert("O fim da transmissão deve ser maior que o início.")
+        return
+    }
+}
+
+if (tipo !== "youtube" && programarExibicaoNovaMidia) {
+    if (!inicioExibicaoNovaMidia || !fimExibicaoNovaMidia) {
+        alert("Informe a data/hora de início e fim da exibição.")
+        return
+    }
+
+    const inicio = new Date(inicioExibicaoNovaMidia)
+    const fim = new Date(fimExibicaoNovaMidia)
+
+    if (fim <= inicio) {
+        alert("O fim da exibição deve ser maior que o início.")
+        return
+    }
+}
+
         await addDoc(collection(db, "midias"), {
             tipo,
             arquivo: arquivo.trim(),

@@ -139,51 +139,10 @@ export default function AbaInicio({
 
                             <div className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden">
                                 <div
-                                    className="bg-[#0f2f70] border-t-4 border-[#f15434] flex items-center px-8 gap-6"
-                                    style={{ height: `${alturaBarraSuperior}px` }}
-                                >
-                                    <span
-                                        className="font-semibold"
-                                        style={{ fontSize: `${tamanhoFonteDataHora}px` }}
-                                    >
-                                        {data}
-                                    </span>
-
-                                    <div className="h-8 w-px bg-white/25" />
-
-                                    <span
-                                        className="font-black"
-                                        style={{ fontSize: `${tamanhoFonteHora}px` }}
-                                    >
-                                        {hora}
-                                    </span>
-
-                                    <div className="h-8 w-px bg-white/25" />
-
-                                    <p
-                                        className="font-medium text-white/90 tracking-wide flex-1"
-                                        style={{ fontSize: `${tamanhoFonteSlogan}px` }}
-                                    >
-                                        {slogan || "Slogan do rodapé"}
-                                    </p>
-
-                                    {logo.trim() !== "" && (
-                                        <>
-                                            <div className="h-8 w-px bg-white/25" />
-
-                                            <img
-                                                src={logo}
-                                                alt="Logo ADUSEPS"
-                                                className="w-auto object-contain drop-shadow-md"
-                                                style={{ height: `${tamanhoLogoRodape}px` }}
-                                            />
-                                        </>
-                                    )}
-                                </div>
-
-                                <div
                                     className="bg-[#2454a4] flex items-center overflow-hidden px-6"
-                                    style={{ height: `${alturaBarraNoticias}px` }}
+                                    style={{
+                                        height: `${alturaBarraNoticias}px`
+                                    }}
                                 >
                                     <p
                                         className="font-medium whitespace-nowrap"

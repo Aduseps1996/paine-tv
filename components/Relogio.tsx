@@ -22,7 +22,7 @@ export default function Relogio() {
 
     atualizarHora()
 
-    const intervalo = setInterval(atualizarHora, 1000)
+    const intervalo = setInterval(atualizarHora, 30000)
 
     return () => clearInterval(intervalo)
 
