@@ -96,12 +96,14 @@ export default function BannerRotativo({
             return false
         }
 
+        // Se não foi programada, roda normal
         if (!midia.exibicaoProgramada) {
             return true
         }
 
+        // Se marcou como programada mas não colocou início/fim, não exibe
         if (!midia.inicioExibicao || !midia.fimExibicao) {
-            return true
+            return false
         }
 
         const agora = agoraPainel
@@ -109,7 +111,7 @@ export default function BannerRotativo({
         const fim = new Date(midia.fimExibicao)
 
         if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
-            return true
+            return false
         }
 
         return agora >= inicio && agora <= fim
@@ -189,44 +191,14 @@ export default function BannerRotativo({
                 ...doc.data()
             })) as Midia[]
 
-            const listaYoutubeAtiva = lista.filter((midia) => {
-                return (
-                    midia.ativo === true &&
-                    midia.tipoExibicaoProgramada === "youtube" &&
-                    midia.exibicaoProgramada === true &&
-                    midia.linkYoutubeExibicao &&
-                    midiaPodeSerExibida(midia)
-                )
+            const listaAtiva = lista.filter((midia) => {
+                return midiaPodeSerExibida(midia)
             })
 
-            const listaMidiasAtivas = lista.filter((midia) => {
-                return (
-                    midia.ativo === true &&
-                    midia.tipoExibicaoProgramada !== "youtube" &&
-                    midiaPodeSerExibida(midia)
-                )
-            })
-
-            const listaBase =
-                listaYoutubeAtiva.length > 0
-                    ? listaYoutubeAtiva
-                    : listaMidiasAtivas
-
-            const listaComPeso = montarListaInteligente(listaBase)
+            const listaComPeso = montarListaInteligente(listaAtiva)
 
             setMidias(listaComPeso)
             setIndiceAtual(0)
-
-
-            setMidias(listaComPeso)
-
-            setIndiceAtual((indiceAtual) => {
-                if (indiceAtual >= listaComPeso.length) {
-                    return 0
-                }
-
-                return indiceAtual
-            })
         })
 
         return () => unsubscribe()

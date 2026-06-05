@@ -102,7 +102,7 @@ export default function AdminPage() {
     >("cheio")
     const [novaNoticia, setNovaNoticia] = useState("")
     const [modeloTarjaMidia, setModeloTarjaMidia] =
-    useState<"telejornal" | "compacta" | "live" | "infobar" | "digital">("telejornal")
+        useState<"telejornal" | "compacta" | "live" | "infobar" | "digital">("telejornal")
 
     // estado de autenticação do usuário
     const [email, setEmail] = useState("")

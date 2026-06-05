@@ -240,51 +240,51 @@ export default function AbaMidias({
                     )}
 
                     <div className="sm:col-span-2 rounded-2xl border border-zinc-700 bg-zinc-800/70 p-4 space-y-4">
-    <label className="flex items-center gap-3">
-        <input
-            type="checkbox"
-            checked={tipo === "youtube" ? true : programarExibicaoNovaMidia}
-            disabled={tipo === "youtube"}
-            onChange={(e) => setProgramarExibicaoNovaMidia(e.target.checked)}
-        />
+                        <label className="flex items-center gap-3">
+                            <input
+                                type="checkbox"
+                                checked={tipo === "youtube" ? true : programarExibicaoNovaMidia}
+                                disabled={tipo === "youtube"}
+                                onChange={(e) => setProgramarExibicaoNovaMidia(e.target.checked)}
+                            />
 
-        <span className="font-bold">
-            {tipo === "youtube"
-                ? "YouTube / Live exige programação"
-                : "Programar exibição desta mídia"}
-        </span>
-    </label>
+                            <span className="font-bold">
+                                {tipo === "youtube"
+                                    ? "YouTube / Live exige programação"
+                                    : "Programar exibição desta mídia"}
+                            </span>
+                        </label>
 
-    {(programarExibicaoNovaMidia || tipo === "youtube") && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-                <label className="text-sm text-zinc-300 mb-2 block">
-                    Início da exibição
-                </label>
+                        {(programarExibicaoNovaMidia || tipo === "youtube") && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm text-zinc-300 mb-2 block">
+                                        Início da exibição
+                                    </label>
 
-                <input
-                    type="datetime-local"
-                    value={inicioExibicaoNovaMidia}
-                    onChange={(e) => setInicioExibicaoNovaMidia(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                />
-            </div>
+                                    <input
+                                        type="datetime-local"
+                                        value={inicioExibicaoNovaMidia}
+                                        onChange={(e) => setInicioExibicaoNovaMidia(e.target.value)}
+                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
 
-            <div>
-                <label className="text-sm text-zinc-300 mb-2 block">
-                    Fim da exibição
-                </label>
+                                <div>
+                                    <label className="text-sm text-zinc-300 mb-2 block">
+                                        Fim da exibição
+                                    </label>
 
-                <input
-                    type="datetime-local"
-                    value={fimExibicaoNovaMidia}
-                    onChange={(e) => setFimExibicaoNovaMidia(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                />
-            </div>
-        </div>
-    )}
-</div>
+                                    <input
+                                        type="datetime-local"
+                                        value={fimExibicaoNovaMidia}
+                                        onChange={(e) => setFimExibicaoNovaMidia(e.target.value)}
+                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
 
                     <button
@@ -520,7 +520,7 @@ export default function AbaMidias({
                                     Exibição de mídia
                                 </button>
 
-                            
+
                                 <button
                                     onClick={() => {
                                         setMidiaEditando(midia.id)
@@ -530,7 +530,7 @@ export default function AbaMidias({
                                 >
                                     Adicionar tarja
                                 </button>
-                            
+
 
                                 <button
                                     onClick={() => midia.id && removerMidia(midia.id)}
