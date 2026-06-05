@@ -161,16 +161,15 @@ export default function AbaMidias({
     }, [midiaEditando, midias])
 
     function abrirModalExibicao(midia: any) {
-        setMidiaExibicaoEditando(midia.id)
+    setMidiaExibicaoEditando(midia.id)
 
-        setExibicaoProgramada(midia.exibicaoProgramada ?? false)
-        setTipoExibicaoProgramada(midia.tipoExibicaoProgramada || "midia")
-        setInicioExibicao(midia.inicioExibicao || "")
-        setFimExibicao(midia.fimExibicao || "")
-        setLinkYoutubeExibicao(midia.linkYoutubeExibicao || "")
+    setExibicaoProgramada(midia.exibicaoProgramada ?? false)
+    setInicioExibicao(midia.inicioExibicao || "")
+    setFimExibicao(midia.fimExibicao || "")
+    setLinkYoutubeExibicao(midia.linkYoutubeExibicao || midia.arquivo || "")
 
-        setModalExibicaoAberto(true)
-    }
+    setModalExibicaoAberto(true)
+}
 
     return (
         <div className="space-y-3 sm:space-y-6">
@@ -517,7 +516,7 @@ export default function AbaMidias({
                                     onClick={() => abrirModalExibicao(midia)}
                                     className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold transition hover:bg-sky-700"
                                 >
-                                    Exibição de mídia
+                                    Editar programação
                                 </button>
 
 
@@ -770,30 +769,8 @@ export default function AbaMidias({
                                 <span>Usar exibição programada</span>
                             </label>
 
-                            <div>
-                                <label className="text-sm font-medium text-zinc-300 mb-2 block">
-                                    Tipo de exibição
-                                </label>
 
-                                <select
-                                    value={tipoExibicaoProgramada}
-                                    onChange={(e) => {
-                                        const valor = e.target.value as "midia" | "youtube"
-
-                                        setTipoExibicaoProgramada(valor)
-
-                                        if (valor === "midia") {
-                                            setLinkYoutubeExibicao("")
-                                        }
-                                    }}
-                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                                >
-                                    <option value="midia">Mídia cadastrada</option>
-                                    <option value="youtube">YouTube</option>
-                                </select>
-                            </div>
-
-                            {tipoExibicaoProgramada === "youtube" && (
+                            {midias.find((m) => m.id === midiaExibicaoEditando)?.tipo === "youtube" && (
                                 <div>
                                     <label className="text-sm font-medium text-zinc-300 mb-2 block">
                                         Link do YouTube
@@ -854,14 +831,16 @@ export default function AbaMidias({
                                 onClick={async () => {
                                     if (!midiaExibicaoEditando) return
 
+                                    const midiaSelecionada = midias.find((m) => m.id === midiaExibicaoEditando)
+                                    const ehYoutube = midiaSelecionada?.tipo === "youtube"
+
                                     await updateDoc(doc(db, "midias", midiaExibicaoEditando), {
-                                        exibicaoProgramada,
-                                        tipoExibicaoProgramada,
+                                        exibicaoProgramada: ehYoutube ? true : exibicaoProgramada,
+                                        tipoExibicaoProgramada: ehYoutube ? "youtube" : "midia",
                                         inicioExibicao,
                                         fimExibicao,
-                                        linkYoutubeExibicao: tipoExibicaoProgramada === "youtube"
-                                            ? linkYoutubeExibicao
-                                            : ""
+                                        linkYoutubeExibicao: ehYoutube ? linkYoutubeExibicao : "",
+                                        arquivo: ehYoutube ? linkYoutubeExibicao : midiaSelecionada?.arquivo
                                     })
 
                                     carregarMidias()
