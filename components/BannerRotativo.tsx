@@ -193,9 +193,12 @@ export default function BannerRotativo({
         .join("|")
 
     const possuiRotacao = midias.length > 1
-    const midiaAtual = midias[indiceAtual]
+    const midiaAtual = midias[indiceAtual] ?? midias[0]
 
     useEffect(() => {
+        setErroMidia(false)
+        setVisivel(true)
+
         if (midias.length === 0) {
             setIndiceAtual(0)
             return
@@ -204,7 +207,7 @@ export default function BannerRotativo({
         if (indiceAtual >= midias.length) {
             setIndiceAtual(0)
         }
-    }, [midias.length, indiceAtual])
+    }, [assinaturaMidias, midias.length, indiceAtual])
 
     useEffect(() => {
         setErroMidia(false)
@@ -261,7 +264,7 @@ export default function BannerRotativo({
 
         if (!videoId) return ""
 
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${audioAtivo ? "0" : "1"}&playsinline=1&rel=0`
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${audioAtivo ? "0" : "1"}&playsinline=1&rel=0&enablejsapi=1`
     }
 
     useEffect(() => {
@@ -280,15 +283,21 @@ export default function BannerRotativo({
 
     if (midias.length === 0 || !midiaAtual || erroMidia) {
         return (
-            <img
-                src={fallback}
-                alt="Imagem padrão"
-                className="absolute inset-0 w-full h-full object-cover"
-            />
+            <div className="absolute inset-0 bg-black">
+                {fallback && (
+                    <img
+                        src={fallback}
+                        alt="Imagem padrão"
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                )}
+            </div>
         )
     }
 
     const chaveMidiaAtual = `${midiaAtual.id || "sem-id"}-${midiaAtual.ativo}-${midiaAtual.tipo}-${midiaAtual.arquivo}-${midiaAtual.linkYoutubeExibicao || ""}-${midiaAtual.inicioExibicao || ""}-${midiaAtual.fimExibicao || ""}`
+
+const chaveYoutubeAtual = `${chaveMidiaAtual}-${audioYoutubeAtivo ? "audio-ligado" : "audio-mudo"}`
 
     const templateAtual = midiaAtual.template || "cheio"
 
@@ -318,7 +327,7 @@ export default function BannerRotativo({
                 className="absolute inset-x-0 top-0 bottom-[clamp(88px,10vh,132px)] bg-black"
             >
                 <iframe
-                    key={chaveMidiaAtual}
+                    key={chaveYoutubeAtual}
                     src={youtubeUrl}
                     title="Transmissão ao vivo"
                     allow="autoplay; encrypted-media; picture-in-picture"
