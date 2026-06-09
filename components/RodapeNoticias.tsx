@@ -863,7 +863,7 @@ export default function RodapeNoticias({
                     style={{ height: `${alturaBarraNoticias}px` }}
                 >
                     <div
-                        className="whitespace-nowrap animate-[marquee_120s_linear_infinite] font-medium leading-none tracking-[0.06em] antialiased text-white"
+                        className="whitespace-nowrap animate-[marquee_120s_linear_infinite] font-semibold leading-none tracking-[0.02em] antialiased text-white"
                         style={{ fontSize: `${tamanhoFonteRodape}px` }}
                     >
                         {noticias.map((noticia, index) => (
