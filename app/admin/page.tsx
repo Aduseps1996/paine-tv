@@ -54,6 +54,11 @@ type Noticia = {
     texto: string
     ativo: boolean
     ordem: number
+
+    programada?: boolean
+    inicioExibicao?: string
+    fimExibicao?: string
+    categoria?: "normal" | "live" | "urgente" | "institucional"
 }
 
 // Função auxiliar para manter valores numéricos dentro de limites seguros.
@@ -101,6 +106,13 @@ export default function AdminPage() {
         "cheio" | "informativo" | "institucional" | "urgente"
     >("cheio")
     const [novaNoticia, setNovaNoticia] = useState("")
+
+    const [noticiaProgramada, setNoticiaProgramada] = useState(false)
+    const [inicioNoticia, setInicioNoticia] = useState("")
+    const [fimNoticia, setFimNoticia] = useState("")
+    const [categoriaNoticia, setCategoriaNoticia] =
+        useState<"normal" | "live" | "urgente" | "institucional">("normal")
+
     const [modeloTarjaMidia, setModeloTarjaMidia] =
         useState<"telejornal" | "compacta" | "live" | "infobar" | "digital">("telejornal")
 
@@ -277,34 +289,34 @@ export default function AdminPage() {
         if (arquivo.trim() === "") return
 
         if (tipo === "youtube") {
-    if (!inicioExibicaoNovaMidia || !fimExibicaoNovaMidia) {
-        alert("Informe a data/hora de início e fim da transmissão.")
-        return
-    }
+            if (!inicioExibicaoNovaMidia || !fimExibicaoNovaMidia) {
+                alert("Informe a data/hora de início e fim da transmissão.")
+                return
+            }
 
-    const inicio = new Date(inicioExibicaoNovaMidia)
-    const fim = new Date(fimExibicaoNovaMidia)
+            const inicio = new Date(inicioExibicaoNovaMidia)
+            const fim = new Date(fimExibicaoNovaMidia)
 
-    if (fim <= inicio) {
-        alert("O fim da transmissão deve ser maior que o início.")
-        return
-    }
-}
+            if (fim <= inicio) {
+                alert("O fim da transmissão deve ser maior que o início.")
+                return
+            }
+        }
 
-if (tipo !== "youtube" && programarExibicaoNovaMidia) {
-    if (!inicioExibicaoNovaMidia || !fimExibicaoNovaMidia) {
-        alert("Informe a data/hora de início e fim da exibição.")
-        return
-    }
+        if (tipo !== "youtube" && programarExibicaoNovaMidia) {
+            if (!inicioExibicaoNovaMidia || !fimExibicaoNovaMidia) {
+                alert("Informe a data/hora de início e fim da exibição.")
+                return
+            }
 
-    const inicio = new Date(inicioExibicaoNovaMidia)
-    const fim = new Date(fimExibicaoNovaMidia)
+            const inicio = new Date(inicioExibicaoNovaMidia)
+            const fim = new Date(fimExibicaoNovaMidia)
 
-    if (fim <= inicio) {
-        alert("O fim da exibição deve ser maior que o início.")
-        return
-    }
-}
+            if (fim <= inicio) {
+                alert("O fim da exibição deve ser maior que o início.")
+                return
+            }
+        }
 
         await addDoc(collection(db, "midias"), {
             tipo,
@@ -378,14 +390,45 @@ if (tipo !== "youtube" && programarExibicaoNovaMidia) {
     async function adicionarNoticia() {
         if (novaNoticia.trim() === "") return
 
+        if (noticiaProgramada) {
+            if (!inicioNoticia || !fimNoticia) {
+                alert("Informe o início e o fim da notícia programada.")
+                return
+            }
+
+            const inicio = new Date(inicioNoticia)
+            const fim = new Date(fimNoticia)
+
+            if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
+                alert("Data/hora inválida.")
+                return
+            }
+
+            if (fim <= inicio) {
+                alert("O fim da notícia precisa ser maior que o início.")
+                return
+            }
+        }
+
         await addDoc(collection(db, "noticias"), {
             texto: novaNoticia.trim(),
             ativo: true,
             ordem: noticias.length + 1,
+
+            programada: noticiaProgramada,
+            inicioExibicao: noticiaProgramada ? inicioNoticia : "",
+            fimExibicao: noticiaProgramada ? fimNoticia : "",
+            categoria: categoriaNoticia,
+
             criadoEm: serverTimestamp()
         })
 
         setNovaNoticia("")
+        setNoticiaProgramada(false)
+        setInicioNoticia("")
+        setFimNoticia("")
+        setCategoriaNoticia("normal")
+
         carregarNoticias()
     }
 
@@ -688,6 +731,15 @@ if (tipo !== "youtube" && programarExibicaoNovaMidia) {
                     alternarNoticia={alternarNoticia}
                     carregarNoticias={carregarNoticias}
                     db={db}
+
+                    noticiaProgramada={noticiaProgramada}
+                    setNoticiaProgramada={setNoticiaProgramada}
+                    inicioNoticia={inicioNoticia}
+                    setInicioNoticia={setInicioNoticia}
+                    fimNoticia={fimNoticia}
+                    setFimNoticia={setFimNoticia}
+                    categoriaNoticia={categoriaNoticia}
+                    setCategoriaNoticia={setCategoriaNoticia}
                 />
             )}
         </AdminLayout>

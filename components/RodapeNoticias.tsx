@@ -19,6 +19,11 @@ type Noticia = {
     texto: string
     ativo: boolean
     ordem: number
+
+    programada?: boolean
+    inicioExibicao?: string
+    fimExibicao?: string
+    categoria?: "normal" | "live" | "urgente" | "institucional"
 }
 
 export default function RodapeNoticias({
@@ -68,6 +73,23 @@ export default function RodapeNoticias({
         return Math.min(Math.max(numero, minimo), maximo)
     }
 
+    function noticiaEstaDentroDoHorario(noticia: Noticia) {
+    if (!noticia.programada) return true
+
+    if (!noticia.inicioExibicao || !noticia.fimExibicao) {
+        return false
+    }
+
+    const inicio = new Date(noticia.inicioExibicao)
+    const fim = new Date(noticia.fimExibicao)
+
+    if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
+        return false
+    }
+
+    return agora >= inicio && agora <= fim
+}
+
     useEffect(() => {
         const relogio = setInterval(() => {
             setAgora(new Date())
@@ -88,9 +110,7 @@ export default function RodapeNoticias({
                 ...documento.data()
             })) as Noticia[]
 
-            const listaAtiva = lista.filter(
-                (noticia) => noticia.ativo === true
-            )
+            const listaAtiva = lista.filter((noticia) => noticia.ativo === true)
 
             setNoticias(listaAtiva)
         })
@@ -195,6 +215,10 @@ export default function RodapeNoticias({
 
     const modeloTarjaFinal =
         midiaAtual?.modeloTarja ?? "telejornal"
+
+    const noticiasVisiveis = noticias.filter((noticia) => {
+        return noticiaEstaDentroDoHorario(noticia)
+    })
 
     useEffect(() => {
         if (
@@ -863,10 +887,10 @@ export default function RodapeNoticias({
                     style={{ height: `${alturaBarraNoticias}px` }}
                 >
                     <div
-                        className="whitespace-nowrap animate-[marquee_120s_linear_infinite] font-semibold leading-none tracking-[0.02em] antialiased text-white"
+                        className="whitespace-nowrap animate-[marquee_150s_linear_infinite] font-bold leading-none tracking-normal text-white will-change-transform [transform:translate3d(0,0,0)]"
                         style={{ fontSize: `${tamanhoFonteRodape}px` }}
                     >
-                        {noticias.map((noticia, index) => (
+                        {noticiasVisiveis.map((noticia, index) => (
                             <span
                                 key={noticia.id}
                                 className="inline-flex items-center"
@@ -875,7 +899,7 @@ export default function RodapeNoticias({
                                     {noticia.texto}
                                 </span>
 
-                                {index < noticias.length - 1 && (
+                                {index < noticiasVisiveis.length - 1 && (
                                     <span
                                         className="text-[#f15434] mx-[clamp(0.75rem,2vw,1.5rem)] opacity-90"
                                         style={{ fontSize: `${tamanhoFonteRodape}px` }}
