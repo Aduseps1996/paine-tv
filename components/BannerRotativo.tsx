@@ -113,8 +113,16 @@ export default function BannerRotativo({
     function midiaPodeSerExibida(midia: Midia) {
         if (!midia.ativo) return false
 
-        if (midia.tipo === "youtube") {
-            if (!midia.linkYoutubeExibicao && !midia.arquivo) {
+        const ehMidiaYoutube =
+            midia.tipo === "youtube" ||
+            midia.tipoExibicaoProgramada === "youtube"
+
+        if (ehMidiaYoutube) {
+            const linkYoutube =
+                midia.linkYoutubeExibicao ||
+                midia.arquivo
+
+            if (!linkYoutube || linkYoutube.trim() === "") {
                 return false
             }
 
@@ -125,14 +133,11 @@ export default function BannerRotativo({
             return midiaEstaDentroDoHorario(midia)
         }
 
-        if (
-            midia.tipoExibicaoProgramada === "youtube" &&
-            !midia.linkYoutubeExibicao
-        ) {
-            return false
+        if (midia.exibicaoProgramada) {
+            return midiaEstaDentroDoHorario(midia)
         }
 
-        return midiaEstaDentroDoHorario(midia)
+        return true
     }
 
     function montarListaInteligente(lista: Midia[]) {
@@ -177,16 +182,16 @@ export default function BannerRotativo({
         })
 
         const youtubeAtivo = listaAtiva.find((midia) => {
-    return (
-        midia.ativo === true &&
-        midia.exibicaoProgramada === true &&
-        (
-            midia.tipoExibicaoProgramada === "youtube" ||
-            midia.tipo === "youtube"
-        ) &&
-        (midia.linkYoutubeExibicao || midia.tipo === "youtube")
-    )
-})
+            return (
+                midia.ativo === true &&
+                midia.exibicaoProgramada === true &&
+                (
+                    midia.tipoExibicaoProgramada === "youtube" ||
+                    midia.tipo === "youtube"
+                ) &&
+                (midia.linkYoutubeExibicao || midia.tipo === "youtube")
+            )
+        })
 
         if (youtubeAtivo) {
             return [youtubeAtivo]
@@ -528,13 +533,13 @@ export default function BannerRotativo({
                         onAbort={(e) => protegerVideo(e.currentTarget)}
                         onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
                         onEnded={(e) => {
-    if (timeoutVideoRef.current) {
-        clearTimeout(timeoutVideoRef.current)
-        timeoutVideoRef.current = null
-    }
+                            if (timeoutVideoRef.current) {
+                                clearTimeout(timeoutVideoRef.current)
+                                timeoutVideoRef.current = null
+                            }
 
-    reiniciarOuAvancarVideo(e.currentTarget)
-}}
+                            reiniciarOuAvancarVideo(e.currentTarget)
+                        }}
                     />
                 )}
 
@@ -587,13 +592,13 @@ export default function BannerRotativo({
                         onAbort={(e) => protegerVideo(e.currentTarget)}
                         onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
                         onEnded={(e) => {
-    if (timeoutVideoRef.current) {
-        clearTimeout(timeoutVideoRef.current)
-        timeoutVideoRef.current = null
-    }
+                            if (timeoutVideoRef.current) {
+                                clearTimeout(timeoutVideoRef.current)
+                                timeoutVideoRef.current = null
+                            }
 
-    reiniciarOuAvancarVideo(e.currentTarget)
-}}
+                            reiniciarOuAvancarVideo(e.currentTarget)
+                        }}
                     />
                 )}
 
@@ -674,13 +679,13 @@ export default function BannerRotativo({
                         onAbort={(e) => protegerVideo(e.currentTarget)}
                         onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
                         onEnded={(e) => {
-    if (timeoutVideoRef.current) {
-        clearTimeout(timeoutVideoRef.current)
-        timeoutVideoRef.current = null
-    }
+                            if (timeoutVideoRef.current) {
+                                clearTimeout(timeoutVideoRef.current)
+                                timeoutVideoRef.current = null
+                            }
 
-    reiniciarOuAvancarVideo(e.currentTarget)
-}}
+                            reiniciarOuAvancarVideo(e.currentTarget)
+                        }}
                     />
                 )}
 
@@ -738,13 +743,13 @@ export default function BannerRotativo({
                     onAbort={(e) => protegerVideo(e.currentTarget)}
                     onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
                     onEnded={(e) => {
-    if (timeoutVideoRef.current) {
-        clearTimeout(timeoutVideoRef.current)
-        timeoutVideoRef.current = null
-    }
+                        if (timeoutVideoRef.current) {
+                            clearTimeout(timeoutVideoRef.current)
+                            timeoutVideoRef.current = null
+                        }
 
-    reiniciarOuAvancarVideo(e.currentTarget)
-}}
+                        reiniciarOuAvancarVideo(e.currentTarget)
+                    }}
                 />
             )}
         </>
