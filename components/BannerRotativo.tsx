@@ -113,6 +113,13 @@ export default function BannerRotativo({
     function midiaPodeSerExibida(midia: Midia) {
         if (!midia.ativo) return false
 
+        if (
+    midia.tipo !== "youtube" &&
+    (!midia.arquivo || midia.arquivo.trim() === "")
+) {
+    return false
+}
+
         const ehMidiaYoutube =
             midia.tipo === "youtube" ||
             midia.tipoExibicaoProgramada === "youtube"
@@ -207,7 +214,12 @@ export default function BannerRotativo({
         .join("|")
 
     const possuiRotacao = midias.length > 1
-    const midiaAtual = midias[indiceAtual] ?? midias[0]
+    const indiceSeguro =
+    indiceAtual >= midias.length
+        ? 0
+        : indiceAtual
+
+const midiaAtual = midias[indiceSeguro]
 
     const ehYoutube =
         midiaAtual?.tipo === "youtube" ||
@@ -233,7 +245,7 @@ export default function BannerRotativo({
         }
     }, [assinaturaMidias, midias.length, indiceAtual])
 
-    useEffect(() => {
+    /* useEffect(() => {
         setErroMidia(false)
         setVisivel(false)
 
@@ -242,7 +254,7 @@ export default function BannerRotativo({
         }, 80)
 
         return () => clearTimeout(tempo)
-    }, [indiceAtual, assinaturaMidias])
+    }, [indiceAtual, assinaturaMidias]) */
 
     useEffect(() => {
         if (midiaAtual) {
@@ -294,21 +306,19 @@ export default function BannerRotativo({
     }, [midias.length, indiceAtual])
 
     function avancarMidia() {
-        if (midias.length <= 1) return
+    if (midias.length <= 1) return
 
-        if (timeoutAvancoRef.current) {
-            clearTimeout(timeoutAvancoRef.current)
-        }
-
-        setVisivel(false)
-
-        timeoutAvancoRef.current = setTimeout(() => {
-            setIndiceAtual((valorAtual) => {
-                const proximo = valorAtual + 1
-                return proximo >= midias.length ? 0 : proximo
-            })
-        }, 250)
+    if (timeoutAvancoRef.current) {
+        clearTimeout(timeoutAvancoRef.current)
     }
+
+    timeoutAvancoRef.current = setTimeout(() => {
+        setIndiceAtual((valorAtual) => {
+            const proximo = valorAtual + 1
+            return proximo >= midias.length ? 0 : proximo
+        })
+    }, 50)
+}
 
     useEffect(() => {
         return () => {
@@ -495,9 +505,7 @@ export default function BannerRotativo({
     const areaMidiaInformativa =
         "absolute top-0 left-0 w-full h-[calc(100vh-6.5rem)] object-cover"
 
-    const transicaoMidia = possuiRotacao
-        ? `transition-opacity duration-300 ease-in-out ${visivel ? "opacity-100" : "opacity-0"}`
-        : ""
+    const transicaoMidia = ""
 
     const animacaoImagemInformativa = possuiRotacao
         ? "scale-[1.02] animate-[zoomBanner_22s_linear_infinite]"
