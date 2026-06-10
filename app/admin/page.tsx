@@ -125,7 +125,13 @@ export default function AdminPage() {
     const [nomePainel, setNomePainel] = useState("")
     const [subtitulo, setSubtitulo] = useState("")
     const [logo, setLogo] = useState("")
+    const [modoLogo, setModoLogo] =
+        useState<"transparente" | "fundo" | "card">("fundo")
+
+    const [tamanhoLogoPainel, setTamanhoLogoPainel] =
+        useState<"pequeno" | "medio" | "grande">("medio")
     const [slogan, setSlogan] = useState("")
+
 
     const [tamanhoFonteRodape, setTamanhoFonteRodape] = useState(28)
     const [tamanhoFonteSlogan, setTamanhoFonteSlogan] = useState(18)
@@ -149,6 +155,7 @@ export default function AdminPage() {
     const [abaAtiva, setAbaAtiva] = useState<
         "inicio" | "midias" | "noticias" | "configuracao-painel" | "configuracao-tipografia"
     >("inicio")
+    const [duracaoAnimacaoNoticias, setDuracaoAnimacaoNoticias] = useState(150)
 
     const [programarExibicaoNovaMidia, setProgramarExibicaoNovaMidia] = useState(false)
     const [inicioExibicaoNovaMidia, setInicioExibicaoNovaMidia] = useState("")
@@ -200,6 +207,8 @@ export default function AdminPage() {
             setNomePainel(dados.nomePainel || "")
             setSubtitulo(dados.subtitulo || "")
             setLogo(dados.logo || "")
+            setModoLogo(dados.modoLogo || "fundo")
+            setTamanhoLogoPainel(dados.tamanhoLogoPainel || "medio")
             setSlogan(dados.slogan || "")
 
             setMostrarTarjaTv(dados.mostrarTarjaTv ?? true)
@@ -239,6 +248,10 @@ export default function AdminPage() {
             setTamanhoLogoRodape(
                 limitarValor(Number(dados.tamanhoLogoRodape || 44), 20, 100, 44)
             )
+
+            setDuracaoAnimacaoNoticias(
+                limitarValor(Number(dados.duracaoAnimacaoNoticias || 150), 60, 300, 150)
+            )
         }
     }
 
@@ -249,6 +262,8 @@ export default function AdminPage() {
             subtitulo,
             logo,
             slogan,
+            modoLogo,
+            tamanhoLogoPainel,
 
             mostrarTarjaTv,
             tempoEntradaTarja,
@@ -263,7 +278,8 @@ export default function AdminPage() {
             tamanhoIconeRodape: limitarValor(tamanhoIconeRodape, 12, 80, 22),
             alturaBarraSuperior: limitarValor(alturaBarraSuperior, 40, 120, 64),
             alturaBarraNoticias: limitarValor(alturaBarraNoticias, 30, 100, 44),
-            tamanhoLogoRodape: limitarValor(tamanhoLogoRodape, 20, 100, 44)
+            tamanhoLogoRodape: limitarValor(tamanhoLogoRodape, 20, 100, 44),
+            duracaoAnimacaoNoticias: limitarValor(duracaoAnimacaoNoticias, 60, 300, 150)
         }
 
         await setDoc(
@@ -279,6 +295,7 @@ export default function AdminPage() {
         setTamanhoIconeRodape(configuracoes.tamanhoIconeRodape)
         setAlturaBarraSuperior(configuracoes.alturaBarraSuperior)
         setAlturaBarraNoticias(configuracoes.alturaBarraNoticias)
+        setDuracaoAnimacaoNoticias(configuracoes.duracaoAnimacaoNoticias)
         setTamanhoLogoRodape(configuracoes.tamanhoLogoRodape)
 
         alert("Configurações salvas!")
@@ -597,22 +614,26 @@ export default function AdminPage() {
                     logo={logo}
                     slogan={slogan}
 
-                    mostrarTarjaTv={mostrarTarjaTv}
+                    modoLogo={modoLogo}
+                    tamanhoLogoPainel={tamanhoLogoPainel}
+
                     tempoEntradaTarja={tempoEntradaTarja}
                     tempoVisivelTarja={tempoVisivelTarja}
                     tempoSaidaTarja={tempoSaidaTarja}
-
-                    setMostrarTarjaTv={setMostrarTarjaTv}
-                    setTempoEntradaTarja={setTempoEntradaTarja}
-                    setTempoVisivelTarja={setTempoVisivelTarja}
-                    setTempoSaidaTarja={setTempoSaidaTarja}
                     tempoOcultaTarja={tempoOcultaTarja}
-                    setTempoOcultaTarja={setTempoOcultaTarja}
 
                     setNomePainel={setNomePainel}
                     setSubtitulo={setSubtitulo}
                     setLogo={setLogo}
                     setSlogan={setSlogan}
+
+                    setModoLogo={setModoLogo}
+                    setTamanhoLogoPainel={setTamanhoLogoPainel}
+
+                    setTempoEntradaTarja={setTempoEntradaTarja}
+                    setTempoVisivelTarja={setTempoVisivelTarja}
+                    setTempoSaidaTarja={setTempoSaidaTarja}
+                    setTempoOcultaTarja={setTempoOcultaTarja}
 
                     salvarConfiguracoes={salvarConfiguracoes}
                 />
@@ -622,21 +643,16 @@ export default function AdminPage() {
                 <AbaConfiguracaoTipografia
                     tamanhoFonteRodape={tamanhoFonteRodape}
                     tamanhoFonteSlogan={tamanhoFonteSlogan}
-                    tamanhoIconeRodape={tamanhoIconeRodape}
-                    tamanhoFonteDataHora={tamanhoFonteDataHora}
                     tamanhoFonteHora={tamanhoFonteHora}
-                    tamanhoLogoRodape={tamanhoLogoRodape}
-                    alturaBarraSuperior={alturaBarraSuperior}
                     alturaBarraNoticias={alturaBarraNoticias}
-                    setTamanhoIconeRodape={setTamanhoIconeRodape}
+                    duracaoAnimacaoNoticias={duracaoAnimacaoNoticias}
+
 
                     setTamanhoFonteSlogan={setTamanhoFonteSlogan}
                     setTamanhoFonteRodape={setTamanhoFonteRodape}
-                    setTamanhoFonteDataHora={setTamanhoFonteDataHora}
                     setTamanhoFonteHora={setTamanhoFonteHora}
-                    setTamanhoLogoRodape={setTamanhoLogoRodape}
-                    setAlturaBarraSuperior={setAlturaBarraSuperior}
                     setAlturaBarraNoticias={setAlturaBarraNoticias}
+                    setDuracaoAnimacaoNoticias={setDuracaoAnimacaoNoticias}
 
                     salvarConfiguracoes={salvarConfiguracoes}
                 />

@@ -45,6 +45,7 @@ export default function RodapeNoticias({
     const [tamanhoIconeRodape, setTamanhoIconeRodape] = useState(22)
     const [alturaBarraSuperior, setAlturaBarraSuperior] = useState(64)
     const [alturaBarraNoticias, setAlturaBarraNoticias] = useState(44)
+    const [duracaoAnimacaoNoticias, setDuracaoAnimacaoNoticias] = useState(150)
     const [tamanhoLogoRodape, setTamanhoLogoRodape] = useState(44)
 
     const [mostrarTarjaTv, setMostrarTarjaTv] = useState(true)
@@ -152,6 +153,18 @@ export default function RodapeNoticias({
 
                 setAlturaBarraNoticias(
                     limitarValor(dados.alturaBarraNoticias, 30, 100, 44)
+                )
+
+                setTamanhoLogoRodape(
+                    limitarValor(dados.tamanhoLogoRodape, 24, 100, 44)
+                )
+
+                setAlturaBarraNoticias(
+                    limitarValor(dados.alturaBarraNoticias, 30, 100, 44)
+                )
+
+                setDuracaoAnimacaoNoticias(
+                    limitarValor(dados.duracaoAnimacaoNoticias, 60, 300, 150)
                 )
 
                 setTamanhoLogoRodape(
@@ -429,7 +442,7 @@ export default function RodapeNoticias({
                                     <h2
                                         className="truncate font-black uppercase leading-none tracking-tight text-[#071b42]"
                                         style={{
-                                            fontSize: `${Math.max(tamanhoFonteSlogan + 8, 26)}px`
+                                            fontSize: `clamp(18px, 1.55vw, ${Math.max(tamanhoFonteSlogan + 2, 26)}px)`
                                         }}
                                     >
                                         {tituloTarjaFinal}
@@ -560,7 +573,7 @@ export default function RodapeNoticias({
                                 <div className="absolute left-0 top-1/2 h-12 w-px -translate-y-1/2 bg-white/15" />
                 
                                 <h2
-                                    className="truncate font-black uppercase leading-none text-white drop-shadow"
+                                    className="font-black uppercase leading-tight text-white drop-shadow line-clamp-2"
                                     style={{
                                         fontSize: `${Math.max(tamanhoFonteSlogan + 8, 26)}px`
                                     }}
@@ -887,8 +900,11 @@ export default function RodapeNoticias({
                     style={{ height: `${alturaBarraNoticias}px` }}
                 >
                     <div
-                        className="whitespace-nowrap animate-[marquee_150s_linear_infinite] font-bold leading-none tracking-normal text-white will-change-transform [transform:translate3d(0,0,0)]"
-                        style={{ fontSize: `${tamanhoFonteRodape}px` }}
+                        className="whitespace-nowrap animate-[marquee_linear_infinite] font-bold leading-none tracking-normal text-white will-change-transform [transform:translate3d(0,0,0)]"
+                        style={{
+                            fontSize: `${tamanhoFonteRodape}px`,
+                            animationDuration: `${duracaoAnimacaoNoticias}s`
+                        }}
                     >
                         {noticiasVisiveis.map((noticia, index) => (
                             <span

@@ -232,6 +232,42 @@ export default function AbaNoticias({
                         </div>
                     )}
 
+                    <div className="rounded-2xl border border-zinc-700 bg-[#183b78]/95 p-4 overflow-hidden">
+    <p className="mb-3 text-sm font-bold text-zinc-200">
+        Prévia do letreiro
+    </p>
+
+    <div className="overflow-hidden rounded-xl bg-[#183b78] py-3">
+        <div className="whitespace-nowrap font-bold text-white">
+            <span className="mx-8">
+                {novaNoticia.trim() !== ""
+                    ? novaNoticia
+                    : "Digite uma notícia para visualizar no letreiro"}
+            </span>
+
+            <span className="mx-6 text-[#f15434]">
+                •
+            </span>
+
+            <span className="mx-8 opacity-80">
+                Categoria: {categoriaNoticia}
+            </span>
+
+            {noticiaProgramada && (
+                <>
+                    <span className="mx-6 text-[#f15434]">
+                        •
+                    </span>
+
+                    <span className="mx-8 opacity-80">
+                        Notícia programada
+                    </span>
+                </>
+            )}
+        </div>
+    </div>
+</div>
+
                     <button
                         onClick={adicionarNoticia}
                         className="rounded-xl bg-green-600 py-3 font-bold transition hover:bg-green-700"

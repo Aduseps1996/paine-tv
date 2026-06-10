@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Chamada from "@/components/Chamada"
 import BannerRotativo from "../components/BannerRotativo"
 import RodapeNoticias from "../components/RodapeNoticias"
@@ -22,12 +22,17 @@ export default function Home() {
   const [matriculaAtual, setMatriculaAtual] = useState("Matrícula 1548")
   const [guicheAtual, setGuicheAtual] = useState("Guichê 2")
   const [chamadaAtiva, setChamadaAtiva] = useState(false)
-  const [ultimaChamadaId, setUltimaChamadaId] = useState("")
-  const [ultimaRepeticaoId, setUltimaRepeticaoId] = useState<number | null>(null)
+  const ultimaChamadaIdRef = useRef("")
+  const ultimaRepeticaoIdRef = useRef<number | null>(null)
   const [painelIniciadoEm] = useState(() => Date.now())
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
   const [logo, setLogo] = useState("")
+  const [modoLogo, setModoLogo] =
+    useState<"transparente" | "fundo" | "card">("fundo")
+
+  const [tamanhoLogoPainel, setTamanhoLogoPainel] =
+    useState<"pequeno" | "medio" | "grande">("medio")
 
   const [slogan, setSlogan] = useState("Informação, acolhimento e compromisso com o associado.")
   const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
@@ -63,6 +68,8 @@ export default function Home() {
           setNomePainel(dados.nomePainel)
           setSubtitulo(dados.subtitulo)
           setLogo(dados.logo || "")
+          setModoLogo(dados.modoLogo || "fundo")
+          setTamanhoLogoPainel(dados.tamanhoLogoPainel || "medio")
 
           setFallback(
             dados.fallback || "/fallbacks/offline.jpg"
@@ -107,18 +114,20 @@ export default function Home() {
           return
         }
 
-        const novaRepeticaoId = dados.repeticao_id || null
+        const novaRepeticaoId = Number(dados.repeticao_id || 0)
 
-        if (
-          dados.atendimento_id === ultimaChamadaId &&
-          novaRepeticaoId !== null &&
-          novaRepeticaoId === ultimaRepeticaoId
-        ) {
+        const mesmaChamada =
+          dados.atendimento_id === ultimaChamadaIdRef.current
+
+        const mesmaRepeticao =
+          novaRepeticaoId === ultimaRepeticaoIdRef.current
+
+        if (mesmaChamada && mesmaRepeticao) {
           return
         }
 
-        setUltimaChamadaId(dados.atendimento_id)
-        setUltimaRepeticaoId(novaRepeticaoId)
+        ultimaChamadaIdRef.current = dados.atendimento_id
+        ultimaRepeticaoIdRef.current = novaRepeticaoId
 
         setNomeAtual(
           (dados.nome || "SEM NOME").toUpperCase()
@@ -157,11 +166,7 @@ export default function Home() {
 
     return () => unsubscribe()
 
-  }, [
-    ultimaChamadaId,
-    ultimaRepeticaoId,
-    painelIniciadoEm
-  ])
+  }, [painelIniciadoEm])
 
   /* Aviso offline */
   useEffect(() => {
@@ -183,6 +188,20 @@ export default function Home() {
       window.removeEventListener("offline", ficouOffline)
     }
   }, [])
+
+  const tamanhoLogoClasse =
+    tamanhoLogoPainel === "pequeno"
+      ? "h-[clamp(2rem,4vw,2.75rem)] w-[clamp(2rem,4vw,2.75rem)]"
+      : tamanhoLogoPainel === "grande"
+        ? "h-[clamp(3.5rem,7vw,5rem)] w-[clamp(3.5rem,7vw,5rem)]"
+        : "h-[clamp(2.75rem,5vw,3.75rem)] w-[clamp(2.75rem,5vw,3.75rem)]"
+
+  const modoLogoClasse =
+    modoLogo === "transparente"
+      ? "bg-transparent p-0 shadow-none"
+      : modoLogo === "card"
+        ? "bg-black/25 border border-white/15 p-2 shadow-md backdrop-blur-sm"
+        : "bg-white/95 p-2 shadow-md"
 
   return (
     <main className="w-screen h-screen text-white relative overflow-hidden">
@@ -208,7 +227,9 @@ export default function Home() {
           <div className="absolute top-[clamp(0.75rem,2vh,1.5rem)] left-[clamp(0.75rem,2vw,2rem)] z-10 flex items-center gap-[clamp(0.5rem,1.5vw,1rem)] rounded-2xl border border-white/10 bg-black/15 px-[clamp(0.75rem,2vw,1rem)] py-[clamp(0.5rem,1.5vh,0.75rem)] backdrop-blur-sm shadow-[0_14px_35px_rgba(0,0,0,0.30)]">
 
             {logo.trim() !== "" && (
-              <div className="flex h-[clamp(2.5rem,5vw,3.5rem)] w-[clamp(2.5rem,5vw,3.5rem)] items-center justify-center rounded-xl bg-white/95 p-2 shadow-md">
+              <div
+                className={`flex ${tamanhoLogoClasse} items-center justify-center rounded-xl ${modoLogoClasse}`}
+              >
                 <Image
                   src={logo}
                   alt="Logo ADUSEPS"
@@ -248,32 +269,6 @@ export default function Home() {
         matricula={matriculaAtual}
         guiche={guicheAtual}
       />
-
-      {/* ADICIOANR BOTÃO PARA TESTE DE CHAMADA */}
-
-      {/* 
-
-        BOTÃO FULLSCREEN (APENAS PARA DESENVOLVIMENTO)
-        APAGAR QUANDO FOR PARA PRODUÇÃO
-        {
-          !fullscreenAtivado && process.env.NODE_ENV === "development" && (
-
-            <button
-              onClick={() => {
-
-                document.documentElement.requestFullscreen()
-
-                setFullscreenAtivado(true)
-
-              }}
-              className="absolute top-6 right-8 z-50 bg-white text-black px-5 py-3 rounded-xl font-bold"
-            >
-              Tela cheia
-            </button>
-
-          )
-        }
-      */}
 
       {!online && (
         <div className="absolute top-6 right-8 z-50 rounded-xl border border-white/10 bg-black/45 px-4 py-3 text-sm font-bold text-white/90 shadow-2xl backdrop-blur-sm">
