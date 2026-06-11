@@ -56,17 +56,12 @@ export default function BannerRotativo({
 }) {
     const [midiasBase, setMidiasBase] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
-    const [visivel, setVisivel] = useState(true)
-    /* const [erroMidia, setErroMidia] = useState(false) */
     const [agoraPainel, setAgoraPainel] = useState(new Date())
     const [audioYoutubeAtivo, setAudioYoutubeAtivo] = useState(false)
     const [midiasComErro, setMidiasComErro] = useState<string[]>([])
 
-
     const timeoutAvancoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const timeoutVideoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const videoMonitoradoRef = useRef<HTMLVideoElement | null>(null)
-    const ultimoTempoVideoRef = useRef(0)
+    const timeoutRecarregarVideoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         const intervalo = setInterval(() => {
@@ -94,6 +89,33 @@ export default function BannerRotativo({
         return () => unsubscribe()
     }, [])
 
+    useEffect(() => {
+        return () => {
+            if (timeoutAvancoRef.current) {
+                clearTimeout(timeoutAvancoRef.current)
+            }
+
+            if (timeoutRecarregarVideoRef.current) {
+                clearTimeout(timeoutRecarregarVideoRef.current)
+            }
+        }
+    }, [])
+
+    function obterChaveMidia(midia: Midia) {
+        return `${midia.id || "sem-id"}-${midia.arquivo || ""}-${midia.linkYoutubeExibicao || ""}`
+    }
+
+    function marcarMidiaComErro(midia: Midia | undefined) {
+        if (!midia) return
+
+        const chave = obterChaveMidia(midia)
+
+        setMidiasComErro((listaAtual) => {
+            if (listaAtual.includes(chave)) return listaAtual
+            return [...listaAtual, chave]
+        })
+    }
+
     function midiaEstaDentroDoHorario(midia: Midia) {
         if (!midia.exibicaoProgramada) return true
 
@@ -111,34 +133,8 @@ export default function BannerRotativo({
         return agoraPainel >= inicio && agoraPainel <= fim
     }
 
-    function obterChaveErroMidia(midia: Midia) {
-        return `${midia.id || "sem-id"}-${midia.arquivo || ""}-${midia.linkYoutubeExibicao || ""}`
-    }
-
-    function marcarMidiaComErro(midia: Midia | undefined) {
-        if (!midia) return
-
-        const chave = obterChaveErroMidia(midia)
-
-        setMidiasComErro((listaAtual) => {
-            if (listaAtual.includes(chave)) return listaAtual
-            return [...listaAtual, chave]
-        })
-    }
-
     function midiaPodeSerExibida(midia: Midia) {
         if (!midia.ativo) return false
-
-        if (midiasComErro.includes(obterChaveErroMidia(midia))) {
-            return false
-        }
-
-        if (
-            midia.tipo !== "youtube" &&
-            (!midia.arquivo || midia.arquivo.trim() === "")
-        ) {
-            return false
-        }
 
         const ehMidiaYoutube =
             midia.tipo === "youtube" ||
@@ -158,6 +154,10 @@ export default function BannerRotativo({
             }
 
             return midiaEstaDentroDoHorario(midia)
+        }
+
+        if (!midia.arquivo || midia.arquivo.trim() === "") {
+            return false
         }
 
         if (midia.exibicaoProgramada) {
@@ -204,11 +204,20 @@ export default function BannerRotativo({
     }
 
     const midias = useMemo(() => {
-        const listaAtiva = midiasBase.filter((midia) => {
+        const listaValida = midiasBase.filter((midia) => {
             return midiaPodeSerExibida(midia)
         })
 
-        const youtubeAtivo = listaAtiva.find((midia) => {
+        const listaSemErro = listaValida.filter((midia) => {
+            return !midiasComErro.includes(obterChaveMidia(midia))
+        })
+
+        const listaParaUso =
+            listaSemErro.length > 0
+                ? listaSemErro
+                : listaValida
+
+        const youtubeAtivo = listaParaUso.find((midia) => {
             return (
                 midia.ativo === true &&
                 midia.exibicaoProgramada === true &&
@@ -216,7 +225,7 @@ export default function BannerRotativo({
                     midia.tipoExibicaoProgramada === "youtube" ||
                     midia.tipo === "youtube"
                 ) &&
-                (midia.linkYoutubeExibicao || midia.tipo === "youtube")
+                Boolean(midia.linkYoutubeExibicao || midia.arquivo)
             )
         })
 
@@ -225,15 +234,18 @@ export default function BannerRotativo({
         }
 
         return montarListaInteligente(
-            listaAtiva.filter((midia) => midia.tipo !== "youtube")
+            listaParaUso.filter((midia) => midia.tipo !== "youtube")
         )
     }, [midiasBase, agoraPainel, midiasComErro])
 
     const assinaturaMidias = midias
-        .map((midia) => `${midia.id}-${midia.tipo}-${midia.arquivo}-${midia.linkYoutubeExibicao}`)
+        .map((midia) =>
+            `${midia.id}-${midia.tipo}-${midia.arquivo}-${midia.linkYoutubeExibicao}-${midia.inicioExibicao}-${midia.fimExibicao}`
+        )
         .join("|")
 
     const possuiRotacao = midias.length > 1
+
     const indiceSeguro =
         indiceAtual >= midias.length
             ? 0
@@ -252,8 +264,6 @@ export default function BannerRotativo({
     }, [ehYoutube])
 
     useEffect(() => {
-        /* setErroMidia(false) */
-        setVisivel(true)
         setIndiceAtual(0)
 
         if (timeoutAvancoRef.current) {
@@ -261,22 +271,11 @@ export default function BannerRotativo({
             timeoutAvancoRef.current = null
         }
 
-        if (timeoutVideoRef.current) {
-            clearTimeout(timeoutVideoRef.current)
-            timeoutVideoRef.current = null
+        if (timeoutRecarregarVideoRef.current) {
+            clearTimeout(timeoutRecarregarVideoRef.current)
+            timeoutRecarregarVideoRef.current = null
         }
     }, [assinaturaMidias])
-
-    /* useEffect(() => {
-        setErroMidia(false)
-        setVisivel(false)
-
-        const tempo = setTimeout(() => {
-            setVisivel(true)
-        }, 80)
-
-        return () => clearTimeout(tempo)
-    }, [indiceAtual, assinaturaMidias]) */
 
     useEffect(() => {
         if (midiaAtual) {
@@ -285,47 +284,6 @@ export default function BannerRotativo({
             onMidiaAtualChange?.(null)
         }
     }, [midiaAtual, onMidiaAtualChange])
-
-    useEffect(() => {
-        const intervalo = setInterval(() => {
-            const video = videoMonitoradoRef.current
-
-            if (!video) return
-            if (video.ended) return
-            if (video.paused) return
-            if (ehYoutube) return
-
-            const tempoAtual = video.currentTime
-            const travado =
-                Math.abs(tempoAtual - ultimoTempoVideoRef.current) < 0.1
-
-            ultimoTempoVideoRef.current = tempoAtual
-
-            if (travado && video.readyState >= 2) {
-                protegerVideo(video)
-            }
-        }, 15000)
-
-        return () => clearInterval(intervalo)
-    }, [ehYoutube, midias.length, midiaAtual?.id])
-
-
-    useEffect(() => {
-        const intervalo = setInterval(() => {
-            if (midias.length === 0) {
-                setIndiceAtual(0)
-                /* setErroMidia(false) */
-                return
-            }
-
-            if (indiceAtual >= midias.length) {
-                setIndiceAtual(0)
-                /* setErroMidia(false) */
-            }
-        }, 60000)
-
-        return () => clearInterval(intervalo)
-    }, [midias.length, indiceAtual])
 
     function avancarMidia() {
         if (midias.length <= 1) return
@@ -339,85 +297,65 @@ export default function BannerRotativo({
                 const proximo = valorAtual + 1
                 return proximo >= midias.length ? 0 : proximo
             })
-        }, 50)
+        }, 150)
     }
 
-    useEffect(() => {
-        return () => {
-            if (timeoutAvancoRef.current) {
-                clearTimeout(timeoutAvancoRef.current)
-            }
-
-            if (timeoutVideoRef.current) {
-                clearTimeout(timeoutVideoRef.current)
-            }
+    function tentarRecarregarVideo(video: HTMLVideoElement) {
+        if (timeoutRecarregarVideoRef.current) {
+            clearTimeout(timeoutRecarregarVideoRef.current)
         }
-    }, [])
 
+        timeoutRecarregarVideoRef.current = setTimeout(() => {
+            try {
+                video.load()
 
-    /* Funções para manipular vídeos */
-    function protegerVideo(video: HTMLVideoElement) {
-        if (midias.length <= 1) {
-            video.load()
+                setTimeout(() => {
+                    video.play().catch(() => {
+                        // Em TV Stick/Fully Kiosk, autoplay pode falhar momentaneamente.
+                        // Não derruba a mídia única por causa disso.
+                    })
+                }, 500)
+            } catch {
+                // Não faz nada aqui para evitar fallback falso.
+            }
+        }, 800)
+    }
 
-            setTimeout(() => {
-                video.play().catch(() => {
-                    marcarMidiaComErro(midiaAtual)
-                })
-            }, 300)
-
+    function lidarComErroVideo(video: HTMLVideoElement) {
+        if (midias.length > 1) {
+            marcarMidiaComErro(midiaAtual)
+            avancarMidia()
             return
         }
 
-        marcarMidiaComErro(midiaAtual)
-        avancarMidia()
+        tentarRecarregarVideo(video)
     }
 
     function reiniciarOuAvancarVideo(video: HTMLVideoElement) {
-        if (midias.length <= 1) {
-            video.currentTime = 0
-
-            video.play().catch(() => {
-                marcarMidiaComErro(midiaAtual)
-            })
-
+        if (midias.length > 1) {
+            avancarMidia()
             return
         }
 
-        avancarMidia()
+        try {
+            video.currentTime = 0
+            video.play().catch(() => {
+                tentarRecarregarVideo(video)
+            })
+        } catch {
+            tentarRecarregarVideo(video)
+        }
     }
 
     function lidarComErroImagem(imagem: HTMLImageElement) {
-        marcarMidiaComErro(midiaAtual)
-
-        if (midias.length <= 1) {
-            imagem.src = fallback
+        if (midias.length > 1) {
+            marcarMidiaComErro(midiaAtual)
+            avancarMidia()
             return
         }
 
-        avancarMidia()
-    }
-
-    function lidarComVideoEsperando(video: HTMLVideoElement) {
-        if (timeoutVideoRef.current) {
-            clearTimeout(timeoutVideoRef.current)
-        }
-
-        timeoutVideoRef.current = setTimeout(() => {
-            if (
-                video.readyState < 3 &&
-                !video.ended
-            ) {
-                protegerVideo(video)
-            }
-        }, 5000)
-    }
-
-    function registrarVideoMonitorado(video: HTMLVideoElement | null) {
-        videoMonitoradoRef.current = video
-
-        if (video) {
-            ultimoTempoVideoRef.current = video.currentTime
+        if (imagem.src !== fallback) {
+            imagem.src = fallback
         }
     }
 
@@ -459,7 +397,7 @@ export default function BannerRotativo({
         }, duracaoSegura * 1000)
 
         return () => clearInterval(intervaloBanner)
-    }, [midiaAtual, midias.length])
+    }, [midiaAtual?.id, midias.length, assinaturaMidias])
 
     if (midias.length === 0 || !midiaAtual) {
         return (
@@ -468,17 +406,18 @@ export default function BannerRotativo({
                     <img
                         src={fallback}
                         alt="Imagem padrão"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover"
                     />
                 )}
             </div>
         )
     }
 
+    const chaveMidiaAtual =
+        `${midiaAtual.id || "sem-id"}-${midiaAtual.ativo}-${midiaAtual.tipo}-${midiaAtual.arquivo}-${midiaAtual.linkYoutubeExibicao || ""}-${midiaAtual.inicioExibicao || ""}-${midiaAtual.fimExibicao || ""}`
 
-    const chaveMidiaAtual = `${midiaAtual.id || "sem-id"}-${midiaAtual.ativo}-${midiaAtual.tipo}-${midiaAtual.arquivo}-${midiaAtual.linkYoutubeExibicao || ""}-${midiaAtual.inicioExibicao || ""}-${midiaAtual.fimExibicao || ""}`
-
-    const chaveYoutubeAtual = `${chaveMidiaAtual}-${audioYoutubeAtivo ? "audio-ligado" : "audio-mudo"}`
+    const chaveYoutubeAtual =
+        `${chaveMidiaAtual}-${audioYoutubeAtivo ? "audio-ligado" : "audio-mudo"}`
 
     const templateAtual = midiaAtual.template || "cheio"
 
@@ -490,11 +429,15 @@ export default function BannerRotativo({
 
         if (!youtubeUrl) {
             return (
-                <img
-                    src={fallback}
-                    alt="Imagem padrão"
-                    className="absolute inset-0 w-full h-full object-cover"
-                />
+                <div className="absolute inset-0 bg-black">
+                    {fallback && (
+                        <img
+                            src={fallback}
+                            alt="Imagem padrão"
+                            className="absolute inset-0 h-full w-full object-cover"
+                        />
+                    )}
+                </div>
             )
         }
 
@@ -530,8 +473,6 @@ export default function BannerRotativo({
     const areaMidiaInformativa =
         "absolute top-0 left-0 w-full h-[calc(100vh-6.5rem)] object-cover"
 
-    const transicaoMidia = ""
-
     const animacaoImagemInformativa = possuiRotacao
         ? "scale-[1.02] animate-[zoomBanner_22s_linear_infinite]"
         : ""
@@ -547,38 +488,27 @@ export default function BannerRotativo({
                     <img
                         key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
-                        alt="Banner institucional"
+                        alt="Banner informativo"
                         onError={(e) => lidarComErroImagem(e.currentTarget)}
-                        className={`${areaMidiaInformativa} ${animacaoImagemInformativa} brightness-[0.96] contrast-[1.04] saturate-[1.02] ${transicaoMidia}`}
+                        className={`${areaMidiaInformativa} ${animacaoImagemInformativa} brightness-[0.96] contrast-[1.04] saturate-[1.02]`}
                     />
                 ) : (
                     <video
-                        ref={registrarVideoMonitorado}
                         key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
                         playsInline
-                        preload="auto"
-                        className={`${areaMidiaInformativa} brightness-[0.96] contrast-[1.04] saturate-[1.02] ${transicaoMidia}`}
-                        onError={(e) => protegerVideo(e.currentTarget)}
-                        /* onStalled={(e) => protegerVideo(e.currentTarget)}
-                        onAbort={(e) => protegerVideo(e.currentTarget)} */
-                        onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
-                        onEnded={(e) => {
-                            if (timeoutVideoRef.current) {
-                                clearTimeout(timeoutVideoRef.current)
-                                timeoutVideoRef.current = null
-                            }
-
-                            reiniciarOuAvancarVideo(e.currentTarget)
-                        }}
+                        preload="metadata"
+                        className={`${areaMidiaInformativa} brightness-[0.96] contrast-[1.04] saturate-[1.02]`}
+                        onError={(e) => lidarComErroVideo(e.currentTarget)}
+                        onEnded={(e) => reiniciarOuAvancarVideo(e.currentTarget)}
                     />
                 )}
 
-                <div className="absolute top-10 right-10 w-[420px] rounded-3xl overflow-hidden bg-[#342c7c]/75 border border-white/10 shadow-2xl z-10">
+                <div className="absolute top-10 right-10 z-10 w-[420px] overflow-hidden rounded-3xl border border-white/10 bg-[#342c7c]/75 shadow-2xl">
                     <div className="bg-[#34bcf8] px-6 py-4">
-                        <h2 className="text-2xl font-black text-white tracking-wide">
+                        <h2 className="text-2xl font-black tracking-wide text-white">
                             {midiaAtual.categoria || "ADUSEPS"}
                         </h2>
                     </div>
@@ -590,7 +520,7 @@ export default function BannerRotativo({
 
                         <div className="mt-6 h-px bg-white/10" />
 
-                        <p className="mt-6 text-lg text-white/80 leading-relaxed">
+                        <p className="mt-6 text-lg leading-relaxed text-white/80">
                             {midiaAtual.subtitulo || "Atendimento jurídico, financeiro e institucional com transparência e acolhimento."}
                         </p>
                     </div>
@@ -608,30 +538,19 @@ export default function BannerRotativo({
                         src={midiaAtual.arquivo}
                         alt="Banner institucional"
                         onError={(e) => lidarComErroImagem(e.currentTarget)}
-                        className={`${areaMidia} ${animacaoImagemInstitucional} brightness-[0.92] contrast-[1.04] ${transicaoMidia}`}
+                        className={`${areaMidia} ${animacaoImagemInstitucional} brightness-[0.92] contrast-[1.04]`}
                     />
                 ) : (
                     <video
-                        ref={registrarVideoMonitorado}
                         key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
                         playsInline
-                        preload="auto"
-                        className={`${areaMidia} brightness-[0.92] contrast-[1.04] ${transicaoMidia}`}
-                        onError={(e) => protegerVideo(e.currentTarget)}
-                        /* onStalled={(e) => protegerVideo(e.currentTarget)}
-                        onAbort={(e) => protegerVideo(e.currentTarget)} */
-                        onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
-                        onEnded={(e) => {
-                            if (timeoutVideoRef.current) {
-                                clearTimeout(timeoutVideoRef.current)
-                                timeoutVideoRef.current = null
-                            }
-
-                            reiniciarOuAvancarVideo(e.currentTarget)
-                        }}
+                        preload="metadata"
+                        className={`${areaMidia} brightness-[0.92] contrast-[1.04]`}
+                        onError={(e) => lidarComErroVideo(e.currentTarget)}
+                        onEnded={(e) => reiniciarOuAvancarVideo(e.currentTarget)}
                     />
                 )}
 
@@ -639,7 +558,7 @@ export default function BannerRotativo({
 
                 <div className="absolute left-[clamp(1rem,4vw,3.5rem)] top-1/2 w-[min(88vw,560px)] -translate-y-1/2">
                     <div className="rounded-[2rem] border border-white/10 bg-black/35 p-[clamp(1.25rem,3vw,2.5rem)] shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
-                        <div className="inline-flex items-center rounded-full bg-[#34bcf8]/15 border border-[#34bcf8]/30 px-5 py-2 mb-6">
+                        <div className="mb-6 inline-flex items-center rounded-full border border-[#34bcf8]/30 bg-[#34bcf8]/15 px-5 py-2">
                             <span className="text-sm font-black uppercase tracking-[0.18em] text-[#34bcf8]">
                                 {midiaAtual.categoria || "ADUSEPS"}
                             </span>
@@ -654,7 +573,7 @@ export default function BannerRotativo({
                         </p>
 
                         <div className="mt-10 flex items-center gap-4">
-                            <div className="w-16 h-1 rounded-full bg-[#34bcf8]" />
+                            <div className="h-1 w-16 rounded-full bg-[#34bcf8]" />
 
                             <span className="text-sm font-bold uppercase tracking-[0.22em] text-white/60">
                                 {midiaAtual.rodape || "Painel Institucional"}
@@ -695,30 +614,19 @@ export default function BannerRotativo({
                         src={midiaAtual.arquivo}
                         alt="Banner urgente"
                         onError={(e) => lidarComErroImagem(e.currentTarget)}
-                        className={`${areaMidia} brightness-[0.45] ${transicaoMidia}`}
+                        className={`${areaMidia} brightness-[0.45]`}
                     />
                 ) : (
                     <video
-                        ref={registrarVideoMonitorado}
                         key={chaveMidiaAtual}
                         src={midiaAtual.arquivo}
                         autoPlay
                         muted
                         playsInline
-                        preload="auto"
-                        className={`${areaMidia} brightness-[0.45] ${transicaoMidia}`}
-                        onError={(e) => protegerVideo(e.currentTarget)}
-                        /* onStalled={(e) => protegerVideo(e.currentTarget)}
-                        onAbort={(e) => protegerVideo(e.currentTarget)} */
-                        onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
-                        onEnded={(e) => {
-                            if (timeoutVideoRef.current) {
-                                clearTimeout(timeoutVideoRef.current)
-                                timeoutVideoRef.current = null
-                            }
-
-                            reiniciarOuAvancarVideo(e.currentTarget)
-                        }}
+                        preload="metadata"
+                        className={`${areaMidia} brightness-[0.45]`}
+                        onError={(e) => lidarComErroVideo(e.currentTarget)}
+                        onEnded={(e) => reiniciarOuAvancarVideo(e.currentTarget)}
                     />
                 )}
 
@@ -759,30 +667,19 @@ export default function BannerRotativo({
                     src={midiaAtual.arquivo}
                     alt="Banner"
                     onError={(e) => lidarComErroImagem(e.currentTarget)}
-                    className={`${areaMidia} ${transicaoMidia}`}
+                    className={areaMidia}
                 />
             ) : (
                 <video
-                    ref={registrarVideoMonitorado}
                     key={chaveMidiaAtual}
                     src={midiaAtual.arquivo}
                     autoPlay
                     muted
                     playsInline
-                    preload="auto"
-                    className={`${areaMidia} ${transicaoMidia}`}
-                    onError={(e) => protegerVideo(e.currentTarget)}
-                    /* onStalled={(e) => protegerVideo(e.currentTarget)}
-                    onAbort={(e) => protegerVideo(e.currentTarget)} */
-                    onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
-                    onEnded={(e) => {
-                        if (timeoutVideoRef.current) {
-                            clearTimeout(timeoutVideoRef.current)
-                            timeoutVideoRef.current = null
-                        }
-
-                        reiniciarOuAvancarVideo(e.currentTarget)
-                    }}
+                    preload="metadata"
+                    className={areaMidia}
+                    onError={(e) => lidarComErroVideo(e.currentTarget)}
+                    onEnded={(e) => reiniciarOuAvancarVideo(e.currentTarget)}
                 />
             )}
         </>
