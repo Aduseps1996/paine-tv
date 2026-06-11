@@ -57,9 +57,10 @@ export default function BannerRotativo({
     const [midiasBase, setMidiasBase] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
     const [visivel, setVisivel] = useState(true)
-    const [erroMidia, setErroMidia] = useState(false)
+    /* const [erroMidia, setErroMidia] = useState(false) */
     const [agoraPainel, setAgoraPainel] = useState(new Date())
     const [audioYoutubeAtivo, setAudioYoutubeAtivo] = useState(false)
+    const [midiasComErro, setMidiasComErro] = useState<string[]>([])
 
 
     const timeoutAvancoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -110,15 +111,34 @@ export default function BannerRotativo({
         return agoraPainel >= inicio && agoraPainel <= fim
     }
 
+    function obterChaveErroMidia(midia: Midia) {
+        return `${midia.id || "sem-id"}-${midia.arquivo || ""}-${midia.linkYoutubeExibicao || ""}`
+    }
+
+    function marcarMidiaComErro(midia: Midia | undefined) {
+        if (!midia) return
+
+        const chave = obterChaveErroMidia(midia)
+
+        setMidiasComErro((listaAtual) => {
+            if (listaAtual.includes(chave)) return listaAtual
+            return [...listaAtual, chave]
+        })
+    }
+
     function midiaPodeSerExibida(midia: Midia) {
         if (!midia.ativo) return false
 
+        if (midiasComErro.includes(obterChaveErroMidia(midia))) {
+            return false
+        }
+
         if (
-    midia.tipo !== "youtube" &&
-    (!midia.arquivo || midia.arquivo.trim() === "")
-) {
-    return false
-}
+            midia.tipo !== "youtube" &&
+            (!midia.arquivo || midia.arquivo.trim() === "")
+        ) {
+            return false
+        }
 
         const ehMidiaYoutube =
             midia.tipo === "youtube" ||
@@ -207,7 +227,7 @@ export default function BannerRotativo({
         return montarListaInteligente(
             listaAtiva.filter((midia) => midia.tipo !== "youtube")
         )
-    }, [midiasBase, agoraPainel])
+    }, [midiasBase, agoraPainel, midiasComErro])
 
     const assinaturaMidias = midias
         .map((midia) => `${midia.id}-${midia.tipo}-${midia.arquivo}-${midia.linkYoutubeExibicao}`)
@@ -215,11 +235,11 @@ export default function BannerRotativo({
 
     const possuiRotacao = midias.length > 1
     const indiceSeguro =
-    indiceAtual >= midias.length
-        ? 0
-        : indiceAtual
+        indiceAtual >= midias.length
+            ? 0
+            : indiceAtual
 
-const midiaAtual = midias[indiceSeguro]
+    const midiaAtual = midias[indiceSeguro]
 
     const ehYoutube =
         midiaAtual?.tipo === "youtube" ||
@@ -232,20 +252,20 @@ const midiaAtual = midias[indiceSeguro]
     }, [ehYoutube])
 
     useEffect(() => {
-    setErroMidia(false)
-    setVisivel(true)
-    setIndiceAtual(0)
+        /* setErroMidia(false) */
+        setVisivel(true)
+        setIndiceAtual(0)
 
-    if (timeoutAvancoRef.current) {
-        clearTimeout(timeoutAvancoRef.current)
-        timeoutAvancoRef.current = null
-    }
+        if (timeoutAvancoRef.current) {
+            clearTimeout(timeoutAvancoRef.current)
+            timeoutAvancoRef.current = null
+        }
 
-    if (timeoutVideoRef.current) {
-        clearTimeout(timeoutVideoRef.current)
-        timeoutVideoRef.current = null
-    }
-}, [assinaturaMidias])
+        if (timeoutVideoRef.current) {
+            clearTimeout(timeoutVideoRef.current)
+            timeoutVideoRef.current = null
+        }
+    }, [assinaturaMidias])
 
     /* useEffect(() => {
         setErroMidia(false)
@@ -294,13 +314,13 @@ const midiaAtual = midias[indiceSeguro]
         const intervalo = setInterval(() => {
             if (midias.length === 0) {
                 setIndiceAtual(0)
-                setErroMidia(false)
+                /* setErroMidia(false) */
                 return
             }
 
             if (indiceAtual >= midias.length) {
                 setIndiceAtual(0)
-                setErroMidia(false)
+                /* setErroMidia(false) */
             }
         }, 60000)
 
@@ -308,19 +328,19 @@ const midiaAtual = midias[indiceSeguro]
     }, [midias.length, indiceAtual])
 
     function avancarMidia() {
-    if (midias.length <= 1) return
+        if (midias.length <= 1) return
 
-    if (timeoutAvancoRef.current) {
-        clearTimeout(timeoutAvancoRef.current)
+        if (timeoutAvancoRef.current) {
+            clearTimeout(timeoutAvancoRef.current)
+        }
+
+        timeoutAvancoRef.current = setTimeout(() => {
+            setIndiceAtual((valorAtual) => {
+                const proximo = valorAtual + 1
+                return proximo >= midias.length ? 0 : proximo
+            })
+        }, 50)
     }
-
-    timeoutAvancoRef.current = setTimeout(() => {
-        setIndiceAtual((valorAtual) => {
-            const proximo = valorAtual + 1
-            return proximo >= midias.length ? 0 : proximo
-        })
-    }, 50)
-}
 
     useEffect(() => {
         return () => {
@@ -338,15 +358,18 @@ const midiaAtual = midias[indiceSeguro]
     /* Funções para manipular vídeos */
     function protegerVideo(video: HTMLVideoElement) {
         if (midias.length <= 1) {
-            video.currentTime = 0
+            video.load()
 
-            video.play().catch(() => {
-                setErroMidia(true)
-            })
+            setTimeout(() => {
+                video.play().catch(() => {
+                    marcarMidiaComErro(midiaAtual)
+                })
+            }, 300)
 
             return
         }
 
+        marcarMidiaComErro(midiaAtual)
         avancarMidia()
     }
 
@@ -355,7 +378,7 @@ const midiaAtual = midias[indiceSeguro]
             video.currentTime = 0
 
             video.play().catch(() => {
-                setErroMidia(true)
+                marcarMidiaComErro(midiaAtual)
             })
 
             return
@@ -365,13 +388,15 @@ const midiaAtual = midias[indiceSeguro]
     }
 
     function lidarComErroImagem(imagem: HTMLImageElement) {
-    if (midias.length <= 1) {
-        setErroMidia(true)
-        return
-    }
+        marcarMidiaComErro(midiaAtual)
 
-    avancarMidia()
-}
+        if (midias.length <= 1) {
+            imagem.src = fallback
+            return
+        }
+
+        avancarMidia()
+    }
 
     function lidarComVideoEsperando(video: HTMLVideoElement) {
         if (timeoutVideoRef.current) {
@@ -436,7 +461,7 @@ const midiaAtual = midias[indiceSeguro]
         return () => clearInterval(intervaloBanner)
     }, [midiaAtual, midias.length])
 
-    if (midias.length === 0 || !midiaAtual || erroMidia) {
+    if (midias.length === 0 || !midiaAtual) {
         return (
             <div className="absolute inset-0 bg-black">
                 {fallback && (
