@@ -232,18 +232,20 @@ const midiaAtual = midias[indiceSeguro]
     }, [ehYoutube])
 
     useEffect(() => {
-        setErroMidia(false)
-        setVisivel(true)
+    setErroMidia(false)
+    setVisivel(true)
+    setIndiceAtual(0)
 
-        if (midias.length === 0) {
-            setIndiceAtual(0)
-            return
-        }
+    if (timeoutAvancoRef.current) {
+        clearTimeout(timeoutAvancoRef.current)
+        timeoutAvancoRef.current = null
+    }
 
-        if (indiceAtual >= midias.length) {
-            setIndiceAtual(0)
-        }
-    }, [assinaturaMidias, midias.length, indiceAtual])
+    if (timeoutVideoRef.current) {
+        clearTimeout(timeoutVideoRef.current)
+        timeoutVideoRef.current = null
+    }
+}, [assinaturaMidias])
 
     /* useEffect(() => {
         setErroMidia(false)
@@ -362,16 +364,14 @@ const midiaAtual = midias[indiceSeguro]
         avancarMidia()
     }
 
-    function lidarComErroImagem(
-        imagem: HTMLImageElement
-    ) {
-        if (midias.length <= 1) {
-            imagem.src = fallback
-            return
-        }
-
-        avancarMidia()
+    function lidarComErroImagem(imagem: HTMLImageElement) {
+    if (midias.length <= 1) {
+        setErroMidia(true)
+        return
     }
+
+    avancarMidia()
+}
 
     function lidarComVideoEsperando(video: HTMLVideoElement) {
         if (timeoutVideoRef.current) {
@@ -537,8 +537,8 @@ const midiaAtual = midias[indiceSeguro]
                         preload="auto"
                         className={`${areaMidiaInformativa} brightness-[0.96] contrast-[1.04] saturate-[1.02] ${transicaoMidia}`}
                         onError={(e) => protegerVideo(e.currentTarget)}
-                        onStalled={(e) => protegerVideo(e.currentTarget)}
-                        onAbort={(e) => protegerVideo(e.currentTarget)}
+                        /* onStalled={(e) => protegerVideo(e.currentTarget)}
+                        onAbort={(e) => protegerVideo(e.currentTarget)} */
                         onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
                         onEnded={(e) => {
                             if (timeoutVideoRef.current) {
@@ -596,8 +596,8 @@ const midiaAtual = midias[indiceSeguro]
                         preload="auto"
                         className={`${areaMidia} brightness-[0.92] contrast-[1.04] ${transicaoMidia}`}
                         onError={(e) => protegerVideo(e.currentTarget)}
-                        onStalled={(e) => protegerVideo(e.currentTarget)}
-                        onAbort={(e) => protegerVideo(e.currentTarget)}
+                        /* onStalled={(e) => protegerVideo(e.currentTarget)}
+                        onAbort={(e) => protegerVideo(e.currentTarget)} */
                         onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
                         onEnded={(e) => {
                             if (timeoutVideoRef.current) {
@@ -683,8 +683,8 @@ const midiaAtual = midias[indiceSeguro]
                         preload="auto"
                         className={`${areaMidia} brightness-[0.45] ${transicaoMidia}`}
                         onError={(e) => protegerVideo(e.currentTarget)}
-                        onStalled={(e) => protegerVideo(e.currentTarget)}
-                        onAbort={(e) => protegerVideo(e.currentTarget)}
+                        /* onStalled={(e) => protegerVideo(e.currentTarget)}
+                        onAbort={(e) => protegerVideo(e.currentTarget)} */
                         onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
                         onEnded={(e) => {
                             if (timeoutVideoRef.current) {
@@ -747,8 +747,8 @@ const midiaAtual = midias[indiceSeguro]
                     preload="auto"
                     className={`${areaMidia} ${transicaoMidia}`}
                     onError={(e) => protegerVideo(e.currentTarget)}
-                    onStalled={(e) => protegerVideo(e.currentTarget)}
-                    onAbort={(e) => protegerVideo(e.currentTarget)}
+                    /* onStalled={(e) => protegerVideo(e.currentTarget)}
+                    onAbort={(e) => protegerVideo(e.currentTarget)} */
                     onWaiting={(e) => lidarComVideoEsperando(e.currentTarget)}
                     onEnded={(e) => {
                         if (timeoutVideoRef.current) {
