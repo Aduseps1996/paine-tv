@@ -631,7 +631,7 @@ export default function BannerRotativo({
                                     </p>
                                 </div>
 
-                                <div className="bg-black/15 px-3 py-[clamp(0.65rem,1.2vh,1rem)] text-center">
+                                <div className="bg-black/15 px-3 py-[clamp(0.65rem,1.2vh,1rem)] text-center pr-5">
                                     <p className="text-[clamp(0.65rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.20em] text-white/70">
                                         Hora
                                     </p>
