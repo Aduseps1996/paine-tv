@@ -595,7 +595,7 @@ export default function BannerRotativo({
 
                         <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/10 to-[#0d5cff]/20" />
 
-                        <div className="relative z-10 flex h-full flex-col pt-15">
+                        <div className="relative z-10 flex h-full flex-col pt-5">
                             <div className="text-center">
                                 <p className="text-[clamp(0.65rem,1vw,1rem)] font-black uppercase tracking-[0.25em] text-white/75">
                                     Previsão do tempo
@@ -631,7 +631,7 @@ export default function BannerRotativo({
                                     </p>
                                 </div>
 
-                                <div className="rounded-[1.4rem] bg-black/15 p-4 text-center">
+                                <div className="rounded-[1.4rem] bg-black/15 p-10 text-center">
                                     <p className="text-[clamp(0.65rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.20em] text-white/70">
                                         Hora
                                     </p>
