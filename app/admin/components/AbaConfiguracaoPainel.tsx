@@ -15,6 +15,9 @@ type Props = {
     tempoSaidaTarja: number
     tempoOcultaTarja: number
 
+    mostrarLogoFaixaPainel: boolean
+    mostrarRodapeNoticias: boolean
+
     setNomePainel: (valor: string) => void
     setSubtitulo: (valor: string) => void
     setLogo: (valor: string) => void
@@ -27,6 +30,9 @@ type Props = {
     setTempoVisivelTarja: (valor: number) => void
     setTempoSaidaTarja: (valor: number) => void
     setTempoOcultaTarja: (valor: number) => void
+
+    setMostrarLogoFaixaPainel: (valor: boolean) => void
+    setMostrarRodapeNoticias: (valor: boolean) => void
 
     salvarConfiguracoes: () => void
 }
@@ -45,6 +51,9 @@ export default function AbaConfiguracaoPainel({
     tempoSaidaTarja,
     tempoOcultaTarja,
 
+    mostrarLogoFaixaPainel,
+    mostrarRodapeNoticias,
+
     setNomePainel,
     setSubtitulo,
     setLogo,
@@ -57,6 +66,9 @@ export default function AbaConfiguracaoPainel({
     setTempoVisivelTarja,
     setTempoSaidaTarja,
     setTempoOcultaTarja,
+
+    setMostrarLogoFaixaPainel,
+    setMostrarRodapeNoticias,
 
     salvarConfiguracoes
 }: Props) {
@@ -161,11 +173,10 @@ export default function AbaConfiguracaoPainel({
                             <button
                                 type="button"
                                 onClick={() => setModoLogo("transparente")}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    modoLogo === "transparente"
+                                className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "transparente"
                                         ? "bg-blue-600 text-white"
                                         : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                    }`}
                             >
                                 Sem fundo
                             </button>
@@ -173,11 +184,10 @@ export default function AbaConfiguracaoPainel({
                             <button
                                 type="button"
                                 onClick={() => setModoLogo("fundo")}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    modoLogo === "fundo"
+                                className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "fundo"
                                         ? "bg-blue-600 text-white"
                                         : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                    }`}
                             >
                                 Fundo branco
                             </button>
@@ -185,11 +195,10 @@ export default function AbaConfiguracaoPainel({
                             <button
                                 type="button"
                                 onClick={() => setModoLogo("card")}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    modoLogo === "card"
+                                className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "card"
                                         ? "bg-blue-600 text-white"
                                         : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                    }`}
                             >
                                 Card discreto
                             </button>
@@ -205,11 +214,10 @@ export default function AbaConfiguracaoPainel({
                             <button
                                 type="button"
                                 onClick={() => setTamanhoLogoPainel("pequeno")}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    tamanhoLogoPainel === "pequeno"
+                                className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "pequeno"
                                         ? "bg-blue-600 text-white"
                                         : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                    }`}
                             >
                                 Pequena
                             </button>
@@ -217,11 +225,10 @@ export default function AbaConfiguracaoPainel({
                             <button
                                 type="button"
                                 onClick={() => setTamanhoLogoPainel("medio")}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    tamanhoLogoPainel === "medio"
+                                className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "medio"
                                         ? "bg-blue-600 text-white"
                                         : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                    }`}
                             >
                                 Média
                             </button>
@@ -229,11 +236,10 @@ export default function AbaConfiguracaoPainel({
                             <button
                                 type="button"
                                 onClick={() => setTamanhoLogoPainel("grande")}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    tamanhoLogoPainel === "grande"
+                                className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "grande"
                                         ? "bg-blue-600 text-white"
                                         : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                    }`}
                             >
                                 Grande
                             </button>
@@ -251,6 +257,44 @@ export default function AbaConfiguracaoPainel({
                 <p className="mt-1 mb-5 text-sm text-zinc-400">
                     Texto institucional fixo usado como slogan do painel.
                 </p>
+
+                <label className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
+                    <div>
+                        <p className="font-bold text-white">
+                            Mostrar logo na faixa inferior do Painel Informativo
+                        </p>
+
+                        <p className="text-sm text-zinc-400">
+                            Usa a mesma logo cadastrada, sem alterar a logo do topo.
+                        </p>
+                    </div>
+
+                    <input
+                        type="checkbox"
+                        checked={mostrarLogoFaixaPainel}
+                        onChange={(e) => setMostrarLogoFaixaPainel(e.target.checked)}
+                        className="h-5 w-5"
+                    />
+                </label>
+
+                <label className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
+                    <div>
+                        <p className="font-bold text-white">
+                            Mostrar rodapé de notícias
+                        </p>
+
+                        <p className="text-sm text-zinc-400">
+                            Liga ou desliga a faixa de notícias rolando na parte inferior da TV.
+                        </p>
+                    </div>
+
+                    <input
+                        type="checkbox"
+                        checked={mostrarRodapeNoticias}
+                        onChange={(e) => setMostrarRodapeNoticias(e.target.checked)}
+                        className="h-5 w-5"
+                    />
+                </label>
 
                 <div>
                     <label className="mb-2 block text-sm font-bold text-zinc-300">

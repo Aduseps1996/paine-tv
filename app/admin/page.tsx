@@ -40,7 +40,7 @@ type Midia = {
     ativo: boolean
     ordem: number
     duracao: number
-    template?: "cheio" | "informativo" | "institucional" | "urgente"
+    template?: "cheio" | "informativo" | "institucional" | "urgente" | "painel"
     titulo?: string
     subtitulo?: string
     rodape?: string
@@ -103,7 +103,7 @@ export default function AdminPage() {
     const [arquivo, setArquivo] = useState("")
     const [tipo, setTipo] = useState<"imagem" | "video" | "youtube">("imagem")
     const [template, setTemplate] = useState<
-        "cheio" | "informativo" | "institucional" | "urgente"
+        "cheio" | "informativo" | "institucional" | "urgente" | "painel"
     >("cheio")
     const [novaNoticia, setNovaNoticia] = useState("")
 
@@ -145,6 +145,9 @@ export default function AdminPage() {
 
     // configurações de fallback e tarja de TV
     const [mostrarTarjaTv, setMostrarTarjaTv] = useState(true)
+    const [mostrarLogoFaixaPainel, setMostrarLogoFaixaPainel] = useState(false)
+    const [mostrarRodapeNoticias, setMostrarRodapeNoticias] = useState(true)
+
     const [tempoEntradaTarja, setTempoEntradaTarja] = useState(1)
     const [tempoVisivelTarja, setTempoVisivelTarja] = useState(8)
     const [tempoSaidaTarja, setTempoSaidaTarja] = useState(1)
@@ -212,6 +215,9 @@ export default function AdminPage() {
             setSlogan(dados.slogan || "")
 
             setMostrarTarjaTv(dados.mostrarTarjaTv ?? true)
+            setMostrarLogoFaixaPainel(dados.mostrarLogoFaixaPainel ?? false)
+            setMostrarRodapeNoticias(dados.mostrarRodapeNoticias ?? true)
+
             setTempoEntradaTarja(Number(dados.tempoEntradaTarja || 1))
             setTempoVisivelTarja(Number(dados.tempoVisivelTarja || 8))
             setTempoSaidaTarja(Number(dados.tempoSaidaTarja || 1))
@@ -266,6 +272,9 @@ export default function AdminPage() {
             tamanhoLogoPainel,
 
             mostrarTarjaTv,
+            mostrarLogoFaixaPainel,
+            mostrarRodapeNoticias,
+
             tempoEntradaTarja,
             tempoVisivelTarja,
             tempoSaidaTarja,
@@ -621,6 +630,11 @@ export default function AdminPage() {
                     tempoVisivelTarja={tempoVisivelTarja}
                     tempoSaidaTarja={tempoSaidaTarja}
                     tempoOcultaTarja={tempoOcultaTarja}
+
+                    mostrarLogoFaixaPainel={mostrarLogoFaixaPainel}
+                    mostrarRodapeNoticias={mostrarRodapeNoticias}
+                    setMostrarLogoFaixaPainel={setMostrarLogoFaixaPainel}
+                    setMostrarRodapeNoticias={setMostrarRodapeNoticias}
 
                     setNomePainel={setNomePainel}
                     setSubtitulo={setSubtitulo}

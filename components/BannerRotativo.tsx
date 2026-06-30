@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import {
     collection,
+    doc,
+    getDoc,
     onSnapshot,
     query,
     orderBy
@@ -21,7 +23,7 @@ type Midia = {
 
     pesoExibicao?: number
 
-    template?: "cheio" | "informativo" | "institucional" | "urgente"
+    template?: "cheio" | "informativo" | "institucional" | "urgente" | "painel"
     titulo?: string
     subtitulo?: string
     rodape?: string
@@ -59,6 +61,11 @@ export default function BannerRotativo({
     const [agoraPainel, setAgoraPainel] = useState(new Date())
     const [audioYoutubeAtivo, setAudioYoutubeAtivo] = useState(false)
     const [midiasComErro, setMidiasComErro] = useState<string[]>([])
+    const [temperaturaAtual, setTemperaturaAtual] = useState<number | null>(null)
+    const [codigoClimaAtual, setCodigoClimaAtual] = useState<number | null>(null)
+    const [erroClima, setErroClima] = useState(false)
+    const [logo, setLogo] = useState("")
+    const [mostrarLogoFaixaPainel, setMostrarLogoFaixaPainel] = useState(false)
 
     const timeoutAvancoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const timeoutRecarregarVideoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -67,6 +74,35 @@ export default function BannerRotativo({
         const intervalo = setInterval(() => {
             setAgoraPainel(new Date())
         }, 10000)
+
+        return () => clearInterval(intervalo)
+    }, [])
+
+    useEffect(() => {
+        async function buscarClima() {
+            try {
+                setErroClima(false)
+
+                const resposta = await fetch(
+                    "https://api.open-meteo.com/v1/forecast?latitude=-8.05&longitude=-34.9&current=temperature_2m,weather_code&timezone=America%2FRecife"
+                )
+
+                if (!resposta.ok) {
+                    throw new Error("Erro ao buscar clima")
+                }
+
+                const dados = await resposta.json()
+
+                setTemperaturaAtual(Math.round(dados.current.temperature_2m))
+                setCodigoClimaAtual(dados.current.weather_code)
+            } catch {
+                setErroClima(true)
+            }
+        }
+
+        buscarClima()
+
+        const intervalo = setInterval(buscarClima, 30 * 60 * 1000)
 
         return () => clearInterval(intervalo)
     }, [])
@@ -87,6 +123,23 @@ export default function BannerRotativo({
         })
 
         return () => unsubscribe()
+    }, [])
+
+    useEffect(() => {
+        async function carregarConfiguracoes() {
+            const documento = await getDoc(
+                doc(db, "configuracoes", "geral")
+            )
+
+            if (documento.exists()) {
+                const dados = documento.data()
+
+                setLogo(dados.logo || "")
+                setMostrarLogoFaixaPainel(dados.mostrarLogoFaixaPainel ?? false)
+            }
+        }
+
+        carregarConfiguracoes()
     }, [])
 
     useEffect(() => {
@@ -385,6 +438,33 @@ export default function BannerRotativo({
         return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${audioAtivo ? "0" : "1"}&playsinline=1&rel=0&enablejsapi=1`
     }
 
+    function obterIconeClima(codigo: number | null) {
+        if (codigo === null) return "🌤️"
+
+        if (codigo === 0) return "☀️"
+        if ([1, 2, 3].includes(codigo)) return "🌤️"
+        if ([45, 48].includes(codigo)) return "🌫️"
+        if ([51, 53, 55, 56, 57].includes(codigo)) return "🌦️"
+        if ([61, 63, 65, 66, 67, 80, 81, 82].includes(codigo)) return "🌧️"
+        if ([95, 96, 99].includes(codigo)) return "⛈️"
+
+        return "🌤️"
+    }
+
+    function obterDescricaoClima(codigo: number | null) {
+        if (codigo === null) return "Tempo estável"
+
+        if (codigo === 0) return "Ensolarado"
+        if ([1, 2, 3].includes(codigo)) return "Parcialmente nublado"
+        if ([45, 48].includes(codigo)) return "Neblina"
+        if ([51, 53, 55, 56, 57].includes(codigo)) return "Garoa"
+        if ([61, 63, 65, 66, 67].includes(codigo)) return "Chuva"
+        if ([80, 81, 82].includes(codigo)) return "Pancadas de chuva"
+        if ([95, 96, 99].includes(codigo)) return "Tempestade"
+
+        return "Tempo estável"
+    }
+
     useEffect(() => {
         if (!midiaAtual) return
         if (midias.length <= 1) return
@@ -480,6 +560,158 @@ export default function BannerRotativo({
     const animacaoImagemInstitucional = possuiRotacao
         ? "scale-[1.02] animate-[zoomBanner_24s_linear_infinite]"
         : ""
+
+    if (templateAtual === "painel") {
+        const horaPainel = agoraPainel.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit"
+        })
+
+        const dataPainel = agoraPainel.toLocaleDateString("pt-BR", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long"
+        })
+
+        const textoFaixa =
+            midiaAtual.mostrarTarja
+                ? `${midiaAtual.tarjaEtiqueta || "ADUSEPS"} ${midiaAtual.tarjaTitulo || midiaAtual.titulo || ""} ${midiaAtual.tarjaSubtitulo || midiaAtual.subtitulo || ""}`
+                : midiaAtual.rodape ||
+                midiaAtual.titulo ||
+                "ADUSEPS • Informação, acolhimento e defesa do associado"
+
+        return (
+            <div className="absolute inset-0 overflow-hidden bg-[#58c9f3]">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#7de2ff] via-[#4fc3ef] to-[#218bd6]" />
+
+                <div className="relative z-10 grid h-[calc(100vh-clamp(78px,9vh,108px))] w-full grid-cols-[clamp(230px,23vw,390px)_minmax(0,1fr)] gap-0 p-0">
+                    <aside className="relative flex h-full flex-col overflow-hidden rounded-none border-r border-white/15 bg-[#0d5cff]/55 p-5 text-white backdrop-blur-md">
+
+                        <div className="absolute inset-0 bg-gradient-to-b from-[#7de2ff]/45 via-[#0d5cff]/35 to-[#063ea8]/75" />
+                        <div className="absolute -left-16 top-10 h-48 w-48 rounded-full bg-white/20 blur-3xl" />
+                        <div className="absolute bottom-20 right-[-70px] h-56 w-56 rounded-full bg-[#7de2ff]/25 blur-3xl" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_42%)]" />
+
+
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/10 to-[#0d5cff]/20" />
+
+                        <div className="relative z-10 flex h-full flex-col pt-15">
+                            <div className="text-center">
+                                <p className="text-[clamp(0.65rem,1vw,1rem)] font-black uppercase tracking-[0.25em] text-white/75">
+                                    Previsão do tempo
+                                </p>
+
+                                <div className="mt-4 text-[clamp(3.5rem,6vw,6.2rem)] leading-none drop-shadow-xl">
+                                    {obterIconeClima(codigoClimaAtual)}
+                                </div>
+
+                                <div className="mt-4 flex items-end justify-center gap-2">
+                                    <span className="text-[clamp(4.5rem,7vw,7rem)] font-black leading-none">
+                                        {erroClima || temperaturaAtual === null ? "--" : temperaturaAtual}
+                                    </span>
+                                    <span className="mb-3 text-[clamp(1.8rem,2.6vw,3rem)] font-black">°C</span>
+                                </div>
+
+                                <p className="mt-4 text-[clamp(1.2rem,1.7vw,2rem)] font-black">
+                                    Recife
+                                </p>
+
+                                <p className="mt-1 text-[clamp(0.95rem,1.35vw,1.45rem)] font-semibold text-white/85">
+                                    {erroClima ? "Clima indisponível" : obterDescricaoClima(codigoClimaAtual)}
+                                </p>
+                            </div>
+
+                            <div className="mt-auto grid gap-4">
+                                <div className="rounded-[1.4rem] bg-black/15 p-4 text-center">
+                                    <p className="text-[clamp(0.65rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.20em] text-white/70">
+                                        Data
+                                    </p>
+                                    <p className="mt-2 text-[clamp(1rem,1.55vw,1.75rem)] font-black capitalize leading-tight">
+                                        {dataPainel}
+                                    </p>
+                                </div>
+
+                                <div className="rounded-[1.4rem] bg-black/15 p-4 text-center">
+                                    <p className="text-[clamp(0.65rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.20em] text-white/70">
+                                        Hora
+                                    </p>
+                                    <p className="mt-2 text-[clamp(2.4rem,4vw,4.2rem)] font-black leading-none">
+                                        {horaPainel}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <main
+                        className="relative h-full min-w-0 overflow-hidden rounded-none border border-white/10 border-l-white/20 bg-[#0F172A]"
+                        style={{
+                            boxShadow:
+                                "inset 0 1px 0 rgba(255,255,255,.10), 0 8px 30px rgba(0,0,0,.18)"
+                        }}
+                    >
+
+                        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-white/10 via-transparent to-[#0d5cff]/15" />
+                        {midiaAtual.tipo === "imagem" ? (
+                            <img
+                                key={chaveMidiaAtual}
+                                src={midiaAtual.arquivo}
+                                alt="Mídia principal"
+                                onError={(e) => lidarComErroImagem(e.currentTarget)}
+                                className={`h-full w-full object-contain relative z-0 ${animacaoImagemInformativa}`}
+                            />
+                        ) : (
+                            <video
+                                key={chaveMidiaAtual}
+                                src={midiaAtual.arquivo}
+                                autoPlay
+                                muted
+                                playsInline
+                                preload="metadata"
+                                className="h-full w-full object-contain relative z-0"
+                                onError={(e) => lidarComErroVideo(e.currentTarget)}
+                                onEnded={(e) => reiniciarOuAvancarVideo(e.currentTarget)}
+                            />
+                        )}
+                    </main>
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 z-20 grid h-[clamp(78px,9vh,108px)] grid-cols-[clamp(130px,15vw,210px)_minmax(0,1fr)_clamp(105px,12vw,170px)] items-center overflow-hidden bg-gradient-to-r from-[#063ea8] via-[#0d5cff] to-[#063ea8] px-0 text-white shadow-[0_-18px_60px_rgba(0,0,0,0.28)]">
+
+                    <div className="min-w-0 h-full w-full truncate bg-white px-[clamp(0.65rem,1.4vw,1.25rem)] py-3 text-center text-[clamp(0.75rem,1.3vw,1.15rem)] font-black uppercase tracking-[0.10em] text-[#0d5cff] flex items-center justify-center">
+                        {mostrarLogoFaixaPainel && logo ? (
+                            <img
+                                src={logo.startsWith("/") || logo.startsWith("http") ? logo : `/${logo}`}
+                                alt="Logo"
+                                className="max-h-full max-w-[70%] object-contain"
+                            />
+                        ) : (
+                            <span className="truncate">
+                                {midiaAtual.mostrarTarja
+                                    ? midiaAtual.tarjaEtiqueta || "Informe"
+                                    : midiaAtual.categoria || "ADUSEPS"}
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate text-[clamp(1.4rem,2.5vw,2.6rem)] font-black leading-tight pl-4">
+                            {textoFaixa}
+                        </p>
+                    </div>
+
+                    <div className="ml-8 text-right pr-4">
+                        <p className="text-4xl font-black leading-none">
+                            {horaPainel}
+                        </p>
+                        <p className="mt-1 text-sm font-bold uppercase tracking-[0.20em] text-white/75">
+                            Recife
+                        </p>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     if (templateAtual === "informativo") {
         return (

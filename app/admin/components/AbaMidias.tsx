@@ -5,7 +5,12 @@ type Props = {
     midias: any[]
     arquivo: string
     tipo: "imagem" | "video" | "youtube"
-    template: "cheio" | "informativo" | "institucional" | "urgente"
+    template:
+    | "cheio"
+    | "informativo"
+    | "institucional"
+    | "urgente"
+    | "painel"
 
     tituloMidia: string
     subtituloMidia: string
@@ -36,7 +41,7 @@ type Props = {
     setArquivo: (valor: string) => void
     setTipo: (valor: "imagem" | "video" | "youtube") => void
     setTemplate: (
-        valor: "cheio" | "informativo" | "institucional" | "urgente"
+    valor: "cheio" | "informativo" | "institucional" | "urgente" | "painel"
     ) => void
 
     modeloTarjaMidia: "telejornal" | "compacta" | "live" | "infobar" | "digital"
@@ -226,6 +231,7 @@ export default function AbaMidias({
                                     | "informativo"
                                     | "institucional"
                                     | "urgente"
+                                    | "painel"
                                 )
                             }
                             className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
@@ -234,6 +240,7 @@ export default function AbaMidias({
                             <option value="informativo">Informativo</option>
                             <option value="institucional">Institucional</option>
                             <option value="urgente">Urgente</option>
+                            <option value="painel">Painel informativo</option>
                         </select>
                     )}
 
@@ -292,7 +299,7 @@ export default function AbaMidias({
                         Adicionar mídia
                     </button>
 
-                    {(template === "institucional" || template === "urgente") && (
+                    {(template === "institucional" || template === "urgente" || template === "painel") && (
                         <div className="md:col-span-4 mt-2 grid grid-cols-1 gap-4">
                             <input
                                 type="text"

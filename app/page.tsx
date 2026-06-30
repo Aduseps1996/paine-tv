@@ -231,7 +231,7 @@ export default function Home() {
                 className={`flex ${tamanhoLogoClasse} items-center justify-center rounded-xl ${modoLogoClasse}`}
               >
                 <Image
-                  src={logo}
+                  src={logo.startsWith("/") || logo.startsWith("http") ? logo : `/${logo}`}
                   alt="Logo ADUSEPS"
                   width={120}
                   height={120}
