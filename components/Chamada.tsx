@@ -49,7 +49,7 @@ export default function Chamada({
                 Identificação
               </p>
 
-              <p className="text-[clamp(5rem,10vw,10rem)] font-black text-white leading-none">
+              <p className="text-[clamp(3rem,6vw,6rem)] font-black text-white leading-none">
                 {matricula}
               </p>
             </div>
