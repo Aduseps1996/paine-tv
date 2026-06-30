@@ -584,8 +584,8 @@ export default function BannerRotativo({
             <div className="absolute inset-0 overflow-hidden bg-[#58c9f3]">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#7de2ff] via-[#4fc3ef] to-[#218bd6]" />
 
-                <div className="relative z-10 grid h-[calc(100vh-clamp(78px,9vh,108px))] w-full grid-cols-[clamp(230px,23vw,390px)_minmax(0,1fr)] gap-0 p-0">
-                    <aside className="relative flex h-full flex-col overflow-hidden rounded-none border-r border-white/15 bg-[#0d5cff]/55 p-5 text-white backdrop-blur-md">
+                <div className="relative z-10 grid h-[calc(100vh-clamp(78px,9vh,108px))] w-full grid-cols-[clamp(260px,24vw,420px)_minmax(0,1fr)] gap-0 p-0">
+                    <aside className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-none border-r border-white/15 bg-[#0d5cff]/55 px-[clamp(0.9rem,1.4vw,1.4rem)] py-[clamp(0.75rem,1.2vh,1.2rem)] text-white backdrop-blur-md">
 
                         <div className="absolute inset-0 bg-gradient-to-b from-[#7de2ff]/45 via-[#0d5cff]/35 to-[#063ea8]/75" />
                         <div className="absolute -left-16 top-10 h-48 w-48 rounded-full bg-white/20 blur-3xl" />
@@ -595,7 +595,7 @@ export default function BannerRotativo({
 
                         <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/10 to-[#0d5cff]/20" />
 
-                        <div className="relative z-10 flex h-full flex-col pt-5">
+                        <div className="relative z-10 flex h-full min-h-0 flex-col justify-between">
                             <div className="text-center">
                                 <p className="text-[clamp(0.65rem,1vw,1rem)] font-black uppercase tracking-[0.25em] text-white/75">
                                     Previsão do tempo
@@ -621,8 +621,8 @@ export default function BannerRotativo({
                                 </p>
                             </div>
 
-                            <div className="mt-auto grid gap-4">
-                                <div className="rounded-[1.4rem] bg-black/15 p-4 text-center">
+                            <div className="grid gap-[clamp(0.45rem,1vh,0.9rem)]">
+                                <div className="bg-black/15 px-3 py-[clamp(0.55rem,1vh,0.9rem)] text-center">
                                     <p className="text-[clamp(0.65rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.20em] text-white/70">
                                         Data
                                     </p>
@@ -631,7 +631,7 @@ export default function BannerRotativo({
                                     </p>
                                 </div>
 
-                                <div className="rounded-[1.4rem] bg-black/15 p-10 text-center">
+                                <div className="bg-black/15 px-3 py-[clamp(0.65rem,1.2vh,1rem)] text-center">
                                     <p className="text-[clamp(0.65rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.20em] text-white/70">
                                         Hora
                                     </p>
