@@ -25,6 +25,7 @@ type Midia = {
     pesoExibicao?: number
 
     template?: "cheio" | "informativo" | "institucional" | "urgente" | "painel"
+    modoExibicao?: "cover" | "contain"
     titulo?: string
     subtitulo?: string
     rodape?: string
@@ -658,6 +659,7 @@ export default function BannerRotativo({
                             src={midiaAtual.arquivo}
                             alt="Mídia principal"
                             fallback={fallback}
+                            modoExibicao={midiaAtual.modoExibicao || "cover"}
                             className={`relative z-0 ${midiaAtual.tipo === "imagem" ? animacaoImagemInformativa : ""}`}
                             onErro={() => marcarMidiaComErro(midiaAtual)}
                             onVideoEnded={reiniciarOuAvancarVideo}

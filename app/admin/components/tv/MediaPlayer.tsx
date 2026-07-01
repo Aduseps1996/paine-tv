@@ -15,6 +15,7 @@ type MediaPlayerProps = {
   alt?: string
   className?: string
   fallback?: string
+  modoExibicao?: "cover" | "contain"
   onErro?: () => void
   onVideoEnded?: (video: HTMLVideoElement) => void
 }
@@ -25,12 +26,16 @@ export default function MediaPlayer({
   alt = "Mídia",
   className = "",
   fallback = "",
+  modoExibicao = "cover",
   onErro,
   onVideoEnded
 }: MediaPlayerProps) {
   const [midiaAtual, setMidiaAtual] = useState<MidiaRender>({ tipo, src })
   const [proximaMidia, setProximaMidia] = useState<MidiaRender | null>(null)
   const [mostrarProxima, setMostrarProxima] = useState(false)
+
+  const classeModoExibicao =
+    modoExibicao === "contain" ? "object-contain" : "object-cover"
 
   useEffect(() => {
     if (!src || src === midiaAtual.src) return
@@ -65,7 +70,7 @@ export default function MediaPlayer({
         ? "opacity-100"
         : "opacity-0"
 
-    const classeFinal = `absolute inset-0 h-full w-full object-contain transition-opacity duration-700 ${opacidade} ${className}`
+    const classeFinal = `absolute inset-0 h-full w-full ${classeModoExibicao} transition-opacity duration-700 ${opacidade} ${className}`
 
     if (midia.tipo === "imagem") {
       return (
@@ -113,7 +118,6 @@ export default function MediaPlayer({
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#0F172A]">
       {renderizarMidia(midiaAtual, "atual")}
-
       {proximaMidia && renderizarMidia(proximaMidia, "proxima")}
     </div>
   )

@@ -40,7 +40,11 @@ type Midia = {
     ativo: boolean
     ordem: number
     duracao: number
+
     template?: "cheio" | "informativo" | "institucional" | "urgente" | "painel"
+
+    modoExibicao?: "cover" | "contain"
+
     titulo?: string
     subtitulo?: string
     rodape?: string
@@ -163,6 +167,9 @@ export default function AdminPage() {
     const [programarExibicaoNovaMidia, setProgramarExibicaoNovaMidia] = useState(false)
     const [inicioExibicaoNovaMidia, setInicioExibicaoNovaMidia] = useState("")
     const [fimExibicaoNovaMidia, setFimExibicaoNovaMidia] = useState("")
+
+    const [modoExibicao, setModoExibicao] =
+    useState<"cover" | "contain">("cover")
 
     // Funções de carregamento de dados do Firebase
     async function carregarMidias() {
@@ -351,6 +358,7 @@ export default function AdminPage() {
             ordem: midias.length + 1,
             duracao: 8,
             template,
+            modoExibicao,
 
             titulo: tituloMidia.trim(),
             subtitulo: subtituloMidia.trim(),
@@ -703,6 +711,8 @@ export default function AdminPage() {
                     categoriaMidia={categoriaMidia}
                     ctaMidia={ctaMidia}
                     setArquivo={setArquivo}
+                    modoExibicao={modoExibicao}
+                    setModoExibicao={setModoExibicao}
                     setTipo={setTipo}
                     setTemplate={setTemplate}
                     setTituloMidia={setTituloMidia}

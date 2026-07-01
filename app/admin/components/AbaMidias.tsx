@@ -19,6 +19,9 @@ type Props = {
     categoriaMidia: string
     ctaMidia: string
 
+    modoExibicao: "cover" | "contain"
+    setModoExibicao: (valor: "cover" | "contain") => void
+
     programarExibicaoNovaMidia: boolean
     setProgramarExibicaoNovaMidia: (valor: boolean) => void
     inicioExibicaoNovaMidia: string
@@ -144,6 +147,9 @@ export default function AbaMidias({
     const [fimExibicao, setFimExibicao] = useState("")
     const [linkYoutubeExibicao, setLinkYoutubeExibicao] = useState("")
 
+    const [modoExibicao, setModoExibicao] =
+    useState<"cover" | "contain">("cover")
+
     useEffect(() => {
         if (!midiaEditando) return
 
@@ -162,6 +168,7 @@ export default function AbaMidias({
         setTempoInicialTarjaMidia(Number(m.tempoInicialTarja || 1))
         setModeloTarjaMidia(m.modeloTarja || "telejornal")
         setTarjaQrcodeMidia(m.qrcode || "")
+        setModoExibicao(m.modoExibicao ?? "cover")
     }, [midiaEditando, midias])
 
     function abrirModalExibicao(midia: any) {
@@ -222,27 +229,47 @@ export default function AbaMidias({
                     </select>
 
                     {tipo !== "youtube" && (
-                        <select
-                            value={template}
-                            onChange={(e) =>
-                                setTemplate(
-                                    e.target.value as
-                                    | "cheio"
-                                    | "informativo"
-                                    | "institucional"
-                                    | "urgente"
-                                    | "painel"
-                                )
-                            }
-                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-                        >
-                            <option value="cheio">Banner cheio</option>
-                            <option value="informativo">Informativo</option>
-                            <option value="institucional">Institucional</option>
-                            <option value="urgente">Urgente</option>
-                            <option value="painel">Painel informativo</option>
-                        </select>
-                    )}
+    <div className="grid gap-3">
+        <select
+            value={template}
+            onChange={(e) =>
+                setTemplate(
+                    e.target.value as
+                        | "cheio"
+                        | "informativo"
+                        | "institucional"
+                        | "urgente"
+                        | "painel"
+                )
+            }
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+        >
+            <option value="cheio">Banner cheio</option>
+            <option value="informativo">Informativo</option>
+            <option value="institucional">Institucional</option>
+            <option value="urgente">Urgente</option>
+            <option value="painel">Painel informativo</option>
+        </select>
+
+        <select
+            value={modoExibicao}
+            onChange={(e) =>
+                setModoExibicao(
+                    e.target.value as "cover" | "contain"
+                )
+            }
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+        >
+            <option value="cover">
+                Preencher espaço (recomendado)
+            </option>
+
+            <option value="contain">
+                Mostrar mídia inteira
+            </option>
+        </select>
+    </div>
+)}
 
                     <div className="sm:col-span-2 rounded-2xl border border-zinc-700 bg-zinc-800/70 p-4 space-y-4">
                         <label className="flex items-center gap-3">
