@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore"
 
 import { db } from "../lib/firebase"
+import MediaPlayer from "@/app/admin/components/tv/MediaPlayer"
 
 type Midia = {
     id?: string
@@ -652,27 +653,15 @@ export default function BannerRotativo({
                     >
 
                         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-white/10 via-transparent to-[#0d5cff]/15" />
-                        {midiaAtual.tipo === "imagem" ? (
-                            <img
-                                key={chaveMidiaAtual}
-                                src={midiaAtual.arquivo}
-                                alt="Mídia principal"
-                                onError={(e) => lidarComErroImagem(e.currentTarget)}
-                                className={`h-full w-full object-contain relative z-0 ${animacaoImagemInformativa}`}
-                            />
-                        ) : (
-                            <video
-                                key={chaveMidiaAtual}
-                                src={midiaAtual.arquivo}
-                                autoPlay
-                                muted
-                                playsInline
-                                preload="metadata"
-                                className="h-full w-full object-contain relative z-0"
-                                onError={(e) => lidarComErroVideo(e.currentTarget)}
-                                onEnded={(e) => reiniciarOuAvancarVideo(e.currentTarget)}
-                            />
-                        )}
+                        <MediaPlayer
+                            tipo={midiaAtual.tipo === "video" ? "video" : "imagem"}
+                            src={midiaAtual.arquivo}
+                            alt="Mídia principal"
+                            fallback={fallback}
+                            className={`relative z-0 ${midiaAtual.tipo === "imagem" ? animacaoImagemInformativa : ""}`}
+                            onErro={() => marcarMidiaComErro(midiaAtual)}
+                            onVideoEnded={reiniciarOuAvancarVideo}
+                        />
                     </main>
                 </div>
 
@@ -700,14 +689,15 @@ export default function BannerRotativo({
                         </p>
                     </div>
 
-                    <div className="ml-8 text-right pr-4">
+                    {/* Hora rodapé */}
+                    {/* <div className="ml-8 text-right pr-4">
                         <p className="text-4xl font-black leading-none">
                             {horaPainel}
                         </p>
                         <p className="mt-1 text-sm font-bold uppercase tracking-[0.20em] text-white/75">
                             Recife
                         </p>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         )

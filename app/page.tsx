@@ -224,7 +224,7 @@ export default function Home() {
         subtitulo.trim() !== ""
       ) && (
 
-          <div className="absolute top-[clamp(0.75rem,2vh,1.5rem)] left-[clamp(0.75rem,2vw,2rem)] z-10 flex items-center gap-[clamp(0.5rem,1.5vw,1rem)] rounded-2xl border border-white/10 bg-black/15 px-[clamp(0.75rem,2vw,1rem)] py-[clamp(0.5rem,1.5vh,0.75rem)] backdrop-blur-sm shadow-[0_14px_35px_rgba(0,0,0,0.30)]">
+          <div className="absolute top-[clamp(0.75rem,2vh,1.5rem)] left-[clamp(0.75rem,2vw,2rem)] z-10 flex items-center gap-[clamp(0.5rem,1.5vw,1rem)]">
 
             {logo.trim() !== "" && (
               <div
