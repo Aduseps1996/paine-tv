@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import {
     collection,
@@ -12,51 +12,15 @@ import {
 } from "firebase/firestore"
 
 import { db } from "../lib/firebase"
-import MediaPlayer from "@/app/admin/components/tv/MediaPlayer"
-
-type Midia = {
-    id?: string
-    tipo: "imagem" | "video" | "youtube"
-    arquivo: string
-    ativo: boolean
-    ordem: number
-    duracao: number
-
-    pesoExibicao?: number
-
-    template?: "cheio" | "informativo" | "institucional" | "urgente" | "painel"
-    modoExibicao?: "cover" | "contain"
-    titulo?: string
-    subtitulo?: string
-    rodape?: string
-    qrcode?: string
-    categoria?: string
-    cta?: string
-
-    exibicaoProgramada?: boolean
-    tipoExibicaoProgramada?: "midia" | "youtube"
-    inicioExibicao?: string
-    fimExibicao?: string
-    linkYoutubeExibicao?: string
-
-    mostrarTarja?: boolean
-    tarjaEtiqueta?: string
-    tarjaTitulo?: string
-    tarjaSubtitulo?: string
-    tempoEntradaTarja?: number
-    tempoVisivelTarja?: number
-    tempoSaidaTarja?: number
-    tempoOcultaTarja?: number
-    tempoInicialTarja?: number
-    modeloTarja?: "telejornal" | "compacta" | "live" | "infobar" | "digital"
-}
+import MediaPlayer from "@/components/tv/MediaPlayer"
+import type { Midia } from "@/types/painel"
 
 export default function BannerRotativo({
     fallback,
     onMidiaAtualChange
 }: {
     fallback: string
-    onMidiaAtualChange?: (midia: any) => void
+    onMidiaAtualChange?: (midia: Midia | null) => void
 }) {
     const [midiasBase, setMidiasBase] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
@@ -171,7 +135,7 @@ export default function BannerRotativo({
         })
     }
 
-    function midiaEstaDentroDoHorario(midia: Midia) {
+    const midiaEstaDentroDoHorario = useCallback((midia: Midia) => {
         if (!midia.exibicaoProgramada) return true
 
         if (!midia.inicioExibicao || !midia.fimExibicao) {
@@ -186,9 +150,9 @@ export default function BannerRotativo({
         }
 
         return agoraPainel >= inicio && agoraPainel <= fim
-    }
+    }, [agoraPainel])
 
-    function midiaPodeSerExibida(midia: Midia) {
+    const midiaPodeSerExibida = useCallback((midia: Midia) => {
         if (!midia.ativo) return false
 
         const ehMidiaYoutube =
@@ -220,7 +184,7 @@ export default function BannerRotativo({
         }
 
         return true
-    }
+    }, [midiaEstaDentroDoHorario])
 
     function montarListaInteligente(lista: Midia[]) {
         const fila = lista.map((midia) => ({
@@ -291,7 +255,7 @@ export default function BannerRotativo({
         return montarListaInteligente(
             listaParaUso.filter((midia) => midia.tipo !== "youtube")
         )
-    }, [midiasBase, agoraPainel, midiasComErro])
+    }, [midiasBase, midiasComErro, midiaPodeSerExibida])
 
     const assinaturaMidias = midias
         .map((midia) =>
@@ -314,12 +278,13 @@ export default function BannerRotativo({
 
     useEffect(() => {
         if (!ehYoutube) {
-            setAudioYoutubeAtivo(false)
+            const timeout = window.setTimeout(() => setAudioYoutubeAtivo(false), 0)
+            return () => window.clearTimeout(timeout)
         }
     }, [ehYoutube])
 
     useEffect(() => {
-        setIndiceAtual(0)
+        const timeout = window.setTimeout(() => setIndiceAtual(0), 0)
 
         if (timeoutAvancoRef.current) {
             clearTimeout(timeoutAvancoRef.current)
@@ -330,6 +295,8 @@ export default function BannerRotativo({
             clearTimeout(timeoutRecarregarVideoRef.current)
             timeoutRecarregarVideoRef.current = null
         }
+
+        return () => window.clearTimeout(timeout)
     }, [assinaturaMidias])
 
     useEffect(() => {
@@ -340,7 +307,7 @@ export default function BannerRotativo({
         }
     }, [midiaAtual, onMidiaAtualChange])
 
-    function avancarMidia() {
+    const avancarMidia = useCallback(() => {
         if (midias.length <= 1) return
 
         if (timeoutAvancoRef.current) {
@@ -353,7 +320,7 @@ export default function BannerRotativo({
                 return proximo >= midias.length ? 0 : proximo
             })
         }, 150)
-    }
+    }, [midias.length])
 
     function tentarRecarregarVideo(video: HTMLVideoElement) {
         if (timeoutRecarregarVideoRef.current) {
@@ -479,7 +446,7 @@ export default function BannerRotativo({
         }, duracaoSegura * 1000)
 
         return () => clearInterval(intervaloBanner)
-    }, [midiaAtual?.id, midias.length, assinaturaMidias])
+    }, [midiaAtual, midias.length, assinaturaMidias, avancarMidia])
 
     if (midias.length === 0 || !midiaAtual) {
         return (

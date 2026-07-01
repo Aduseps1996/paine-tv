@@ -1,19 +1,13 @@
-import { useEffect, useState } from "react"
+import type { Midia, Noticia } from "@/types/painel"
 
 type Props = {
-    midiaPreview: any
+    midiaPreview?: Midia
     logo: string
     nomePainel: string
     subtitulo: string
-    slogan: string
-    tamanhoFonteDataHora: number
-    tamanhoFonteHora: number
-    tamanhoFonteSlogan: number
-    tamanhoLogoRodape: number
     tamanhoFonteRodape: number
-    alturaBarraSuperior: number
     alturaBarraNoticias: number
-    noticiasAtivas: any[]
+    noticiasAtivas: Noticia[]
 }
 
 export default function AbaInicio({
@@ -21,51 +15,27 @@ export default function AbaInicio({
     logo,
     nomePainel,
     subtitulo,
-    slogan,
-    tamanhoFonteDataHora,
-    tamanhoFonteHora,
-    tamanhoFonteSlogan,
-    tamanhoLogoRodape,
     tamanhoFonteRodape,
-    alturaBarraSuperior,
     alturaBarraNoticias,
     noticiasAtivas
 }: Props) {
-    const [agora, setAgora] = useState(new Date())
-
-    useEffect(() => {
-        const relogio = setInterval(() => {
-            setAgora(new Date())
-        }, 1000)
-
-        return () => clearInterval(relogio)
-    }, [])
-
-    const hora = agora.toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit"
-    })
-
-    const data = agora.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
-    })
-
     return (
-        <div className="space-y-3 sm:space-y-6">
-            <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
+        <div className="space-y-4 sm:space-y-6">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:p-6">
+                <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-300">
+                    Visão geral
+                </div>
+                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
                     Painel ao vivo
                 </h1>
 
-                <p className="mt-2 text-zinc-400">
+                <p className="mt-2 max-w-2xl text-sm text-zinc-400 sm:text-base">
                     Pré-visualização em tempo real do painel institucional da TV.
                 </p>
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-                <h2 className="text-2xl font-bold mb-4">
+            <div className="rounded-[28px] border border-white/10 bg-zinc-900/80 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:p-6">
+                <h2 className="mb-4 text-2xl font-bold">
                     Prévia da TV
                 </h2>
 

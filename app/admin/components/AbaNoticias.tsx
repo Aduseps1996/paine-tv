@@ -1,9 +1,8 @@
-import { doc, updateDoc } from "firebase/firestore"
-
-type CategoriaNoticia = "normal" | "live" | "urgente" | "institucional"
+import type { CategoriaNoticia, Noticia, StatusVisual } from "@/types/painel"
+import { atualizarNoticia as atualizarNoticiaServico } from "@/lib/firestore/noticias"
 
 type Props = {
-    noticias: any[]
+    noticias: Noticia[]
     novaNoticia: string
     setNovaNoticia: (valor: string) => void
 
@@ -21,7 +20,6 @@ type Props = {
     categoriaNoticia: CategoriaNoticia
     setCategoriaNoticia: (valor: CategoriaNoticia) => void
 
-    db: any
 }
 
 export default function AbaNoticias({
@@ -40,16 +38,14 @@ export default function AbaNoticias({
     fimNoticia,
     setFimNoticia,
     categoriaNoticia,
-    setCategoriaNoticia,
-
-    db
+    setCategoriaNoticia
 }: Props) {
-    async function atualizarNoticia(id: string, dados: any) {
-        await updateDoc(doc(db, "noticias", id), dados)
+    async function atualizarNoticia(id: string, dados: Partial<Noticia>) {
+        await atualizarNoticiaServico(id, dados)
         carregarNoticias()
     }
 
-    function obterStatusNoticia(noticia: any) {
+    function obterStatusNoticia(noticia: Noticia): StatusVisual {
         if (!noticia.ativo) {
             return {
                 texto: "Inativa",
@@ -103,19 +99,22 @@ export default function AbaNoticias({
     }
 
     return (
-        <div className="space-y-3 sm:space-y-6">
-            <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
+        <div className="space-y-4 sm:space-y-6">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:p-6">
+                <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-300">
+                    Comunicação
+                </div>
+                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
                     Notícias do rodapé
                 </h1>
 
-                <p className="mt-2 text-zinc-400">
+                <p className="mt-2 max-w-2xl text-sm text-zinc-400 sm:text-base">
                     Cadastre e organize as mensagens exibidas no letreiro da TV.
                 </p>
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-                <h2 className="text-2xl font-bold mb-2">
+            <div className="rounded-[28px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:p-6">
+                <h2 className="mb-2 text-2xl font-bold">
                     Nova notícia
                 </h2>
 
@@ -270,7 +269,7 @@ export default function AbaNoticias({
 
                     <button
                         onClick={adicionarNoticia}
-                        className="rounded-xl bg-green-600 py-3 font-bold transition hover:bg-green-700"
+                        className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-4 py-3 font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:brightness-110"
                     >
                         Adicionar notícia
                     </button>
@@ -278,7 +277,7 @@ export default function AbaNoticias({
                 </div>
             </div>
 
-            <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <section className="rounded-[28px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:p-6">
                 <div className="mb-6">
                     <h2 className="text-2xl font-bold">
                         Notícias cadastradas
@@ -296,7 +295,7 @@ export default function AbaNoticias({
                         return (
                             <div
                                 key={noticia.id}
-                                className="rounded-2xl border border-zinc-700 bg-zinc-800/80 p-5 shadow-lg"
+                                className="rounded-[24px] border border-white/10 bg-zinc-800/70 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.22)]"
                             >
                                 <div className="mb-4 flex items-center justify-between gap-4">
                                     <div className="flex flex-wrap items-center gap-2">
@@ -346,7 +345,7 @@ export default function AbaNoticias({
                                                 if (!noticia.id) return
 
                                                 atualizarNoticia(noticia.id, {
-                                                    categoria: e.target.value
+                                                    categoria: e.target.value as CategoriaNoticia
                                                 })
                                             }}
                                             className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 outline-none"

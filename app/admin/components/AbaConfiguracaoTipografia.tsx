@@ -31,17 +31,20 @@ export default function AbaConfiguracaoTipografia({
 }: Props) {
     return (
         <div className="space-y-4 sm:space-y-6">
-            <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:p-6">
+                <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-300">
+                    Estilo
+                </div>
+                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
                     Tipografia e medidas
                 </h1>
 
-                <p className="mt-2 text-zinc-400">
+                <p className="mt-2 max-w-2xl text-sm text-zinc-400 sm:text-base">
                     Ajuste o tamanho dos textos, altura do rodapé e velocidade das notícias.
                 </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
+            <div className="rounded-[28px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:p-6">
                 <h2 className="mb-6 text-xl sm:text-2xl font-bold">
                     Configurações do rodapé
                 </h2>
@@ -240,7 +243,7 @@ export default function AbaConfiguracaoTipografia({
 
                 <button
                     onClick={salvarConfiguracoes}
-                    className="mt-6 w-full rounded-xl bg-blue-600 px-6 py-4 font-bold transition hover:bg-blue-700 sm:w-auto"
+                    className="mt-6 w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-6 py-4 font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110 sm:w-auto"
                 >
                     Salvar tipografia
                 </button>

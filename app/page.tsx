@@ -13,6 +13,8 @@ import {
 } from "firebase/firestore"
 
 import { db } from "../lib/firebase"
+import type { Midia } from "@/types/painel"
+import { useOnlineStatus } from "@/hooks/useOnlineStatus"
 
 
 export default function Home() {
@@ -21,7 +23,6 @@ export default function Home() {
   const [nomeAtual, setNomeAtual] = useState("Maria Silva")
   const [matriculaAtual, setMatriculaAtual] = useState("Matrícula 1548")
   const [guicheAtual, setGuicheAtual] = useState("Guichê 2")
-  const [chamadaAtiva, setChamadaAtiva] = useState(false)
   const ultimaChamadaIdRef = useRef("")
   const ultimaRepeticaoIdRef = useRef<number | null>(null)
   const [painelIniciadoEm] = useState(() => Date.now())
@@ -36,9 +37,9 @@ export default function Home() {
 
   const [slogan, setSlogan] = useState("Informação, acolhimento e compromisso com o associado.")
   const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
-  const [online, setOnline] = useState(true)
+  const online = useOnlineStatus()
 
-  const [midiaAtualTv, setMidiaAtualTv] = useState<any>(null)
+  const [midiaAtualTv, setMidiaAtualTv] = useState<Midia | null>(null)
 
   const tocarSomChamada = () => {
     try {
@@ -167,27 +168,6 @@ export default function Home() {
     return () => unsubscribe()
 
   }, [painelIniciadoEm])
-
-  /* Aviso offline */
-  useEffect(() => {
-    setOnline(navigator.onLine)
-
-    function ficouOnline() {
-      setOnline(true)
-    }
-
-    function ficouOffline() {
-      setOnline(false)
-    }
-
-    window.addEventListener("online", ficouOnline)
-    window.addEventListener("offline", ficouOffline)
-
-    return () => {
-      window.removeEventListener("online", ficouOnline)
-      window.removeEventListener("offline", ficouOffline)
-    }
-  }, [])
 
   const tamanhoLogoClasse =
     tamanhoLogoPainel === "pequeno"

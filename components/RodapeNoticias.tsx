@@ -11,20 +11,7 @@ import {
 } from "firebase/firestore"
 
 import { db } from "../lib/firebase"
-
-import { CalendarDays, Clock3 } from "lucide-react"
-
-type Noticia = {
-    id?: string
-    texto: string
-    ativo: boolean
-    ordem: number
-
-    programada?: boolean
-    inicioExibicao?: string
-    fimExibicao?: string
-    categoria?: "normal" | "live" | "urgente" | "institucional"
-}
+import type { Midia, Noticia } from "@/types/painel"
 
 export default function RodapeNoticias({
     logo,
@@ -33,22 +20,18 @@ export default function RodapeNoticias({
 }: {
     logo: string
     slogan: string
-    midiaAtual?: any
+    midiaAtual?: Midia | null
 }) {
     const [noticias, setNoticias] = useState<Noticia[]>([])
     const [agora, setAgora] = useState(new Date())
 
     const [tamanhoFonteRodape, setTamanhoFonteRodape] = useState(28)
     const [tamanhoFonteSlogan, setTamanhoFonteSlogan] = useState(18)
-    const [tamanhoFonteDataHora, setTamanhoFonteDataHora] = useState(18)
     const [tamanhoFonteHora, setTamanhoFonteHora] = useState(24)
-    const [tamanhoIconeRodape, setTamanhoIconeRodape] = useState(22)
-    const [alturaBarraSuperior, setAlturaBarraSuperior] = useState(64)
     const [alturaBarraNoticias, setAlturaBarraNoticias] = useState(44)
     const [duracaoAnimacaoNoticias, setDuracaoAnimacaoNoticias] = useState(150)
     const [tamanhoLogoRodape, setTamanhoLogoRodape] = useState(44)
 
-    const [mostrarTarjaTv, setMostrarTarjaTv] = useState(true)
     const [tempoEntradaTarja, setTempoEntradaTarja] = useState(1)
     const [tempoVisivelTarja, setTempoVisivelTarja] = useState(8)
     const [tempoSaidaTarja, setTempoSaidaTarja] = useState(1)
@@ -136,20 +119,8 @@ export default function RodapeNoticias({
                     limitarValor(dados.tamanhoFonteSlogan, 12, 60, 18)
                 )
 
-                setTamanhoFonteDataHora(
-                    limitarValor(dados.tamanhoFonteDataHora, 12, 60, 18)
-                )
-
                 setTamanhoFonteHora(
                     limitarValor(dados.tamanhoFonteHora, 12, 70, 24)
-                )
-
-                setTamanhoIconeRodape(
-                    limitarValor(dados.tamanhoIconeRodape, 14, 60, 22)
-                )
-
-                setAlturaBarraSuperior(
-                    limitarValor(dados.alturaBarraSuperior, 40, 120, 64)
                 )
 
                 setAlturaBarraNoticias(
@@ -172,7 +143,6 @@ export default function RodapeNoticias({
                     limitarValor(dados.tamanhoLogoRodape, 24, 100, 44)
                 )
 
-                setMostrarTarjaTv(dados.mostrarTarjaTv ?? true)
                 setMostrarRodapeNoticias(dados.mostrarRodapeNoticias ?? true)
 
                 setTempoEntradaTarja(Number(dados.tempoEntradaTarja || 1))
@@ -241,29 +211,30 @@ export default function RodapeNoticias({
             !mostrarTarjaFinal ||
             modeloTarjaFinal !== "telejornal"
         ) {
-            setMostrarQrTelejornal(false)
-            return
+            const timer = setTimeout(() => setMostrarQrTelejornal(false), 0)
+            return () => clearTimeout(timer)
         }
 
-        setMostrarQrTelejornal(false)
+        const timerReset = setTimeout(() => setMostrarQrTelejornal(false), 0)
 
         const timer = setTimeout(() => {
             setMostrarQrTelejornal(true)
         }, 5000)
 
-        return () => clearTimeout(timer)
+        return () => {
+            clearTimeout(timerReset)
+            clearTimeout(timer)
+        }
 
     }, [mostrarTarjaFinal, modeloTarjaFinal, midiaAtual?.id])
 
     useEffect(() => {
         if (!mostrarTarjaFinal) {
-            setFaseTarja("oculta")
-            return
+            const timer = setTimeout(() => setFaseTarja("oculta"), 0)
+            return () => clearTimeout(timer)
         }
 
         let ativo = true
-
-        setFaseTarja("oculta")
 
         function iniciarCiclo() {
             if (!ativo) return
@@ -305,10 +276,11 @@ export default function RodapeNoticias({
             }, tempoInicialTarjaFinal * 1000)
         }
 
-        iniciarCiclo()
+        const timerInicial = setTimeout(iniciarCiclo, 0)
 
         return () => {
             ativo = false
+            clearTimeout(timerInicial)
         }
     }, [
         mostrarTarjaFinal,

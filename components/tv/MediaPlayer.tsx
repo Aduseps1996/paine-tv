@@ -1,21 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import type { ModoExibicaoMidia } from "@/types/painel"
 
-type TipoMidia = "imagem" | "video"
+type TipoMidiaRender = "imagem" | "video"
 
 type MidiaRender = {
-  tipo: TipoMidia
+  tipo: TipoMidiaRender
   src: string
 }
 
 type MediaPlayerProps = {
-  tipo: TipoMidia
+  tipo: TipoMidiaRender
   src: string
   alt?: string
   className?: string
   fallback?: string
-  modoExibicao?: "cover" | "contain"
+  modoExibicao?: ModoExibicaoMidia
   onErro?: () => void
   onVideoEnded?: (video: HTMLVideoElement) => void
 }
@@ -40,8 +41,12 @@ export default function MediaPlayer({
   useEffect(() => {
     if (!src || src === midiaAtual.src) return
 
-    setProximaMidia({ tipo, src })
-    setMostrarProxima(false)
+    const timeout = window.setTimeout(() => {
+      setProximaMidia({ tipo, src })
+      setMostrarProxima(false)
+    }, 0)
+
+    return () => window.clearTimeout(timeout)
   }, [src, tipo, midiaAtual.src])
 
   function finalizarTroca() {

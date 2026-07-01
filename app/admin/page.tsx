@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 
@@ -10,568 +10,185 @@ import AbaNoticias from "./components/AbaNoticias"
 import AbaConfiguracaoPainel from "./components/AbaConfiguracaoPainel"
 import AbaConfiguracaoTipografia from "./components/AbaConfiguracaoTipografia"
 
-import {
-    collection,
-    addDoc,
-    getDocs,
-    getDoc,
-    setDoc,
-    serverTimestamp,
-    query,
-    orderBy,
-    deleteDoc,
-    doc,
-    updateDoc
-} from "firebase/firestore"
+import type { AbaAdmin } from "@/types/painel"
+import { useAdminAuth } from "@/hooks/admin/useAdminAuth"
+import { useAdminCollections } from "@/hooks/admin/useAdminCollections"
+import { useAdminPreview } from "@/hooks/admin/useAdminPreview"
+import { useAdminConfiguracoesPainel } from "@/hooks/admin/useAdminConfiguracoesPainel"
+import { useNovaMidiaForm } from "@/hooks/admin/useNovaMidiaForm"
+import { useNovaNoticiaForm } from "@/hooks/admin/useNovaNoticiaForm"
 
-import {
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-    signOut
-} from "firebase/auth"
-
-import { db, auth } from "../../lib/firebase"
-
-// Tipos usados para modelar os dados de mídia e notícias no painel.
-type Midia = {
-    id?: string
-    tipo: "imagem" | "video" | "youtube"
-    arquivo: string
-    ativo: boolean
-    ordem: number
-    duracao: number
-
-    template?: "cheio" | "informativo" | "institucional" | "urgente" | "painel"
-
-    modoExibicao?: "cover" | "contain"
-
-    titulo?: string
-    subtitulo?: string
-    rodape?: string
-    qrcode?: string
-    categoria?: string
-    cta?: string
-}
-
-type Noticia = {
-    id?: string
-    texto: string
-    ativo: boolean
-    ordem: number
-
-    programada?: boolean
-    inicioExibicao?: string
-    fimExibicao?: string
-    categoria?: "normal" | "live" | "urgente" | "institucional"
-}
-
-// Função auxiliar para manter valores numéricos dentro de limites seguros.
-const limitarValor = (
-    valor: number,
-    minimo: number,
-    maximo: number,
-    padrao: number
-) => {
-    if (Number.isNaN(valor)) return padrao
-    if (valor < minimo) return minimo
-    if (valor > maximo) return maximo
-    return valor
-}
-
-// Componente principal do painel administrativo.
-// Controla estado, autenticação e renderiza as abas de configuração, mídia e notícias.
 export default function AdminPage() {
-    // estado dos dados carregados do Firebase
-    const [midias, setMidias] = useState<Midia[]>([])
-    const [noticias, setNoticias] = useState<Noticia[]>([])
-
-    // campos específicos para template institucional de mídia
-    const [tituloMidia, setTituloMidia] = useState("")
-    const [subtituloMidia, setSubtituloMidia] = useState("")
-    const [rodapeMidia, setRodapeMidia] = useState("")
-    const [qrcodeMidia, setQrcodeMidia] = useState("")
-    const [categoriaMidia, setCategoriaMidia] = useState("")
-    const [ctaMidia, setCtaMidia] = useState("")
-
-    const [mostrarTarjaMidia, setMostrarTarjaMidia] = useState(false)
-    const [tarjaEtiquetaMidia, setTarjaEtiquetaMidia] = useState("ADUSEPS INFORMA")
-    const [tarjaTituloMidia, setTarjaTituloMidia] = useState("")
-    const [tarjaSubtituloMidia, setTarjaSubtituloMidia] = useState("")
-    const [tempoEntradaTarjaMidia, setTempoEntradaTarjaMidia] = useState(1)
-    const [tempoVisivelTarjaMidia, setTempoVisivelTarjaMidia] = useState(8)
-    const [tempoSaidaTarjaMidia, setTempoSaidaTarjaMidia] = useState(1)
-    const [tempoInicialTarjaMidia, setTempoInicialTarjaMidia] = useState(1)
-    const [tarjaQrcodeMidia, setTarjaQrcodeMidia] = useState("")
-
-    // campos do formulário para adicionar nova mídia e notícia
-    const [arquivo, setArquivo] = useState("")
-    const [tipo, setTipo] = useState<"imagem" | "video" | "youtube">("imagem")
-    const [template, setTemplate] = useState<
-        "cheio" | "informativo" | "institucional" | "urgente" | "painel"
-    >("cheio")
-    const [novaNoticia, setNovaNoticia] = useState("")
-
-    const [noticiaProgramada, setNoticiaProgramada] = useState(false)
-    const [inicioNoticia, setInicioNoticia] = useState("")
-    const [fimNoticia, setFimNoticia] = useState("")
-    const [categoriaNoticia, setCategoriaNoticia] =
-        useState<"normal" | "live" | "urgente" | "institucional">("normal")
-
-    const [modeloTarjaMidia, setModeloTarjaMidia] =
-        useState<"telejornal" | "compacta" | "live" | "infobar" | "digital">("telejornal")
-
-    // estado de autenticação do usuário
-    const [email, setEmail] = useState("")
-    const [senha, setSenha] = useState("")
-    const [logado, setLogado] = useState(false)
-
-    // configurações do painel institucional exibidas na prévia
-    const [nomePainel, setNomePainel] = useState("")
-    const [subtitulo, setSubtitulo] = useState("")
-    const [logo, setLogo] = useState("")
-    const [modoLogo, setModoLogo] =
-        useState<"transparente" | "fundo" | "card">("fundo")
-
-    const [tamanhoLogoPainel, setTamanhoLogoPainel] =
-        useState<"pequeno" | "medio" | "grande">("medio")
-    const [slogan, setSlogan] = useState("")
-
-
-    const [tamanhoFonteRodape, setTamanhoFonteRodape] = useState(28)
-    const [tamanhoFonteSlogan, setTamanhoFonteSlogan] = useState(18)
-    const [tamanhoFonteDataHora, setTamanhoFonteDataHora] = useState(18)
-    const [tamanhoFonteHora, setTamanhoFonteHora] = useState(24)
-    const [tamanhoIconeRodape, setTamanhoIconeRodape] = useState(22)
-    const [alturaBarraSuperior, setAlturaBarraSuperior] = useState(64)
-    const [alturaBarraNoticias, setAlturaBarraNoticias] = useState(44)
-    const [tamanhoLogoRodape, setTamanhoLogoRodape] = useState(44)
-    const [tempoOcultaTarja, setTempoOcultaTarja] = useState(10)
-
-    // configurações de fallback e tarja de TV
-    const [mostrarTarjaTv, setMostrarTarjaTv] = useState(true)
-    const [mostrarLogoFaixaPainel, setMostrarLogoFaixaPainel] = useState(false)
-    const [mostrarRodapeNoticias, setMostrarRodapeNoticias] = useState(true)
-
-    const [tempoEntradaTarja, setTempoEntradaTarja] = useState(1)
-    const [tempoVisivelTarja, setTempoVisivelTarja] = useState(8)
-    const [tempoSaidaTarja, setTempoSaidaTarja] = useState(1)
-    const [tempoOcultaTarjaMidia, setTempoOcultaTarjaMidia] = useState(10)
-
-    // controle de navegação entre abas e índice da pré-visualização
-    const [indicePreview, setIndicePreview] = useState(0)
-    const [abaAtiva, setAbaAtiva] = useState<
-        "inicio" | "midias" | "noticias" | "configuracao-painel" | "configuracao-tipografia"
-    >("inicio")
-    const [duracaoAnimacaoNoticias, setDuracaoAnimacaoNoticias] = useState(150)
-
-    const [programarExibicaoNovaMidia, setProgramarExibicaoNovaMidia] = useState(false)
-    const [inicioExibicaoNovaMidia, setInicioExibicaoNovaMidia] = useState("")
-    const [fimExibicaoNovaMidia, setFimExibicaoNovaMidia] = useState("")
-
-    const [modoExibicao, setModoExibicao] =
-    useState<"cover" | "contain">("cover")
-
-    // Funções de carregamento de dados do Firebase
-    async function carregarMidias() {
-        const consulta = query(
-            collection(db, "midias"),
-            orderBy("ordem", "asc")
-        )
-
-        const resultado = await getDocs(consulta)
-
-        const lista = resultado.docs.map((documento) => ({
-            id: documento.id,
-            ...documento.data()
-        })) as Midia[]
-
-        setMidias(lista)
-    }
-
-    // Carrega as notícias do Firebase e atualiza o estado local
-    async function carregarNoticias() {
-        const consulta = query(
-            collection(db, "noticias"),
-            orderBy("ordem", "asc")
-        )
-
-        const resultado = await getDocs(consulta)
-
-        const lista = resultado.docs.map((documento) => ({
-            id: documento.id,
-            ...documento.data()
-        })) as Noticia[]
-
-        setNoticias(lista)
-    }
-
-    // Carrega as configurações gerais do painel e normaliza os valores numéricos
-    async function carregarConfiguracoes() {
-        const documento = await getDoc(
-            doc(db, "configuracoes", "geral")
-        )
-
-        if (documento.exists()) {
-            const dados = documento.data()
-
-            setNomePainel(dados.nomePainel || "")
-            setSubtitulo(dados.subtitulo || "")
-            setLogo(dados.logo || "")
-            setModoLogo(dados.modoLogo || "fundo")
-            setTamanhoLogoPainel(dados.tamanhoLogoPainel || "medio")
-            setSlogan(dados.slogan || "")
-
-            setMostrarTarjaTv(dados.mostrarTarjaTv ?? true)
-            setMostrarLogoFaixaPainel(dados.mostrarLogoFaixaPainel ?? false)
-            setMostrarRodapeNoticias(dados.mostrarRodapeNoticias ?? true)
-
-            setTempoEntradaTarja(Number(dados.tempoEntradaTarja || 1))
-            setTempoVisivelTarja(Number(dados.tempoVisivelTarja || 8))
-            setTempoSaidaTarja(Number(dados.tempoSaidaTarja || 1))
-            setTempoOcultaTarja(Number(dados.tempoOcultaTarja || 10))
-
-            setTamanhoFonteRodape(
-                limitarValor(Number(dados.tamanhoFonteRodape || 28), 12, 80, 28)
-            )
-
-            setTamanhoFonteSlogan(
-                limitarValor(Number(dados.tamanhoFonteSlogan || 18), 12, 80, 18)
-            )
-
-            setTamanhoFonteDataHora(
-                limitarValor(Number(dados.tamanhoFonteDataHora || 18), 12, 80, 18)
-            )
-
-            setTamanhoFonteHora(
-                limitarValor(Number(dados.tamanhoFonteHora || 24), 12, 80, 24)
-            )
-
-            setTamanhoIconeRodape(
-                limitarValor(Number(dados.tamanhoIconeRodape || 22), 12, 80, 22)
-            )
-
-            setAlturaBarraSuperior(
-                limitarValor(Number(dados.alturaBarraSuperior || 64), 40, 120, 64)
-            )
-
-            setAlturaBarraNoticias(
-                limitarValor(Number(dados.alturaBarraNoticias || 44), 30, 100, 44)
-            )
-
-            setTamanhoLogoRodape(
-                limitarValor(Number(dados.tamanhoLogoRodape || 44), 20, 100, 44)
-            )
-
-            setDuracaoAnimacaoNoticias(
-                limitarValor(Number(dados.duracaoAnimacaoNoticias || 150), 60, 300, 150)
-            )
-        }
-    }
-
-    // Salva as configurações do painel no Firebase e atualiza o estado local
-    async function salvarConfiguracoes() {
-        const configuracoes = {
-            nomePainel,
-            subtitulo,
-            logo,
-            slogan,
-            modoLogo,
-            tamanhoLogoPainel,
-
-            mostrarTarjaTv,
-            mostrarLogoFaixaPainel,
-            mostrarRodapeNoticias,
-
-            tempoEntradaTarja,
-            tempoVisivelTarja,
-            tempoSaidaTarja,
-            tempoOcultaTarja,
-
-            tamanhoFonteRodape: limitarValor(tamanhoFonteRodape, 12, 80, 28),
-            tamanhoFonteSlogan: limitarValor(tamanhoFonteSlogan, 12, 80, 18),
-            tamanhoFonteDataHora: limitarValor(tamanhoFonteDataHora, 12, 80, 18),
-            tamanhoFonteHora: limitarValor(tamanhoFonteHora, 12, 80, 24),
-            tamanhoIconeRodape: limitarValor(tamanhoIconeRodape, 12, 80, 22),
-            alturaBarraSuperior: limitarValor(alturaBarraSuperior, 40, 120, 64),
-            alturaBarraNoticias: limitarValor(alturaBarraNoticias, 30, 100, 44),
-            tamanhoLogoRodape: limitarValor(tamanhoLogoRodape, 20, 100, 44),
-            duracaoAnimacaoNoticias: limitarValor(duracaoAnimacaoNoticias, 60, 300, 150)
-        }
-
-        await setDoc(
-            doc(db, "configuracoes", "geral"),
-            configuracoes,
-            { merge: true }
-        )
-
-        setTamanhoFonteRodape(configuracoes.tamanhoFonteRodape)
-        setTamanhoFonteSlogan(configuracoes.tamanhoFonteSlogan)
-        setTamanhoFonteDataHora(configuracoes.tamanhoFonteDataHora)
-        setTamanhoFonteHora(configuracoes.tamanhoFonteHora)
-        setTamanhoIconeRodape(configuracoes.tamanhoIconeRodape)
-        setAlturaBarraSuperior(configuracoes.alturaBarraSuperior)
-        setAlturaBarraNoticias(configuracoes.alturaBarraNoticias)
-        setDuracaoAnimacaoNoticias(configuracoes.duracaoAnimacaoNoticias)
-        setTamanhoLogoRodape(configuracoes.tamanhoLogoRodape)
-
-        alert("Configurações salvas!")
-    }
-
-    // Adiciona uma mídia nova à coleção e limpa o formulário
-    async function adicionarMidia() {
-        if (arquivo.trim() === "") return
-
-        if (tipo === "youtube") {
-            if (!inicioExibicaoNovaMidia || !fimExibicaoNovaMidia) {
-                alert("Informe a data/hora de início e fim da transmissão.")
-                return
-            }
-
-            const inicio = new Date(inicioExibicaoNovaMidia)
-            const fim = new Date(fimExibicaoNovaMidia)
-
-            if (fim <= inicio) {
-                alert("O fim da transmissão deve ser maior que o início.")
-                return
-            }
-        }
-
-        if (tipo !== "youtube" && programarExibicaoNovaMidia) {
-            if (!inicioExibicaoNovaMidia || !fimExibicaoNovaMidia) {
-                alert("Informe a data/hora de início e fim da exibição.")
-                return
-            }
-
-            const inicio = new Date(inicioExibicaoNovaMidia)
-            const fim = new Date(fimExibicaoNovaMidia)
-
-            if (fim <= inicio) {
-                alert("O fim da exibição deve ser maior que o início.")
-                return
-            }
-        }
-
-        await addDoc(collection(db, "midias"), {
-            tipo,
-            arquivo: arquivo.trim(),
-            ativo: true,
-            ordem: midias.length + 1,
-            duracao: 8,
-            template,
-            modoExibicao,
-
-            titulo: tituloMidia.trim(),
-            subtitulo: subtituloMidia.trim(),
-            rodape: rodapeMidia.trim(),
-            qrcode: qrcodeMidia.trim(),
-            categoria: categoriaMidia.trim(),
-            cta: ctaMidia.trim(),
-
-            tarjaEtiqueta: tarjaEtiquetaMidia.trim(),
-            tarjaTitulo: tarjaTituloMidia.trim(),
-            tarjaSubtitulo: tarjaSubtituloMidia.trim(),
-            tempoEntradaTarja: tempoEntradaTarjaMidia,
-            tempoVisivelTarja: tempoVisivelTarjaMidia,
-            tempoSaidaTarja: tempoSaidaTarjaMidia,
-            tempoOcultaTarja: tempoOcultaTarjaMidia,
-            tempoInicialTarja: tempoInicialTarjaMidia,
-            modeloTarja: modeloTarjaMidia,
-
-            exibicaoProgramada: tipo === "youtube" ? true : programarExibicaoNovaMidia,
-            tipoExibicaoProgramada: tipo === "youtube" ? "youtube" : "midia",
-            inicioExibicao: inicioExibicaoNovaMidia,
-            fimExibicao: fimExibicaoNovaMidia,
-            linkYoutubeExibicao: tipo === "youtube" ? arquivo.trim() : "",
-
-            mostrarTarja: mostrarTarjaMidia,
-            pesoExibicao: 1,
-
-            criadoEm: serverTimestamp()
-        })
-
-        setArquivo("")
-        setTipo("imagem")
-        setTemplate("cheio")
-
-        setTituloMidia("")
-        setSubtituloMidia("")
-        setRodapeMidia("")
-        setQrcodeMidia("")
-        setCtaMidia("")
-        setCategoriaMidia("")
-
-        setMostrarTarjaMidia(false)
-        setTarjaEtiquetaMidia("ADUSEPS INFORMA")
-        setTarjaTituloMidia("")
-        setTarjaSubtituloMidia("")
-        setTempoEntradaTarjaMidia(1)
-        setTempoVisivelTarjaMidia(8)
-        setTempoSaidaTarjaMidia(1)
-        setTempoInicialTarjaMidia(1)
-        setTempoOcultaTarjaMidia(10)
-        setModeloTarjaMidia("telejornal")
-
-        setProgramarExibicaoNovaMidia(false)
-        setInicioExibicaoNovaMidia("")
-        setFimExibicaoNovaMidia("")
-        setMostrarTarjaMidia(false)
-
-
-        carregarMidias()
-    }
-
-    // Adiciona uma notícia ao rodapé e atualiza a lista local
-    async function adicionarNoticia() {
-        if (novaNoticia.trim() === "") return
-
-        if (noticiaProgramada) {
-            if (!inicioNoticia || !fimNoticia) {
-                alert("Informe o início e o fim da notícia programada.")
-                return
-            }
-
-            const inicio = new Date(inicioNoticia)
-            const fim = new Date(fimNoticia)
-
-            if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
-                alert("Data/hora inválida.")
-                return
-            }
-
-            if (fim <= inicio) {
-                alert("O fim da notícia precisa ser maior que o início.")
-                return
-            }
-        }
-
-        await addDoc(collection(db, "noticias"), {
-            texto: novaNoticia.trim(),
-            ativo: true,
-            ordem: noticias.length + 1,
-
-            programada: noticiaProgramada,
-            inicioExibicao: noticiaProgramada ? inicioNoticia : "",
-            fimExibicao: noticiaProgramada ? fimNoticia : "",
-            categoria: categoriaNoticia,
-
-            criadoEm: serverTimestamp()
-        })
-
-        setNovaNoticia("")
-        setNoticiaProgramada(false)
-        setInicioNoticia("")
-        setFimNoticia("")
-        setCategoriaNoticia("normal")
-
-        carregarNoticias()
-    }
-
-    // Funções de exclusão e alternância de status de mídia e notícia
-    async function removerMidia(id: string) {
-        await deleteDoc(doc(db, "midias", id))
-        carregarMidias()
-    }
-
-    async function removerNoticia(id: string) {
-        await deleteDoc(doc(db, "noticias", id))
-        carregarNoticias()
-    }
-
-    async function alternarMidia(id: string, ativoAtual: boolean) {
-        await updateDoc(doc(db, "midias", id), {
-            ativo: !ativoAtual
-        })
-
-        carregarMidias()
-    }
-
-    async function alternarNoticia(id: string, ativoAtual: boolean) {
-        await updateDoc(doc(db, "noticias", id), {
-            ativo: !ativoAtual
-        })
-
-        carregarNoticias()
-    }
-
-    // Efeito inicial: carrega mídias, notícias e configurações ao montar o componente
-    useEffect(() => {
-        carregarMidias()
-        carregarNoticias()
-        carregarConfiguracoes()
-    }, [])
-
-    // Observa mudanças de autenticação para atualizar o estado de login
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (usuario) => {
-            setLogado(!!usuario)
-        })
-
-        return () => unsubscribe()
-    }, [])
-
-    // Dados derivados usados para pré-visualizar apenas itens ativos
-    const midiasAtivas = midias
-        .filter((midia) => midia.ativo)
-        .sort((a, b) => a.ordem - b.ordem)
-
-    const noticiasAtivas = noticias
-        .filter((noticia) => noticia.ativo)
-        .sort((a, b) => a.ordem - b.ordem)
-
-    const activeIds = midiasAtivas.map((midia) => midia.id).join(",")
-    const midiaPreview = midiasAtivas[indicePreview]
+    const {
+        email,
+        senha,
+        logado,
+        setEmail,
+        setSenha,
+        entrar,
+        sair
+    } = useAdminAuth()
+
+    const {
+        midias,
+        noticias,
+        carregarMidias,
+        carregarNoticias,
+        removerMidia,
+        removerNoticia,
+        alternarMidia,
+        alternarNoticia
+    } = useAdminCollections()
+
+    const {
+        nomePainel,
+        subtitulo,
+        logo,
+        modoLogo,
+        tamanhoLogoPainel,
+        slogan,
+        tamanhoFonteRodape,
+        tamanhoFonteSlogan,
+        tamanhoFonteHora,
+        alturaBarraNoticias,
+        tempoOcultaTarja,
+        mostrarLogoFaixaPainel,
+        mostrarRodapeNoticias,
+        tempoEntradaTarja,
+        tempoVisivelTarja,
+        tempoSaidaTarja,
+        duracaoAnimacaoNoticias,
+        mostrarTemperaturaPainel,
+        mostrarDescricaoClimaPainel,
+        mostrarCidadePainel,
+        mostrarDataPainel,
+        mostrarHoraPainel,
+        cidadeClimaPainel,
+        setNomePainel,
+        setSubtitulo,
+        setLogo,
+        setModoLogo,
+        setTamanhoLogoPainel,
+        setSlogan,
+        setTamanhoFonteRodape,
+        setTamanhoFonteSlogan,
+        setTamanhoFonteHora,
+        setAlturaBarraNoticias,
+        setTempoOcultaTarja,
+        setMostrarLogoFaixaPainel,
+        setMostrarRodapeNoticias,
+        setTempoEntradaTarja,
+        setTempoVisivelTarja,
+        setTempoSaidaTarja,
+        setDuracaoAnimacaoNoticias,
+        setMostrarTemperaturaPainel,
+        setMostrarDescricaoClimaPainel,
+        setMostrarCidadePainel,
+        setMostrarDataPainel,
+        setMostrarHoraPainel,
+        setCidadeClimaPainel,
+        carregarConfiguracoes,
+        salvarConfiguracoes
+    } = useAdminConfiguracoesPainel()
+
+    const {
+        arquivo,
+        tipo,
+        template,
+        modoExibicao,
+        tituloMidia,
+        subtituloMidia,
+        rodapeMidia,
+        qrcodeMidia,
+        categoriaMidia,
+        ctaMidia,
+        mostrarTarjaMidia,
+        tarjaEtiquetaMidia,
+        tarjaTituloMidia,
+        tarjaSubtituloMidia,
+        tempoEntradaTarjaMidia,
+        tempoVisivelTarjaMidia,
+        tempoSaidaTarjaMidia,
+        tempoOcultaTarjaMidia,
+        tempoInicialTarjaMidia,
+        modeloTarjaMidia,
+        tarjaQrcodeMidia,
+        programarExibicaoNovaMidia,
+        inicioExibicaoNovaMidia,
+        fimExibicaoNovaMidia,
+        setArquivo,
+        setTipo,
+        setTemplate,
+        setModoExibicao,
+        setTituloMidia,
+        setSubtituloMidia,
+        setRodapeMidia,
+        setQrcodeMidia,
+        setCategoriaMidia,
+        setCtaMidia,
+        setMostrarTarjaMidia,
+        setTarjaEtiquetaMidia,
+        setTarjaTituloMidia,
+        setTarjaSubtituloMidia,
+        setTempoEntradaTarjaMidia,
+        setTempoVisivelTarjaMidia,
+        setTempoSaidaTarjaMidia,
+        setTempoOcultaTarjaMidia,
+        setTempoInicialTarjaMidia,
+        setModeloTarjaMidia,
+        setTarjaQrcodeMidia,
+        setProgramarExibicaoNovaMidia,
+        setInicioExibicaoNovaMidia,
+        setFimExibicaoNovaMidia,
+        adicionarMidia
+    } = useNovaMidiaForm({
+        totalMidias: midias.length,
+        carregarMidias
+    })
+
+    const {
+        novaNoticia,
+        setNovaNoticia,
+        adicionarNoticia,
+        noticiaProgramada,
+        setNoticiaProgramada,
+        inicioNoticia,
+        setInicioNoticia,
+        fimNoticia,
+        setFimNoticia,
+        categoriaNoticia,
+        setCategoriaNoticia
+    } = useNovaNoticiaForm({
+        totalNoticias: noticias.length,
+        carregarNoticias
+    })
+
+    const [abaAtiva, setAbaAtiva] = useState<AbaAdmin>("inicio")
 
     useEffect(() => {
-        if (midiasAtivas.length === 0) {
-            setIndicePreview(0)
-            return
-        }
+        void Promise.resolve().then(carregarConfiguracoes)
+    }, [carregarConfiguracoes])
 
-        if (indicePreview >= midiasAtivas.length) {
-            setIndicePreview(0)
-        }
-    }, [activeIds, indicePreview, midiasAtivas.length])
+    const {
+        noticiasAtivas,
+        midiaPreview
+    } = useAdminPreview(midias, noticias)
 
-    // Efeito que alterna a pré-visualização de imagens automaticamente
-    useEffect(() => {
-        if (midiasAtivas.length === 0) return
-
-        const midiaAtual = midiasAtivas[indicePreview]
-
-        if (!midiaAtual) {
-            setIndicePreview(0)
-            return
-        }
-
-        if (midiaAtual.tipo !== "imagem") return
-
-        const intervalo = setInterval(() => {
-            setIndicePreview((indiceAtual) => {
-                const proximoIndice = indiceAtual + 1
-
-                if (proximoIndice >= midiasAtivas.length) {
-                    return 0
-                }
-
-                return proximoIndice
-            })
-        }, midiaAtual.duracao * 1000)
-
-        return () => clearInterval(intervalo)
-    }, [activeIds, indicePreview])
-
-    // Se o usuário não estiver logado, mostra o formulário de login
     if (!logado) {
         return (
-            <main className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-8">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 w-full max-w-md">
-                    <h1 className="text-3xl font-bold mb-2">
-                        Acesso administrativo
-                    </h1>
-
-                    <p className="text-zinc-400 mb-6">
-                        Digite suas credenciais para acessar o CMS.
-                    </p>
+            <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.24),_transparent_40%),linear-gradient(135deg,_#050816_0%,_#0f172a_50%,_#020617_100%)] p-4 text-white sm:p-8">
+                <div className="w-full max-w-md rounded-[28px] border border-white/10 bg-zinc-950/80 p-7 shadow-[0_24px_80px_rgba(0,0,0,0.36)] backdrop-blur-xl sm:p-8">
+                    <div className="mb-6">
+                        <div className="mb-4 inline-flex rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-300">
+                            Área restrita
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            Acesso administrativo
+                        </h1>
+                        <p className="mt-2 text-sm text-zinc-400">
+                            Digite suas credenciais para acessar o CMS do painel.
+                        </p>
+                    </div>
 
                     <input
                         type="email"
@@ -579,7 +196,7 @@ export default function AdminPage() {
                         autoCapitalize="none"
                         autoCorrect="off"
                         spellCheck={false}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none mb-4"
+                        className="mb-4 w-full rounded-2xl border border-white/10 bg-zinc-900/90 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-500"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
@@ -590,7 +207,7 @@ export default function AdminPage() {
                         autoCapitalize="none"
                         autoCorrect="off"
                         spellCheck={false}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none mb-4"
+                        className="mb-5 w-full rounded-2xl border border-white/10 bg-zinc-900/90 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-500"
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
                     />
@@ -598,16 +215,12 @@ export default function AdminPage() {
                     <button
                         onClick={async () => {
                             try {
-                                await signInWithEmailAndPassword(
-                                    auth,
-                                    email.trim(),
-                                    senha.trim()
-                                )
+                                await entrar()
                             } catch {
                                 alert("E-mail ou senha inválidos.")
                             }
                         }}
-                        className="w-full bg-blue-600 hover:bg-blue-700 transition rounded-xl font-bold py-3"
+                        className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110"
                     >
                         Entrar
                     </button>
@@ -616,12 +229,11 @@ export default function AdminPage() {
         )
     }
 
-    // Interface do painel administrativo após login
     return (
         <AdminLayout
             abaAtiva={abaAtiva}
             setAbaAtiva={setAbaAtiva}
-            sair={() => signOut(auth)}
+            sair={sair}
         >
 
             {abaAtiva === "configuracao-painel" && (
@@ -657,6 +269,19 @@ export default function AdminPage() {
                     setTempoSaidaTarja={setTempoSaidaTarja}
                     setTempoOcultaTarja={setTempoOcultaTarja}
 
+                    mostrarTemperaturaPainel={mostrarTemperaturaPainel}
+                    setMostrarTemperaturaPainel={setMostrarTemperaturaPainel}
+                    mostrarDescricaoClimaPainel={mostrarDescricaoClimaPainel}
+                    setMostrarDescricaoClimaPainel={setMostrarDescricaoClimaPainel}
+                    mostrarCidadePainel={mostrarCidadePainel}
+                    setMostrarCidadePainel={setMostrarCidadePainel}
+                    mostrarDataPainel={mostrarDataPainel}
+                    setMostrarDataPainel={setMostrarDataPainel}
+                    mostrarHoraPainel={mostrarHoraPainel}
+                    setMostrarHoraPainel={setMostrarHoraPainel}
+                    cidadeClimaPainel={cidadeClimaPainel}
+                    setCidadeClimaPainel={setCidadeClimaPainel}
+
                     salvarConfiguracoes={salvarConfiguracoes}
                 />
             )}
@@ -686,13 +311,7 @@ export default function AdminPage() {
                     logo={logo}
                     nomePainel={nomePainel}
                     subtitulo={subtitulo}
-                    slogan={slogan}
-                    tamanhoFonteDataHora={tamanhoFonteDataHora}
-                    tamanhoFonteHora={tamanhoFonteHora}
-                    tamanhoFonteSlogan={tamanhoFonteSlogan}
-                    tamanhoLogoRodape={tamanhoLogoRodape}
                     tamanhoFonteRodape={tamanhoFonteRodape}
-                    alturaBarraSuperior={alturaBarraSuperior}
                     alturaBarraNoticias={alturaBarraNoticias}
                     noticiasAtivas={noticiasAtivas}
                 />
@@ -725,7 +344,6 @@ export default function AdminPage() {
                     removerMidia={removerMidia}
                     alternarMidia={alternarMidia}
                     carregarMidias={carregarMidias}
-                    db={db}
 
                     programarExibicaoNovaMidia={programarExibicaoNovaMidia}
                     setProgramarExibicaoNovaMidia={setProgramarExibicaoNovaMidia}
@@ -770,7 +388,6 @@ export default function AdminPage() {
                     removerNoticia={removerNoticia}
                     alternarNoticia={alternarNoticia}
                     carregarNoticias={carregarNoticias}
-                    db={db}
 
                     noticiaProgramada={noticiaProgramada}
                     setNoticiaProgramada={setNoticiaProgramada}

@@ -33,6 +33,19 @@ type Props = {
 
     setMostrarLogoFaixaPainel: (valor: boolean) => void
     setMostrarRodapeNoticias: (valor: boolean) => void
+    setMostrarTemperaturaPainel: (valor: boolean) => void
+    setMostrarDescricaoClimaPainel: (valor: boolean) => void
+    setMostrarCidadePainel: (valor: boolean) => void
+    setMostrarDataPainel: (valor: boolean) => void
+    setMostrarHoraPainel: (valor: boolean) => void
+    setCidadeClimaPainel: (valor: string) => void
+
+    mostrarTemperaturaPainel: boolean
+    mostrarDescricaoClimaPainel: boolean
+    mostrarCidadePainel: boolean
+    mostrarDataPainel: boolean
+    mostrarHoraPainel: boolean
+    cidadeClimaPainel: string
 
     salvarConfiguracoes: () => void
 }
@@ -53,6 +66,12 @@ export default function AbaConfiguracaoPainel({
 
     mostrarLogoFaixaPainel,
     mostrarRodapeNoticias,
+    mostrarTemperaturaPainel,
+    mostrarDescricaoClimaPainel,
+    mostrarCidadePainel,
+    mostrarDataPainel,
+    mostrarHoraPainel,
+    cidadeClimaPainel,
 
     setNomePainel,
     setSubtitulo,
@@ -69,6 +88,13 @@ export default function AbaConfiguracaoPainel({
 
     setMostrarLogoFaixaPainel,
     setMostrarRodapeNoticias,
+
+    setMostrarTemperaturaPainel,
+    setMostrarDescricaoClimaPainel,
+    setMostrarCidadePainel,
+    setMostrarDataPainel,
+    setMostrarHoraPainel,
+    setCidadeClimaPainel,
 
     salvarConfiguracoes
 }: Props) {
@@ -88,12 +114,15 @@ export default function AbaConfiguracaoPainel({
 
     return (
         <div className="space-y-4 sm:space-y-6">
-            <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:p-6">
+                <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-300">
+                    Configuração
+                </div>
+                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
                     Configuração do painel
                 </h1>
 
-                <p className="mt-2 text-zinc-400">
+                <p className="mt-2 max-w-2xl text-sm text-zinc-400 sm:text-base">
                     Configure separadamente topo, logo, rodapé e tarjas da TV.
                 </p>
             </div>
@@ -174,8 +203,8 @@ export default function AbaConfiguracaoPainel({
                                 type="button"
                                 onClick={() => setModoLogo("transparente")}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "transparente"
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-zinc-700 bg-zinc-800 text-white"
                                     }`}
                             >
                                 Sem fundo
@@ -185,8 +214,8 @@ export default function AbaConfiguracaoPainel({
                                 type="button"
                                 onClick={() => setModoLogo("fundo")}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "fundo"
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-zinc-700 bg-zinc-800 text-white"
                                     }`}
                             >
                                 Fundo branco
@@ -196,8 +225,8 @@ export default function AbaConfiguracaoPainel({
                                 type="button"
                                 onClick={() => setModoLogo("card")}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "card"
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-zinc-700 bg-zinc-800 text-white"
                                     }`}
                             >
                                 Card discreto
@@ -215,8 +244,8 @@ export default function AbaConfiguracaoPainel({
                                 type="button"
                                 onClick={() => setTamanhoLogoPainel("pequeno")}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "pequeno"
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-zinc-700 bg-zinc-800 text-white"
                                     }`}
                             >
                                 Pequena
@@ -226,8 +255,8 @@ export default function AbaConfiguracaoPainel({
                                 type="button"
                                 onClick={() => setTamanhoLogoPainel("medio")}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "medio"
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-zinc-700 bg-zinc-800 text-white"
                                     }`}
                             >
                                 Média
@@ -237,8 +266,8 @@ export default function AbaConfiguracaoPainel({
                                 type="button"
                                 onClick={() => setTamanhoLogoPainel("grande")}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "grande"
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-zinc-700 bg-zinc-800 text-white"
                                     }`}
                             >
                                 Grande
@@ -308,6 +337,55 @@ export default function AbaConfiguracaoPainel({
                         className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                         placeholder="Ex: Informação e compromisso com o associado"
                     />
+                </div>
+            </section>
+
+            <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold">
+                    Painel Informativo
+                </h2>
+
+                <p className="mt-1 mb-5 text-sm text-zinc-400">
+                    Controle os elementos exibidos no template com clima, mídia principal e faixa inferior.
+                </p>
+
+                <div className="grid gap-3">
+                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
+                        <span>Mostrar temperatura</span>
+                        <input type="checkbox" checked={mostrarTemperaturaPainel} onChange={(e) => setMostrarTemperaturaPainel(e.target.checked)} />
+                    </label>
+
+                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
+                        <span>Mostrar descrição do clima</span>
+                        <input type="checkbox" checked={mostrarDescricaoClimaPainel} onChange={(e) => setMostrarDescricaoClimaPainel(e.target.checked)} />
+                    </label>
+
+                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
+                        <span>Mostrar cidade</span>
+                        <input type="checkbox" checked={mostrarCidadePainel} onChange={(e) => setMostrarCidadePainel(e.target.checked)} />
+                    </label>
+
+                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
+                        <span>Mostrar data</span>
+                        <input type="checkbox" checked={mostrarDataPainel} onChange={(e) => setMostrarDataPainel(e.target.checked)} />
+                    </label>
+
+                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
+                        <span>Mostrar hora</span>
+                        <input type="checkbox" checked={mostrarHoraPainel} onChange={(e) => setMostrarHoraPainel(e.target.checked)} />
+                    </label>
+
+                    <div>
+                        <label className="mb-2 block text-sm font-semibold text-zinc-300">
+                            Cidade exibida
+                        </label>
+
+                        <input
+                            value={cidadeClimaPainel}
+                            onChange={(e) => setCidadeClimaPainel(e.target.value)}
+                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
+                        />
+                    </div>
                 </div>
             </section>
 
@@ -419,7 +497,7 @@ export default function AbaConfiguracaoPainel({
 
             <button
                 onClick={salvarConfiguracoes}
-                className="w-full rounded-xl bg-blue-600 px-6 py-4 font-bold transition hover:bg-blue-700 sm:w-auto"
+                className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-6 py-4 font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110 sm:w-auto"
             >
                 Salvar configurações do painel
             </button>

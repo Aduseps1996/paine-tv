@@ -1,16 +1,12 @@
-import { doc, updateDoc } from "firebase/firestore"
-import { useState, useEffect } from "react"
+import type { Midia, ModeloTarja, ModoExibicaoMidia, TemplateMidia, TipoMidia } from "@/types/painel"
+import { atualizarMidia } from "@/lib/firestore/midias"
+import { useAbaMidiasModais } from "@/hooks/admin/useAbaMidiasModais"
 
 type Props = {
-    midias: any[]
+    midias: Midia[]
     arquivo: string
-    tipo: "imagem" | "video" | "youtube"
-    template:
-    | "cheio"
-    | "informativo"
-    | "institucional"
-    | "urgente"
-    | "painel"
+    tipo: TipoMidia
+    template: TemplateMidia
 
     tituloMidia: string
     subtituloMidia: string
@@ -19,8 +15,8 @@ type Props = {
     categoriaMidia: string
     ctaMidia: string
 
-    modoExibicao: "cover" | "contain"
-    setModoExibicao: (valor: "cover" | "contain") => void
+    modoExibicao: ModoExibicaoMidia
+    setModoExibicao: (valor: ModoExibicaoMidia) => void
 
     programarExibicaoNovaMidia: boolean
     setProgramarExibicaoNovaMidia: (valor: boolean) => void
@@ -42,15 +38,11 @@ type Props = {
     setTarjaQrcodeMidia: (valor: string) => void
 
     setArquivo: (valor: string) => void
-    setTipo: (valor: "imagem" | "video" | "youtube") => void
-    setTemplate: (
-    valor: "cheio" | "informativo" | "institucional" | "urgente" | "painel"
-    ) => void
+    setTipo: (valor: TipoMidia) => void
+    setTemplate: (valor: TemplateMidia) => void
 
-    modeloTarjaMidia: "telejornal" | "compacta" | "live" | "infobar" | "digital"
-    setModeloTarjaMidia: (
-        valor: "telejornal" | "compacta" | "live" | "infobar" | "digital"
-    ) => void
+    modeloTarjaMidia: ModeloTarja
+    setModeloTarjaMidia: (valor: ModeloTarja) => void
 
     setTituloMidia: (valor: string) => void
     setSubtituloMidia: (valor: string) => void
@@ -74,7 +66,6 @@ type Props = {
     setTempoOcultaTarjaMidia: (valor: number) => void
     setTempoInicialTarjaMidia: (valor: number) => void
 
-    db: any
 }
 
 /* Desestruturação */
@@ -83,6 +74,8 @@ export default function AbaMidias({
     arquivo,
     tipo,
     template,
+    modoExibicao,
+    setModoExibicao,
     tituloMidia,
     subtituloMidia,
     rodapeMidia,
@@ -133,73 +126,63 @@ export default function AbaMidias({
     modeloTarjaMidia,
     setModeloTarjaMidia,
     tarjaQrcodeMidia,
-    setTarjaQrcodeMidia,
-
-    db
+    setTarjaQrcodeMidia
 }: Props) {
-    const [modalTarjaAberto, setModalTarjaAberto] = useState(false)
-    const [midiaEditando, setMidiaEditando] = useState<string | null>(null)
-    const [modalExibicaoAberto, setModalExibicaoAberto] = useState(false)
-    const [midiaExibicaoEditando, setMidiaExibicaoEditando] = useState<string | null>(null)
-
-    const [exibicaoProgramada, setExibicaoProgramada] = useState(false)
-    const [inicioExibicao, setInicioExibicao] = useState("")
-    const [fimExibicao, setFimExibicao] = useState("")
-    const [linkYoutubeExibicao, setLinkYoutubeExibicao] = useState("")
-
-    const [modoExibicao, setModoExibicao] =
-    useState<"cover" | "contain">("cover")
-
-    useEffect(() => {
-        if (!midiaEditando) return
-
-        const m = midias.find((x) => x.id === midiaEditando)
-
-        if (!m) return
-
-        setMostrarTarjaMidia(m.mostrarTarja ?? false)
-        setTarjaEtiquetaMidia(m.tarjaEtiqueta || "ADUSEPS INFORMA")
-        setTarjaTituloMidia(m.tarjaTitulo || "")
-        setTarjaSubtituloMidia(m.tarjaSubtitulo || "")
-        setTempoEntradaTarjaMidia(Number(m.tempoEntradaTarja || 1))
-        setTempoVisivelTarjaMidia(Number(m.tempoVisivelTarja || 8))
-        setTempoSaidaTarjaMidia(Number(m.tempoSaidaTarja || 1))
-        setTempoOcultaTarjaMidia(Number(m.tempoOcultaTarja || 10))
-        setTempoInicialTarjaMidia(Number(m.tempoInicialTarja || 1))
-        setModeloTarjaMidia(m.modeloTarja || "telejornal")
-        setTarjaQrcodeMidia(m.qrcode || "")
-        setModoExibicao(m.modoExibicao ?? "cover")
-    }, [midiaEditando, midias])
-
-    function abrirModalExibicao(midia: any) {
-    setMidiaExibicaoEditando(midia.id)
-
-    setExibicaoProgramada(midia.exibicaoProgramada ?? false)
-    setInicioExibicao(midia.inicioExibicao || "")
-    setFimExibicao(midia.fimExibicao || "")
-    setLinkYoutubeExibicao(midia.linkYoutubeExibicao || midia.arquivo || "")
-
-    setModalExibicaoAberto(true)
-}
+    const {
+        modalTarjaAberto,
+        setModalTarjaAberto,
+        midiaEditando,
+        setMidiaEditando,
+        modalExibicaoAberto,
+        setModalExibicaoAberto,
+        midiaExibicaoEditando,
+        setMidiaExibicaoEditando,
+        exibicaoProgramada,
+        setExibicaoProgramada,
+        inicioExibicao,
+        setInicioExibicao,
+        fimExibicao,
+        setFimExibicao,
+        linkYoutubeExibicao,
+        setLinkYoutubeExibicao,
+        abrirModalExibicao
+    } = useAbaMidiasModais({
+        midias,
+        setModoExibicao,
+        setMostrarTarjaMidia,
+        setTarjaEtiquetaMidia,
+        setTarjaTituloMidia,
+        setTarjaSubtituloMidia,
+        setTempoEntradaTarjaMidia,
+        setTempoVisivelTarjaMidia,
+        setTempoSaidaTarjaMidia,
+        setTempoOcultaTarjaMidia,
+        setTempoInicialTarjaMidia,
+        setModeloTarjaMidia,
+        setTarjaQrcodeMidia
+    })
 
     return (
-        <div className="space-y-3 sm:space-y-6">
-            <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black">
+        <div className="space-y-4 sm:space-y-6">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:p-6">
+                <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-300">
+                    Conteúdo
+                </div>
+                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
                     Mídias do painel
                 </h1>
 
-                <p className="mt-2 text-zinc-400">
+                <p className="mt-2 max-w-2xl text-sm text-zinc-400 sm:text-base">
                     Gerencie banners, vídeos, campanhas e templates institucionais.
                 </p>
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-                <h2 className="text-2xl font-bold mb-2">
+            <div className="rounded-[28px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:p-6">
+                <h2 className="mb-2 text-2xl font-bold">
                     Nova mídia
                 </h2>
 
-                <p className="text-zinc-400 mb-6">
+                <p className="mb-6 text-zinc-400">
                     Adicione banners, vídeos e campanhas para exibição no painel.
                 </p>
 
@@ -221,7 +204,7 @@ export default function AbaMidias({
                         onChange={(e) =>
                             setTipo(e.target.value as "imagem" | "video" | "youtube")
                         }
-                        className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
+                        className="w-full rounded-2xl border border-white/10 bg-zinc-900/90 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-500"
                     >
                         <option value="imagem">imagem</option>
                         <option value="video">video</option>
@@ -321,7 +304,7 @@ export default function AbaMidias({
 
                     <button
                         onClick={adicionarMidia}
-                        className="bg-blue-600 hover:bg-blue-700 transition rounded-lg font-bold text-sm py-2"
+                        className="rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110"
                     >
                         Adicionar mídia
                     </button>
@@ -379,7 +362,7 @@ export default function AbaMidias({
                 </div>
             </div>
 
-            <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <section className="rounded-[28px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:p-6">
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h2 className="text-2xl font-bold">
@@ -396,7 +379,7 @@ export default function AbaMidias({
                     {midias.map((midia) => (
                         <div
                             key={midia.id}
-                            className="flex h-full flex-col rounded-2xl border border-zinc-700 bg-zinc-800/80 p-5 shadow-lg"
+                            className="flex h-full flex-col rounded-[24px] border border-white/10 bg-zinc-800/70 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.22)]"
                         >
                             <div className="flex items-center gap-2 mb-3 flex-wrap">
                                 <div
@@ -482,7 +465,7 @@ export default function AbaMidias({
                                         onChange={(e) => {
                                             if (!midia.id) return
 
-                                            updateDoc(doc(db, "midias", midia.id), {
+                                            atualizarMidia(midia.id, {
                                                 duracao: Number(e.target.value)
                                             })
 
@@ -509,7 +492,7 @@ export default function AbaMidias({
                                     onChange={(e) => {
                                         if (!midia.id) return
 
-                                        updateDoc(doc(db, "midias", midia.id), {
+                                        atualizarMidia(midia.id, {
                                             ordem: Number(e.target.value)
                                         })
 
@@ -532,7 +515,7 @@ export default function AbaMidias({
                                     onChange={(e) => {
                                         if (!midia.id) return
 
-                                        updateDoc(doc(db, "midias", midia.id), {
+                                        atualizarMidia(midia.id, {
                                             pesoExibicao: Number(e.target.value)
                                         })
 
@@ -757,7 +740,7 @@ export default function AbaMidias({
                             <button
                                 onClick={() => {
                                     if (midiaEditando) {
-                                        updateDoc(doc(db, "midias", midiaEditando), {
+                                        atualizarMidia(midiaEditando, {
                                             mostrarTarja: mostrarTarjaMidia,
                                             tarjaEtiqueta: tarjaEtiquetaMidia,
                                             tarjaTitulo: tarjaTituloMidia,
@@ -928,7 +911,7 @@ export default function AbaMidias({
                                         }
                                     }
 
-                                    await updateDoc(doc(db, "midias", midiaExibicaoEditando), {
+                                    await atualizarMidia(midiaExibicaoEditando, {
                                         exibicaoProgramada: ehYoutube ? true : exibicaoProgramada,
                                         tipoExibicaoProgramada: ehYoutube ? "youtube" : "midia",
                                         inicioExibicao,
