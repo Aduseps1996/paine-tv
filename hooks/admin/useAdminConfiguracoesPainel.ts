@@ -44,6 +44,10 @@ export function useAdminConfiguracoesPainel() {
     const [mostrarHoraPainel, setMostrarHoraPainel] = useState(true)
     const [cidadeClimaPainel, setCidadeClimaPainel] = useState("Recife")
 
+    const [latitudeClimaPainel, setLatitudeClimaPainel] = useState(-8.05)
+    const [longitudeClimaPainel, setLongitudeClimaPainel] = useState(-34.9)
+    const [timezoneClimaPainel, setTimezoneClimaPainel] = useState("America/Recife")
+
     const carregarConfiguracoes = useCallback(async () => {
         const dados = await buscarConfiguracoesPainel()
 
@@ -71,6 +75,10 @@ export function useAdminConfiguracoesPainel() {
         setMostrarDataPainel(dados.mostrarDataPainel ?? true)
         setMostrarHoraPainel(dados.mostrarHoraPainel ?? true)
         setCidadeClimaPainel(dados.cidadeClimaPainel || "Recife")
+
+        setLatitudeClimaPainel(Number(dados.latitudeClimaPainel ?? -8.05))
+        setLongitudeClimaPainel(Number(dados.longitudeClimaPainel ?? -34.9))
+        setTimezoneClimaPainel(dados.timezoneClimaPainel || "America/Recife")
 
         setTamanhoFonteRodape(
             limitarValor(Number(dados.tamanhoFonteRodape || 28), 12, 80, 28)
@@ -118,6 +126,9 @@ export function useAdminConfiguracoesPainel() {
             mostrarDataPainel,
             mostrarHoraPainel,
             cidadeClimaPainel,
+            latitudeClimaPainel,
+            longitudeClimaPainel,
+            timezoneClimaPainel,
             tempoEntradaTarja,
             tempoVisivelTarja,
             tempoSaidaTarja,
@@ -177,6 +188,9 @@ export function useAdminConfiguracoesPainel() {
         mostrarDataPainel,
         mostrarHoraPainel,
         cidadeClimaPainel,
+        latitudeClimaPainel,
+        longitudeClimaPainel,
+        timezoneClimaPainel,
         setNomePainel,
         setSubtitulo,
         setLogo,
@@ -188,6 +202,8 @@ export function useAdminConfiguracoesPainel() {
         setTamanhoFonteDataHora,
         setTamanhoFonteHora,
         setAlturaBarraNoticias,
+        setAlturaBarraSuperior,
+        setTamanhoIconeRodape,
         setTamanhoLogoRodape,
         setTempoOcultaTarja,
         setMostrarLogoFaixaPainel,
@@ -202,6 +218,9 @@ export function useAdminConfiguracoesPainel() {
         setMostrarDataPainel,
         setMostrarHoraPainel,
         setCidadeClimaPainel,
+        setLatitudeClimaPainel,
+        setLongitudeClimaPainel,
+        setTimezoneClimaPainel,
         carregarConfiguracoes,
         salvarConfiguracoes
     }

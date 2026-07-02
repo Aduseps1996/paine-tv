@@ -1,3 +1,5 @@
+import CidadeAutocomplete from "./clima/CidadeAutocomplete"
+
 type ModoLogo = "transparente" | "fundo" | "card"
 type TamanhoLogo = "pequeno" | "medio" | "grande"
 
@@ -40,12 +42,19 @@ type Props = {
     setMostrarHoraPainel: (valor: boolean) => void
     setCidadeClimaPainel: (valor: string) => void
 
+    setLatitudeClimaPainel: (valor: number) => void
+    setLongitudeClimaPainel: (valor: number) => void
+    setTimezoneClimaPainel: (valor: string) => void
+
     mostrarTemperaturaPainel: boolean
     mostrarDescricaoClimaPainel: boolean
     mostrarCidadePainel: boolean
     mostrarDataPainel: boolean
     mostrarHoraPainel: boolean
     cidadeClimaPainel: string
+    latitudeClimaPainel: number
+    longitudeClimaPainel: number
+    timezoneClimaPainel: string
 
     salvarConfiguracoes: () => void
 }
@@ -95,6 +104,10 @@ export default function AbaConfiguracaoPainel({
     setMostrarDataPainel,
     setMostrarHoraPainel,
     setCidadeClimaPainel,
+
+    setLatitudeClimaPainel,
+    setLongitudeClimaPainel,
+    setTimezoneClimaPainel,
 
     salvarConfiguracoes
 }: Props) {
@@ -380,11 +393,15 @@ export default function AbaConfiguracaoPainel({
                             Cidade exibida
                         </label>
 
-                        <input
-                            value={cidadeClimaPainel}
-                            onChange={(e) => setCidadeClimaPainel(e.target.value)}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
-                        />
+                        <CidadeAutocomplete
+    value={cidadeClimaPainel}
+    onSelecionar={(cidade) => {
+        setCidadeClimaPainel(cidade.nome)
+        setLatitudeClimaPainel(cidade.latitude)
+        setLongitudeClimaPainel(cidade.longitude)
+        setTimezoneClimaPainel(cidade.timezone)
+    }}
+/>
                     </div>
                 </div>
             </section>

@@ -64,6 +64,14 @@ export default function AdminPage() {
         mostrarDataPainel,
         mostrarHoraPainel,
         cidadeClimaPainel,
+
+        latitudeClimaPainel,
+        longitudeClimaPainel,
+        timezoneClimaPainel,
+        setLatitudeClimaPainel,
+        setLongitudeClimaPainel,
+        setTimezoneClimaPainel,
+
         setNomePainel,
         setSubtitulo,
         setLogo,
@@ -281,6 +289,12 @@ export default function AdminPage() {
                     setMostrarHoraPainel={setMostrarHoraPainel}
                     cidadeClimaPainel={cidadeClimaPainel}
                     setCidadeClimaPainel={setCidadeClimaPainel}
+                    latitudeClimaPainel={latitudeClimaPainel}
+                    longitudeClimaPainel={longitudeClimaPainel}
+                    timezoneClimaPainel={timezoneClimaPainel}
+                    setLatitudeClimaPainel={setLatitudeClimaPainel}
+                    setLongitudeClimaPainel={setLongitudeClimaPainel}
+                    setTimezoneClimaPainel={setTimezoneClimaPainel}
 
                     salvarConfiguracoes={salvarConfiguracoes}
                 />

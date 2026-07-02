@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
     collection,
     doc,
-    getDoc,
     onSnapshot,
     query,
     orderBy
@@ -14,6 +13,21 @@ import {
 import { db } from "../lib/firebase"
 import MediaPlayer from "@/components/tv/MediaPlayer"
 import type { Midia } from "@/types/painel"
+
+type PrevisaoDia = {
+    data: string
+    codigoClima: number
+    maxima: number
+    minima: number
+}
+
+function formatarNumeroClima(valor: unknown) {
+    const numero = Number(valor)
+
+    if (!Number.isFinite(numero)) return null
+
+    return Math.round(numero)
+}
 
 export default function BannerRotativo({
     fallback,
@@ -24,11 +38,17 @@ export default function BannerRotativo({
 }) {
     const [midiasBase, setMidiasBase] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
-    const [agoraPainel, setAgoraPainel] = useState(new Date())
+    const [agoraPainel, setAgoraPainel] = useState<Date | null>(null)
     const [audioYoutubeAtivo, setAudioYoutubeAtivo] = useState(false)
     const [midiasComErro, setMidiasComErro] = useState<string[]>([])
     const [temperaturaAtual, setTemperaturaAtual] = useState<number | null>(null)
     const [codigoClimaAtual, setCodigoClimaAtual] = useState<number | null>(null)
+    const [sensacaoTermicaAtual, setSensacaoTermicaAtual] = useState<number | null>(null)
+    const [umidadeAtual, setUmidadeAtual] = useState<number | null>(null)
+    const [ventoAtual, setVentoAtual] = useState<number | null>(null)
+    const [temperaturaMaximaHoje, setTemperaturaMaximaHoje] = useState<number | null>(null)
+    const [temperaturaMinimaHoje, setTemperaturaMinimaHoje] = useState<number | null>(null)
+    const [previsaoProximosDias, setPrevisaoProximosDias] = useState<PrevisaoDia[]>([])
     const [erroClima, setErroClima] = useState(false)
     const [logo, setLogo] = useState("")
     const [mostrarLogoFaixaPainel, setMostrarLogoFaixaPainel] = useState(false)
@@ -42,16 +62,21 @@ export default function BannerRotativo({
     const [cidadeClimaPainel, setCidadeClimaPainel] = useState("Recife")
     const [latitudeClimaPainel, setLatitudeClimaPainel] = useState(-8.05)
     const [longitudeClimaPainel, setLongitudeClimaPainel] = useState(-34.9)
+    const [timezoneClimaPainel, setTimezoneClimaPainel] = useState("America/Recife")
 
     const timeoutAvancoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const timeoutRecarregarVideoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
-        const intervalo = setInterval(() => {
-            setAgoraPainel(new Date())
-        }, 10000)
+        const atualizarAgora = () => setAgoraPainel(new Date())
 
-        return () => clearInterval(intervalo)
+        const timeoutInicial = setTimeout(atualizarAgora, 0)
+        const intervalo = setInterval(atualizarAgora, 10000)
+
+        return () => {
+            clearTimeout(timeoutInicial)
+            clearInterval(intervalo)
+        }
     }, [])
 
     useEffect(() => {
@@ -60,7 +85,7 @@ export default function BannerRotativo({
                 setErroClima(false)
 
                 const resposta = await fetch(
-                    `https://api.open-meteo.com/v1/forecast?latitude=${latitudeClimaPainel}&longitude=${longitudeClimaPainel}&current=temperature_2m,weather_code&timezone=America%2FRecife`
+                    `https://api.open-meteo.com/v1/forecast?latitude=${latitudeClimaPainel}&longitude=${longitudeClimaPainel}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=4&timezone=${encodeURIComponent(timezoneClimaPainel)}`
                 )
 
                 if (!resposta.ok) {
@@ -68,11 +93,40 @@ export default function BannerRotativo({
                 }
 
                 const dados = await resposta.json()
+                const current = dados.current || {}
+                const daily = dados.daily || {}
 
-                setTemperaturaAtual(Math.round(dados.current.temperature_2m))
-                setCodigoClimaAtual(dados.current.weather_code)
+                setTemperaturaAtual(formatarNumeroClima(current.temperature_2m))
+                setCodigoClimaAtual(formatarNumeroClima(current.weather_code))
+                setSensacaoTermicaAtual(formatarNumeroClima(current.apparent_temperature))
+                setUmidadeAtual(formatarNumeroClima(current.relative_humidity_2m))
+                setVentoAtual(formatarNumeroClima(current.wind_speed_10m))
+                setTemperaturaMaximaHoje(formatarNumeroClima(daily.temperature_2m_max?.[0]))
+                setTemperaturaMinimaHoje(formatarNumeroClima(daily.temperature_2m_min?.[0]))
+                setPrevisaoProximosDias(
+                    [1, 2, 3]
+                        .map((indice) => {
+                            const data = daily.time?.[indice]
+                            const codigoClima = formatarNumeroClima(daily.weather_code?.[indice])
+                            const maxima = formatarNumeroClima(daily.temperature_2m_max?.[indice])
+                            const minima = formatarNumeroClima(daily.temperature_2m_min?.[indice])
+
+                            if (!data || codigoClima === null || maxima === null || minima === null) {
+                                return null
+                            }
+
+                            return {
+                                data,
+                                codigoClima,
+                                maxima,
+                                minima
+                            }
+                        })
+                        .filter((dia): dia is PrevisaoDia => dia !== null)
+                )
             } catch {
                 setErroClima(true)
+                setPrevisaoProximosDias([])
             }
         }
 
@@ -81,7 +135,7 @@ export default function BannerRotativo({
         const intervalo = setInterval(buscarClima, 30 * 60 * 1000)
 
         return () => clearInterval(intervalo)
-    }, [latitudeClimaPainel, longitudeClimaPainel])
+    }, [latitudeClimaPainel, longitudeClimaPainel, timezoneClimaPainel])
 
     useEffect(() => {
         const consulta = query(
@@ -102,16 +156,16 @@ export default function BannerRotativo({
     }, [])
 
     useEffect(() => {
-        async function carregarConfiguracoes() {
-            const documento = await getDoc(
-                doc(db, "configuracoes", "geral")
-            )
+        const unsubscribe = onSnapshot(
+            doc(db, "configuracoes", "geral"),
+            (documento) => {
+                if (!documento.exists()) return
 
-            if (documento.exists()) {
                 const dados = documento.data()
 
                 setLogo(dados.logo || "")
                 setMostrarLogoFaixaPainel(dados.mostrarLogoFaixaPainel ?? false)
+
                 setMostrarTemperaturaPainel(dados.mostrarTemperaturaPainel ?? true)
                 setMostrarDescricaoClimaPainel(dados.mostrarDescricaoClimaPainel ?? true)
                 setMostrarCidadePainel(dados.mostrarCidadePainel ?? true)
@@ -121,10 +175,12 @@ export default function BannerRotativo({
                 setCidadeClimaPainel(dados.cidadeClimaPainel || "Recife")
                 setLatitudeClimaPainel(Number(dados.latitudeClimaPainel ?? -8.05))
                 setLongitudeClimaPainel(Number(dados.longitudeClimaPainel ?? -34.9))
-            }
-        }
+                setTimezoneClimaPainel(dados.timezoneClimaPainel || "America/Recife")
 
-        carregarConfiguracoes()
+            }
+        )
+
+        return () => unsubscribe()
     }, [])
 
     useEffect(() => {
@@ -167,6 +223,8 @@ export default function BannerRotativo({
         if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
             return false
         }
+
+        if (!agoraPainel) return true
 
         return agoraPainel >= inicio && agoraPainel <= fim
     }, [agoraPainel])
@@ -426,6 +484,16 @@ export default function BannerRotativo({
         return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${audioAtivo ? "0" : "1"}&playsinline=1&rel=0&enablejsapi=1`
     }
 
+    function formatarDiaCurto(data: string) {
+        return new Intl.DateTimeFormat("pt-BR", {
+            weekday: "short",
+            timeZone: timezoneClimaPainel
+        })
+            .format(new Date(`${data}T12:00:00`))
+            .replace(".", "")
+            .toUpperCase()
+    }
+
     function obterIconeClima(codigo: number | null) {
         if (codigo === null) return "🌤️"
 
@@ -550,16 +618,20 @@ export default function BannerRotativo({
         : ""
 
     if (templateAtual === "painel") {
-        const horaPainel = agoraPainel.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit"
-        })
+        const horaPainel = agoraPainel
+            ? agoraPainel.toLocaleTimeString("pt-BR", {
+                hour: "2-digit",
+                minute: "2-digit"
+            })
+            : ""
 
-        const dataPainel = agoraPainel.toLocaleDateString("pt-BR", {
-            weekday: "long",
-            day: "2-digit",
-            month: "long"
-        })
+        const dataPainel = agoraPainel
+            ? agoraPainel.toLocaleDateString("pt-BR", {
+                weekday: "long",
+                day: "2-digit",
+                month: "long"
+            })
+            : ""
 
         const textoFaixa =
             midiaAtual.mostrarTarja
@@ -583,61 +655,83 @@ export default function BannerRotativo({
 
                         <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/10 to-[#0d5cff]/20" />
 
-                        <div className="relative z-10 flex h-full min-h-0 flex-col justify-between">
-                            <div className="text-center">
-                                <p className="text-[clamp(0.65rem,1vw,1rem)] font-black uppercase tracking-[0.25em] text-white/75">
+                        <div className="relative z-10 flex h-full min-h-0 flex-col justify-between gap-[clamp(0.35rem,0.9vh,0.8rem)]">
+                            <div className="min-h-0 text-center">
+                                <p className="text-[clamp(0.58rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.2em] text-white/75">
                                     Previsão do tempo
                                 </p>
 
-                                <div className="mt-4 text-[clamp(3.5rem,6vw,6.2rem)] leading-none drop-shadow-xl">
+                                <div className="mt-[clamp(0.3rem,0.8vh,0.7rem)] text-[clamp(2.6rem,4.6vw,5rem)] leading-none drop-shadow-xl">
                                     {obterIconeClima(codigoClimaAtual)}
                                 </div>
 
                                 {mostrarTemperaturaPainel && (
-                                    <div className="mt-4 flex items-end justify-center gap-2">
-                                        <span className="text-[clamp(4.5rem,7vw,7rem)] font-black leading-none">
+                                    <div className="mt-[clamp(0.25rem,0.65vh,0.55rem)] flex items-end justify-center gap-2">
+                                        <span className="text-[clamp(3rem,5.4vw,5.8rem)] font-black leading-none">
                                             {erroClima || temperaturaAtual === null ? "--" : temperaturaAtual}
                                         </span>
-                                        <span className="mb-3 text-[clamp(1.8rem,2.6vw,3rem)] font-black">°C</span>
+                                        <span className="mb-2 text-[clamp(1.2rem,2vw,2.2rem)] font-black">°C</span>
                                     </div>
                                 )}
 
-                                {mostrarCidadePainel && (
-                                    <p className="mt-4 text-[clamp(1.2rem,1.7vw,2rem)] font-black">
-                                        {cidadeClimaPainel}
+                                {mostrarDescricaoClimaPainel && (
+                                    <p className="mt-[clamp(0.2rem,0.45vh,0.45rem)] text-[clamp(0.82rem,1.15vw,1.22rem)] font-semibold leading-tight text-white/85">
+                                        {erroClima ? "Clima indisponível" : obterDescricaoClima(codigoClimaAtual)}
                                     </p>
                                 )}
 
-                                {mostrarDescricaoClimaPainel && (
-                                    <p className="mt-1 text-[clamp(0.95rem,1.35vw,1.45rem)] font-semibold text-white/85">
-                                        {erroClima ? "Clima indisponível" : obterDescricaoClima(codigoClimaAtual)}
+                                {mostrarCidadePainel && (
+                                    <p className="mt-[clamp(0.25rem,0.6vh,0.55rem)] truncate text-[clamp(0.95rem,1.4vw,1.55rem)] font-black">
+                                        {cidadeClimaPainel || "--"}
                                     </p>
                                 )}
                             </div>
 
-                            <div className="grid gap-[clamp(0.45rem,1vh,0.9rem)]">
+                            <div className="grid min-h-0 gap-[clamp(0.25rem,0.55vh,0.5rem)] text-[clamp(0.68rem,0.9vw,0.9rem)] font-bold">
+                                <div className="grid grid-cols-2 gap-2 rounded-lg bg-white/[0.12] px-2.5 py-[clamp(0.3rem,0.6vh,0.55rem)]">
+                                    <p className="whitespace-nowrap">Máx {erroClima || temperaturaMaximaHoje === null ? "--" : temperaturaMaximaHoje}°</p>
+                                    <p className="whitespace-nowrap">Mín {erroClima || temperaturaMinimaHoje === null ? "--" : temperaturaMinimaHoje}°</p>
+                                </div>
 
-                                {mostrarDataPainel && (
-                                    <div className="bg-black/15 px-3 py-[clamp(0.55rem,1vh,0.9rem)] text-center">
-                                        <p className="text-[clamp(0.65rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.20em] text-white/70">
-                                            Data
-                                        </p>
-                                        <p className="mt-2 text-[clamp(1rem,1.55vw,1.75rem)] font-black capitalize leading-tight">
-                                            {dataPainel}
-                                        </p>
-                                    </div>
-                                )}
+                                <div className="whitespace-nowrap rounded-lg bg-white/[0.12] px-2.5 py-[clamp(0.28rem,0.55vh,0.5rem)]">
+                                    Sensação {erroClima || sensacaoTermicaAtual === null ? "--" : sensacaoTermicaAtual}°
+                                </div>
 
-                                {mostrarHoraPainel && (
-                                    <div className="bg-black/15 px-3 py-[clamp(0.65rem,1.2vh,1rem)] text-center pr-5">
-                                        <p className="text-[clamp(0.65rem,0.9vw,0.9rem)] font-black uppercase tracking-[0.20em] text-white/70">
-                                            Hora
-                                        </p>
-                                        <p className="mt-2 text-[clamp(2.4rem,4vw,4.2rem)] font-black leading-none">
-                                            {horaPainel}
-                                        </p>
+                                <div className="grid grid-cols-2 gap-2 rounded-lg bg-white/[0.12] px-2.5 py-[clamp(0.3rem,0.6vh,0.55rem)]">
+                                    <p className="whitespace-nowrap">Umid. {erroClima || umidadeAtual === null ? "--" : `${umidadeAtual}%`}</p>
+                                    <p className="whitespace-nowrap">Vento {erroClima || ventoAtual === null ? "--" : `${ventoAtual} km/h`}</p>
+                                </div>
+
+                                <div className="rounded-lg bg-black/15 px-2.5 py-[clamp(0.35rem,0.7vh,0.6rem)]">
+                                    <p className="mb-[clamp(0.22rem,0.45vh,0.4rem)] text-[clamp(0.56rem,0.75vw,0.7rem)] font-black uppercase tracking-[0.16em] text-white/70">
+                                        Próximos dias
+                                    </p>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {previsaoProximosDias.length > 0 ? (
+                                            previsaoProximosDias.map((dia) => (
+                                                <div key={dia.data} className="min-w-0 rounded-md bg-white/10 px-1.5 py-[clamp(0.25rem,0.55vh,0.45rem)] text-center">
+                                                    <p className="text-[clamp(0.56rem,0.72vw,0.68rem)] font-black text-white/70">
+                                                        {formatarDiaCurto(dia.data)}
+                                                    </p>
+                                                    <p className="text-[clamp(0.95rem,1.35vw,1.45rem)] leading-tight">
+                                                        {obterIconeClima(dia.codigoClima)}
+                                                    </p>
+                                                    <p className="whitespace-nowrap text-[clamp(0.62rem,0.84vw,0.78rem)] font-black">
+                                                        {dia.maxima}/{dia.minima}°
+                                                    </p>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            [1, 2, 3].map((indice) => (
+                                                <div key={indice} className="rounded-md bg-white/10 px-1.5 py-[clamp(0.25rem,0.55vh,0.45rem)] text-center">
+                                                    <p className="text-[clamp(0.56rem,0.72vw,0.68rem)] font-black text-white/70">--</p>
+                                                    <p className="text-[clamp(0.95rem,1.35vw,1.45rem)] leading-tight">--</p>
+                                                    <p className="whitespace-nowrap text-[clamp(0.62rem,0.84vw,0.78rem)] font-black">--/--°</p>
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
-                                )}
+                                </div>
                             </div>
                         </div>
                     </aside>
@@ -664,7 +758,7 @@ export default function BannerRotativo({
                     </main>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 z-20 grid h-[clamp(78px,9vh,108px)] grid-cols-[clamp(130px,15vw,210px)_minmax(0,1fr)_clamp(105px,12vw,170px)] items-center overflow-hidden bg-gradient-to-r from-[#063ea8] via-[#0d5cff] to-[#063ea8] px-0 text-white shadow-[0_-18px_60px_rgba(0,0,0,0.28)]">
+                <div className="absolute bottom-0 left-0 right-0 z-20 grid h-[clamp(78px,9vh,108px)] grid-cols-[clamp(130px,15vw,210px)_minmax(0,1fr)_clamp(130px,16vw,240px)] items-center overflow-hidden bg-gradient-to-r from-[#063ea8] via-[#0d5cff] to-[#063ea8] px-0 text-white shadow-[0_-18px_60px_rgba(0,0,0,0.28)]">
 
                     <div className="min-w-0 h-full w-full truncate bg-white px-[clamp(0.65rem,1.4vw,1.25rem)] py-3 text-center text-[clamp(0.75rem,1.3vw,1.15rem)] font-black uppercase tracking-[0.10em] text-[#0d5cff] flex items-center justify-center">
                         {mostrarLogoFaixaPainel && logo ? (
@@ -682,21 +776,25 @@ export default function BannerRotativo({
                         )}
                     </div>
 
-                    <div className="min-w-0 flex-1">
-                        <p className="truncate text-[clamp(1.4rem,2.5vw,2.6rem)] font-black leading-tight pl-4">
+                    <div className="min-w-0 flex-1 px-4">
+                        <p className="truncate text-[clamp(1.25rem,2.25vw,2.45rem)] font-black leading-tight">
                             {textoFaixa}
                         </p>
                     </div>
 
-                    {/* Hora rodapé */}
-                    {/* <div className="ml-8 text-right pr-4">
-                        <p className="text-4xl font-black leading-none">
-                            {horaPainel}
-                        </p>
-                        <p className="mt-1 text-sm font-bold uppercase tracking-[0.20em] text-white/75">
-                            Recife
-                        </p>
-                    </div> */}
+                    <div className="flex min-w-0 flex-col items-end justify-center px-4 text-right">
+                        {mostrarHoraPainel && (
+                            <p className="text-[clamp(2rem,3.2vw,3.6rem)] font-black leading-none">
+                                {horaPainel}
+                            </p>
+                        )}
+
+                        {mostrarDataPainel && (
+                            <p className="mt-1 max-w-full truncate text-[clamp(0.68rem,1vw,0.95rem)] font-bold capitalize text-white/75">
+                                {dataPainel}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         )

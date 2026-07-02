@@ -105,6 +105,9 @@ export type ConfiguracoesPainel = {
     mostrarDataPainel?: boolean
     mostrarHoraPainel?: boolean
     cidadeClimaPainel?: string
+    latitudeClimaPainel?: number
+    longitudeClimaPainel?: number
+    timezoneClimaPainel?: string
     tempoEntradaTarja?: number
     tempoVisivelTarja?: number
     tempoSaidaTarja?: number
