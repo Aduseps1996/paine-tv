@@ -1,48 +1,66 @@
+import { useState } from "react"
 import type { CategoriaNoticia, Noticia, StatusVisual } from "@/types/painel"
-import { atualizarNoticia as atualizarNoticiaServico } from "@/lib/firestore/noticias"
+import { usePainelDraftContext } from "../context/PainelDraftContext"
 
-type Props = {
-    noticias: Noticia[]
-    novaNoticia: string
-    setNovaNoticia: (valor: string) => void
+export default function AbaNoticias() {
+    const {
+        draft,
+        atualizarNoticiasDraft
+    } = usePainelDraftContext()
 
-    adicionarNoticia: () => void
-    removerNoticia: (id: string) => void
-    alternarNoticia: (id: string, ativo: boolean) => void
-    carregarNoticias: () => void
+    const noticias = draft.noticias
 
-    noticiaProgramada: boolean
-    setNoticiaProgramada: (valor: boolean) => void
-    inicioNoticia: string
-    setInicioNoticia: (valor: string) => void
-    fimNoticia: string
-    setFimNoticia: (valor: string) => void
-    categoriaNoticia: CategoriaNoticia
-    setCategoriaNoticia: (valor: CategoriaNoticia) => void
+    const [textoNoticia, setTextoNoticia] = useState("")
+    const [noticiaProgramada, setNoticiaProgramada] = useState(false)
+    const [inicioNoticia, setInicioNoticia] = useState("")
+    const [fimNoticia, setFimNoticia] = useState("")
+    const [categoriaNoticia, setCategoriaNoticia] =
+        useState<CategoriaNoticia>("normal")
 
-}
+    function atualizarNoticia(id: string, dados: Partial<Noticia>) {
+        atualizarNoticiasDraft(
+            noticias.map((noticia) =>
+                noticia.id === id
+                    ? { ...noticia, ...dados }
+                    : noticia
+            )
+        )
+    }
 
-export default function AbaNoticias({
-    noticias,
-    novaNoticia,
-    setNovaNoticia,
-    adicionarNoticia,
-    removerNoticia,
-    alternarNoticia,
-    carregarNoticias,
+    const alternarNoticiaDraft = (id: string, ativo: boolean) => {
+        atualizarNoticiasDraft(
+            noticias.map((noticia) =>
+                noticia.id === id
+                    ? { ...noticia, ativo: !ativo }
+                    : noticia
+            )
+        )
+    }
 
-    noticiaProgramada,
-    setNoticiaProgramada,
-    inicioNoticia,
-    setInicioNoticia,
-    fimNoticia,
-    setFimNoticia,
-    categoriaNoticia,
-    setCategoriaNoticia
-}: Props) {
-    async function atualizarNoticia(id: string, dados: Partial<Noticia>) {
-        await atualizarNoticiaServico(id, dados)
-        carregarNoticias()
+    const removerNoticiaDraft = (id: string) => {
+        atualizarNoticiasDraft(
+            noticias.filter((noticia) => noticia.id !== id)
+        )
+    }
+
+    const adicionarNoticiaDraft = () => {
+        if (!textoNoticia.trim()) return
+
+        atualizarNoticiasDraft([
+            ...noticias,
+            {
+                id: `draft-${Date.now()}`,
+                texto: textoNoticia.trim(),
+                ativo: true,
+                ordem: noticias.length + 1,
+                categoria: categoriaNoticia,
+                programada: noticiaProgramada,
+                inicioExibicao: inicioNoticia,
+                fimExibicao: fimNoticia
+            }
+        ])
+
+        setTextoNoticia("")
     }
 
     function obterStatusNoticia(noticia: Noticia): StatusVisual {
@@ -184,8 +202,8 @@ export default function AbaNoticias({
                             type="text"
                             placeholder="Digite a mensagem que será exibida no rodapé"
                             className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
-                            value={novaNoticia}
-                            onChange={(e) => setNovaNoticia(e.target.value)}
+                            value={textoNoticia}
+                            onChange={(e) => setTextoNoticia(e.target.value)}
                         />
                     </div>
 
@@ -239,8 +257,8 @@ export default function AbaNoticias({
     <div className="overflow-hidden rounded-xl bg-[#183b78] py-3">
         <div className="whitespace-nowrap font-bold text-white">
             <span className="mx-8">
-                {novaNoticia.trim() !== ""
-                    ? novaNoticia
+                {textoNoticia.trim() !== ""
+                    ? textoNoticia
                     : "Digite uma notícia para visualizar no letreiro"}
             </span>
 
@@ -268,7 +286,7 @@ export default function AbaNoticias({
 </div>
 
                     <button
-                        onClick={adicionarNoticia}
+                        onClick={adicionarNoticiaDraft}
                         className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-4 py-3 font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:brightness-110"
                     >
                         Adicionar notícia
@@ -444,7 +462,7 @@ export default function AbaNoticias({
                                     <button
                                         onClick={() =>
                                             noticia.id &&
-                                            alternarNoticia(noticia.id, noticia.ativo)
+                                            alternarNoticiaDraft(noticia.id, noticia.ativo)
                                         }
                                         className={`rounded-lg px-4 py-2 text-sm font-bold transition ${noticia.ativo
                                             ? "bg-yellow-600 hover:bg-yellow-700"
@@ -456,7 +474,7 @@ export default function AbaNoticias({
 
                                     <button
                                         onClick={() =>
-                                            noticia.id && removerNoticia(noticia.id)
+                                            noticia.id && removerNoticiaDraft(noticia.id)
                                         }
                                         className="rounded-lg bg-red-600 px-4 py-2 text-sm font-bold transition hover:bg-red-700"
                                     >

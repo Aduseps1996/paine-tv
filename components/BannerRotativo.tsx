@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import {
     collection,
@@ -12,7 +12,7 @@ import {
 
 import { db } from "../lib/firebase"
 import MediaPlayer from "@/components/tv/MediaPlayer"
-import type { Midia } from "@/types/painel"
+import type { ConfiguracoesPainel, Midia } from "@/types/painel"
 
 type PrevisaoDia = {
     data: string
@@ -31,10 +31,16 @@ function formatarNumeroClima(valor: unknown) {
 
 export default function BannerRotativo({
     fallback,
-    onMidiaAtualChange
+    onMidiaAtualChange,
+    modoPreview = false,
+    previewMidias,
+    previewConfiguracoes
 }: {
     fallback: string
     onMidiaAtualChange?: (midia: Midia | null) => void
+    modoPreview?: boolean
+    previewMidias?: Midia[]
+    previewConfiguracoes?: ConfiguracoesPainel
 }) {
     const [midiasBase, setMidiasBase] = useState<Midia[]>([])
     const [indiceAtual, setIndiceAtual] = useState(0)
@@ -66,6 +72,7 @@ export default function BannerRotativo({
 
     const timeoutAvancoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const timeoutRecarregarVideoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const assinaturaPreviewMidiasRef = useRef("")
 
     useEffect(() => {
         const atualizarAgora = () => setAgoraPainel(new Date())
@@ -138,6 +145,8 @@ export default function BannerRotativo({
     }, [latitudeClimaPainel, longitudeClimaPainel, timezoneClimaPainel])
 
     useEffect(() => {
+        if (modoPreview) return
+
         const consulta = query(
             collection(db, "midias"),
             orderBy("ordem", "asc")
@@ -156,6 +165,23 @@ export default function BannerRotativo({
     }, [])
 
     useEffect(() => {
+        if (modoPreview && previewConfiguracoes) {
+            const dados = previewConfiguracoes
+
+            setLogo(dados.logo || "")
+            setMostrarLogoFaixaPainel(dados.mostrarLogoFaixaPainel ?? false)
+            setMostrarTemperaturaPainel(dados.mostrarTemperaturaPainel ?? true)
+            setMostrarDescricaoClimaPainel(dados.mostrarDescricaoClimaPainel ?? true)
+            setMostrarCidadePainel(dados.mostrarCidadePainel ?? true)
+            setMostrarDataPainel(dados.mostrarDataPainel ?? true)
+            setMostrarHoraPainel(dados.mostrarHoraPainel ?? true)
+            setCidadeClimaPainel(dados.cidadeClimaPainel || "Recife")
+            setLatitudeClimaPainel(Number(dados.latitudeClimaPainel ?? -8.05))
+            setLongitudeClimaPainel(Number(dados.longitudeClimaPainel ?? -34.9))
+            setTimezoneClimaPainel(dados.timezoneClimaPainel || "America/Recife")
+            return
+        }
+
         const unsubscribe = onSnapshot(
             doc(db, "configuracoes", "geral"),
             (documento) => {
@@ -181,7 +207,7 @@ export default function BannerRotativo({
         )
 
         return () => unsubscribe()
-    }, [])
+    }, [modoPreview, previewConfiguracoes])
 
     useEffect(() => {
         return () => {
@@ -198,6 +224,36 @@ export default function BannerRotativo({
     function obterChaveMidia(midia: Midia) {
         return `${midia.id || "sem-id"}-${midia.arquivo || ""}-${midia.linkYoutubeExibicao || ""}`
     }
+
+    useEffect(() => {
+        if (!modoPreview) {
+            assinaturaPreviewMidiasRef.current = ""
+            return
+        }
+
+        const assinaturaPreview = (previewMidias || [])
+            .map((midia) =>
+                [
+                    obterChaveMidia(midia),
+                    midia.ativo,
+                    midia.ordem,
+                    midia.tipo,
+                    midia.tipoExibicaoProgramada,
+                    midia.duracao,
+                    midia.pesoExibicao,
+                    midia.exibicaoProgramada,
+                    midia.inicioExibicao,
+                    midia.fimExibicao
+                ].join(":")
+            )
+            .join("|")
+
+        if (assinaturaPreviewMidiasRef.current === assinaturaPreview) return
+
+        assinaturaPreviewMidiasRef.current = assinaturaPreview
+        setIndiceAtual(0)
+        setMidiasComErro([])
+    })
 
     function marcarMidiaComErro(midia: Midia | undefined) {
         if (!midia) return
@@ -299,8 +355,10 @@ export default function BannerRotativo({
         return resultado
     }
 
-    const midias = useMemo(() => {
-        const listaValida = midiasBase.filter((midia) => {
+    const midias = (() => {
+        const midiasOrigem = modoPreview ? previewMidias || [] : midiasBase
+
+        const listaValida = midiasOrigem.filter((midia) => {
             return midiaPodeSerExibida(midia)
         })
 
@@ -332,7 +390,7 @@ export default function BannerRotativo({
         return montarListaInteligente(
             listaParaUso.filter((midia) => midia.tipo !== "youtube")
         )
-    }, [midiasBase, midiasComErro, midiaPodeSerExibida])
+    })()
 
     const assinaturaMidias = midias
         .map((midia) =>
@@ -485,14 +543,15 @@ export default function BannerRotativo({
     }
 
     function formatarDiaCurto(data: string) {
-        return new Intl.DateTimeFormat("pt-BR", {
-            weekday: "short",
-            timeZone: timezoneClimaPainel
-        })
-            .format(new Date(`${data}T12:00:00`))
-            .replace(".", "")
-            .toUpperCase()
-    }
+    const [ano, mes, dia] = data.split("-").map(Number)
+
+    const dataLocal = new Date(ano, mes - 1, dia, 12, 0, 0)
+
+    return dataLocal
+        .toLocaleDateString("pt-BR", { weekday: "short" })
+        .replace(".", "")
+        .toUpperCase()
+}
 
     function obterIconeClima(codigo: number | null) {
         if (codigo === null) return "🌤️"

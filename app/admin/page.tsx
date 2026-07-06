@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import AdminLayout from "./components/AdminLayout"
 
@@ -9,16 +9,25 @@ import AbaMidias from "./components/AbaMidias"
 import AbaNoticias from "./components/AbaNoticias"
 import AbaConfiguracaoPainel from "./components/AbaConfiguracaoPainel"
 import AbaConfiguracaoTipografia from "./components/AbaConfiguracaoTipografia"
+import {
+    PainelDraftProvider,
+    usePainelDraftContext
+} from "./context/PainelDraftContext"
 
-import type { AbaAdmin } from "@/types/painel"
+import type { AbaAdmin, ConfiguracoesPainel } from "@/types/painel"
 import { useAdminAuth } from "@/hooks/admin/useAdminAuth"
 import { useAdminCollections } from "@/hooks/admin/useAdminCollections"
-import { useAdminPreview } from "@/hooks/admin/useAdminPreview"
 import { useAdminConfiguracoesPainel } from "@/hooks/admin/useAdminConfiguracoesPainel"
-import { useNovaMidiaForm } from "@/hooks/admin/useNovaMidiaForm"
-import { useNovaNoticiaForm } from "@/hooks/admin/useNovaNoticiaForm"
 
 export default function AdminPage() {
+    return (
+        <PainelDraftProvider>
+            <AdminPageContent />
+        </PainelDraftProvider>
+    )
+}
+
+function AdminPageContent() {
     const {
         email,
         senha,
@@ -32,12 +41,6 @@ export default function AdminPage() {
     const {
         midias,
         noticias,
-        carregarMidias,
-        carregarNoticias,
-        removerMidia,
-        removerNoticia,
-        alternarMidia,
-        alternarNoticia
     } = useAdminCollections()
 
     const {
@@ -68,108 +71,19 @@ export default function AdminPage() {
         latitudeClimaPainel,
         longitudeClimaPainel,
         timezoneClimaPainel,
-        setLatitudeClimaPainel,
-        setLongitudeClimaPainel,
-        setTimezoneClimaPainel,
-
-        setNomePainel,
-        setSubtitulo,
-        setLogo,
-        setModoLogo,
-        setTamanhoLogoPainel,
-        setSlogan,
         setTamanhoFonteRodape,
         setTamanhoFonteSlogan,
         setTamanhoFonteHora,
         setAlturaBarraNoticias,
-        setTempoOcultaTarja,
-        setMostrarLogoFaixaPainel,
-        setMostrarRodapeNoticias,
-        setTempoEntradaTarja,
-        setTempoVisivelTarja,
-        setTempoSaidaTarja,
         setDuracaoAnimacaoNoticias,
-        setMostrarTemperaturaPainel,
-        setMostrarDescricaoClimaPainel,
-        setMostrarCidadePainel,
-        setMostrarDataPainel,
-        setMostrarHoraPainel,
-        setCidadeClimaPainel,
         carregarConfiguracoes,
         salvarConfiguracoes
     } = useAdminConfiguracoesPainel()
 
     const {
-        arquivo,
-        tipo,
-        template,
-        modoExibicao,
-        tituloMidia,
-        subtituloMidia,
-        rodapeMidia,
-        qrcodeMidia,
-        categoriaMidia,
-        ctaMidia,
-        mostrarTarjaMidia,
-        tarjaEtiquetaMidia,
-        tarjaTituloMidia,
-        tarjaSubtituloMidia,
-        tempoEntradaTarjaMidia,
-        tempoVisivelTarjaMidia,
-        tempoSaidaTarjaMidia,
-        tempoOcultaTarjaMidia,
-        tempoInicialTarjaMidia,
-        modeloTarjaMidia,
-        tarjaQrcodeMidia,
-        programarExibicaoNovaMidia,
-        inicioExibicaoNovaMidia,
-        fimExibicaoNovaMidia,
-        setArquivo,
-        setTipo,
-        setTemplate,
-        setModoExibicao,
-        setTituloMidia,
-        setSubtituloMidia,
-        setRodapeMidia,
-        setQrcodeMidia,
-        setCategoriaMidia,
-        setCtaMidia,
-        setMostrarTarjaMidia,
-        setTarjaEtiquetaMidia,
-        setTarjaTituloMidia,
-        setTarjaSubtituloMidia,
-        setTempoEntradaTarjaMidia,
-        setTempoVisivelTarjaMidia,
-        setTempoSaidaTarjaMidia,
-        setTempoOcultaTarjaMidia,
-        setTempoInicialTarjaMidia,
-        setModeloTarjaMidia,
-        setTarjaQrcodeMidia,
-        setProgramarExibicaoNovaMidia,
-        setInicioExibicaoNovaMidia,
-        setFimExibicaoNovaMidia,
-        adicionarMidia
-    } = useNovaMidiaForm({
-        totalMidias: midias.length,
-        carregarMidias
-    })
-
-    const {
-        novaNoticia,
-        setNovaNoticia,
-        adicionarNoticia,
-        noticiaProgramada,
-        setNoticiaProgramada,
-        inicioNoticia,
-        setInicioNoticia,
-        fimNoticia,
-        setFimNoticia,
-        categoriaNoticia,
-        setCategoriaNoticia
-    } = useNovaNoticiaForm({
-        totalNoticias: noticias.length,
-        carregarNoticias
-    })
+        draft,
+        carregarPublicadoNoDraft,
+    } = usePainelDraftContext()
 
     const [abaAtiva, setAbaAtiva] = useState<AbaAdmin>("inicio")
 
@@ -177,10 +91,80 @@ export default function AdminPage() {
         void Promise.resolve().then(carregarConfiguracoes)
     }, [carregarConfiguracoes])
 
-    const {
-        noticiasAtivas,
-        midiaPreview
-    } = useAdminPreview(midias, noticias)
+    const configuracoes = useMemo<ConfiguracoesPainel>(() => ({
+        nomePainel,
+        subtitulo,
+        logo,
+        slogan,
+        modoLogo,
+        tamanhoLogoPainel,
+        mostrarLogoFaixaPainel,
+        mostrarRodapeNoticias,
+        mostrarTemperaturaPainel,
+        mostrarDescricaoClimaPainel,
+        mostrarCidadePainel,
+        mostrarDataPainel,
+        mostrarHoraPainel,
+        cidadeClimaPainel,
+        latitudeClimaPainel,
+        longitudeClimaPainel,
+        timezoneClimaPainel,
+        tempoEntradaTarja,
+        tempoVisivelTarja,
+        tempoSaidaTarja,
+        tempoOcultaTarja,
+        tamanhoFonteRodape,
+        tamanhoFonteSlogan,
+        tamanhoFonteHora,
+        alturaBarraNoticias,
+        duracaoAnimacaoNoticias
+    }), [
+        nomePainel,
+        subtitulo,
+        logo,
+        slogan,
+        modoLogo,
+        tamanhoLogoPainel,
+        mostrarLogoFaixaPainel,
+        mostrarRodapeNoticias,
+        mostrarTemperaturaPainel,
+        mostrarDescricaoClimaPainel,
+        mostrarCidadePainel,
+        mostrarDataPainel,
+        mostrarHoraPainel,
+        cidadeClimaPainel,
+        latitudeClimaPainel,
+        longitudeClimaPainel,
+        timezoneClimaPainel,
+        tempoEntradaTarja,
+        tempoVisivelTarja,
+        tempoSaidaTarja,
+        tempoOcultaTarja,
+        tamanhoFonteRodape,
+        tamanhoFonteSlogan,
+        tamanhoFonteHora,
+        alturaBarraNoticias,
+        duracaoAnimacaoNoticias
+    ])
+
+    const carregouDraftRef = useRef(false)
+
+    useEffect(() => {
+        if (carregouDraftRef.current) return
+
+        const midiasCarregadas = midias.length > 0
+        const noticiasCarregadas = noticias.length > 0
+
+        if (!midiasCarregadas && !noticiasCarregadas) return
+
+        carregarPublicadoNoDraft({
+            configuracoes,
+            midias,
+            noticias
+        })
+
+        carregouDraftRef.current = true
+    }, [configuracoes, midias, noticias, carregarPublicadoNoDraft])
 
     if (!logado) {
         return (
@@ -245,59 +229,7 @@ export default function AdminPage() {
         >
 
             {abaAtiva === "configuracao-painel" && (
-                <AbaConfiguracaoPainel
-                    nomePainel={nomePainel}
-                    subtitulo={subtitulo}
-                    logo={logo}
-                    slogan={slogan}
-
-                    modoLogo={modoLogo}
-                    tamanhoLogoPainel={tamanhoLogoPainel}
-
-                    tempoEntradaTarja={tempoEntradaTarja}
-                    tempoVisivelTarja={tempoVisivelTarja}
-                    tempoSaidaTarja={tempoSaidaTarja}
-                    tempoOcultaTarja={tempoOcultaTarja}
-
-                    mostrarLogoFaixaPainel={mostrarLogoFaixaPainel}
-                    mostrarRodapeNoticias={mostrarRodapeNoticias}
-                    setMostrarLogoFaixaPainel={setMostrarLogoFaixaPainel}
-                    setMostrarRodapeNoticias={setMostrarRodapeNoticias}
-
-                    setNomePainel={setNomePainel}
-                    setSubtitulo={setSubtitulo}
-                    setLogo={setLogo}
-                    setSlogan={setSlogan}
-
-                    setModoLogo={setModoLogo}
-                    setTamanhoLogoPainel={setTamanhoLogoPainel}
-
-                    setTempoEntradaTarja={setTempoEntradaTarja}
-                    setTempoVisivelTarja={setTempoVisivelTarja}
-                    setTempoSaidaTarja={setTempoSaidaTarja}
-                    setTempoOcultaTarja={setTempoOcultaTarja}
-
-                    mostrarTemperaturaPainel={mostrarTemperaturaPainel}
-                    setMostrarTemperaturaPainel={setMostrarTemperaturaPainel}
-                    mostrarDescricaoClimaPainel={mostrarDescricaoClimaPainel}
-                    setMostrarDescricaoClimaPainel={setMostrarDescricaoClimaPainel}
-                    mostrarCidadePainel={mostrarCidadePainel}
-                    setMostrarCidadePainel={setMostrarCidadePainel}
-                    mostrarDataPainel={mostrarDataPainel}
-                    setMostrarDataPainel={setMostrarDataPainel}
-                    mostrarHoraPainel={mostrarHoraPainel}
-                    setMostrarHoraPainel={setMostrarHoraPainel}
-                    cidadeClimaPainel={cidadeClimaPainel}
-                    setCidadeClimaPainel={setCidadeClimaPainel}
-                    latitudeClimaPainel={latitudeClimaPainel}
-                    longitudeClimaPainel={longitudeClimaPainel}
-                    timezoneClimaPainel={timezoneClimaPainel}
-                    setLatitudeClimaPainel={setLatitudeClimaPainel}
-                    setLongitudeClimaPainel={setLongitudeClimaPainel}
-                    setTimezoneClimaPainel={setTimezoneClimaPainel}
-
-                    salvarConfiguracoes={salvarConfiguracoes}
-                />
+                <AbaConfiguracaoPainel />
             )}
 
             {abaAtiva === "configuracao-tipografia" && (
@@ -320,98 +252,15 @@ export default function AdminPage() {
             )}
 
             {abaAtiva === "inicio" && (
-                <AbaInicio
-                    midiaPreview={midiaPreview}
-                    logo={logo}
-                    nomePainel={nomePainel}
-                    subtitulo={subtitulo}
-                    tamanhoFonteRodape={tamanhoFonteRodape}
-                    alturaBarraNoticias={alturaBarraNoticias}
-                    noticiasAtivas={noticiasAtivas}
-                />
+                <AbaInicio />
             )}
 
             {abaAtiva === "midias" && (
-                <AbaMidias
-                    midias={midias}
-                    arquivo={arquivo}
-                    tipo={tipo}
-                    template={template}
-                    tituloMidia={tituloMidia}
-                    subtituloMidia={subtituloMidia}
-                    rodapeMidia={rodapeMidia}
-                    qrcodeMidia={qrcodeMidia}
-                    categoriaMidia={categoriaMidia}
-                    ctaMidia={ctaMidia}
-                    setArquivo={setArquivo}
-                    modoExibicao={modoExibicao}
-                    setModoExibicao={setModoExibicao}
-                    setTipo={setTipo}
-                    setTemplate={setTemplate}
-                    setTituloMidia={setTituloMidia}
-                    setSubtituloMidia={setSubtituloMidia}
-                    setRodapeMidia={setRodapeMidia}
-                    setQrcodeMidia={setQrcodeMidia}
-                    setCategoriaMidia={setCategoriaMidia}
-                    setCtaMidia={setCtaMidia}
-                    adicionarMidia={adicionarMidia}
-                    removerMidia={removerMidia}
-                    alternarMidia={alternarMidia}
-                    carregarMidias={carregarMidias}
-
-                    programarExibicaoNovaMidia={programarExibicaoNovaMidia}
-                    setProgramarExibicaoNovaMidia={setProgramarExibicaoNovaMidia}
-                    inicioExibicaoNovaMidia={inicioExibicaoNovaMidia}
-                    setInicioExibicaoNovaMidia={setInicioExibicaoNovaMidia}
-                    fimExibicaoNovaMidia={fimExibicaoNovaMidia}
-                    setFimExibicaoNovaMidia={setFimExibicaoNovaMidia}
-
-
-                    mostrarTarjaMidia={mostrarTarjaMidia}
-                    tarjaEtiquetaMidia={tarjaEtiquetaMidia}
-                    tarjaTituloMidia={tarjaTituloMidia}
-                    tarjaSubtituloMidia={tarjaSubtituloMidia}
-                    tempoEntradaTarjaMidia={tempoEntradaTarjaMidia}
-                    tempoVisivelTarjaMidia={tempoVisivelTarjaMidia}
-                    tempoSaidaTarjaMidia={tempoSaidaTarjaMidia}
-                    tempoOcultaTarjaMidia={tempoOcultaTarjaMidia}
-                    setTempoOcultaTarjaMidia={setTempoOcultaTarjaMidia}
-                    tempoInicialTarjaMidia={tempoInicialTarjaMidia}
-                    setTempoInicialTarjaMidia={setTempoInicialTarjaMidia}
-                    modeloTarjaMidia={modeloTarjaMidia}
-                    setModeloTarjaMidia={setModeloTarjaMidia}
-                    tarjaQrcodeMidia={tarjaQrcodeMidia}
-                    setTarjaQrcodeMidia={setTarjaQrcodeMidia}
-
-                    setMostrarTarjaMidia={setMostrarTarjaMidia}
-                    setTarjaEtiquetaMidia={setTarjaEtiquetaMidia}
-                    setTarjaTituloMidia={setTarjaTituloMidia}
-                    setTarjaSubtituloMidia={setTarjaSubtituloMidia}
-                    setTempoEntradaTarjaMidia={setTempoEntradaTarjaMidia}
-                    setTempoVisivelTarjaMidia={setTempoVisivelTarjaMidia}
-                    setTempoSaidaTarjaMidia={setTempoSaidaTarjaMidia}
-                />
+                <AbaMidias />
             )}
 
             {abaAtiva === "noticias" && (
-                <AbaNoticias
-                    noticias={noticias}
-                    novaNoticia={novaNoticia}
-                    setNovaNoticia={setNovaNoticia}
-                    adicionarNoticia={adicionarNoticia}
-                    removerNoticia={removerNoticia}
-                    alternarNoticia={alternarNoticia}
-                    carregarNoticias={carregarNoticias}
-
-                    noticiaProgramada={noticiaProgramada}
-                    setNoticiaProgramada={setNoticiaProgramada}
-                    inicioNoticia={inicioNoticia}
-                    setInicioNoticia={setInicioNoticia}
-                    fimNoticia={fimNoticia}
-                    setFimNoticia={setFimNoticia}
-                    categoriaNoticia={categoriaNoticia}
-                    setCategoriaNoticia={setCategoriaNoticia}
-                />
+                <AbaNoticias />
             )}
         </AdminLayout>
     )

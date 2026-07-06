@@ -1,116 +1,17 @@
 import CidadeAutocomplete from "./clima/CidadeAutocomplete"
+import { salvarConfiguracoesPainel } from "@/lib/firestore/configuracoes"
+import { usePainelDraftContext } from "../context/PainelDraftContext"
 
 type ModoLogo = "transparente" | "fundo" | "card"
 type TamanhoLogo = "pequeno" | "medio" | "grande"
 
-type Props = {
-    nomePainel: string
-    subtitulo: string
-    logo: string
-    slogan: string
+export default function AbaConfiguracaoPainel() {
+    const { draft, atualizarConfiguracoesDraft } = usePainelDraftContext()
+    const config = draft.configuracoes
 
-    modoLogo: ModoLogo
-    tamanhoLogoPainel: TamanhoLogo
+    const modoLogo = (config.modoLogo || "fundo") as ModoLogo
+    const tamanhoLogoPainel = (config.tamanhoLogoPainel || "medio") as TamanhoLogo
 
-    tempoEntradaTarja: number
-    tempoVisivelTarja: number
-    tempoSaidaTarja: number
-    tempoOcultaTarja: number
-
-    mostrarLogoFaixaPainel: boolean
-    mostrarRodapeNoticias: boolean
-
-    setNomePainel: (valor: string) => void
-    setSubtitulo: (valor: string) => void
-    setLogo: (valor: string) => void
-    setSlogan: (valor: string) => void
-
-    setModoLogo: (valor: ModoLogo) => void
-    setTamanhoLogoPainel: (valor: TamanhoLogo) => void
-
-    setTempoEntradaTarja: (valor: number) => void
-    setTempoVisivelTarja: (valor: number) => void
-    setTempoSaidaTarja: (valor: number) => void
-    setTempoOcultaTarja: (valor: number) => void
-
-    setMostrarLogoFaixaPainel: (valor: boolean) => void
-    setMostrarRodapeNoticias: (valor: boolean) => void
-    setMostrarTemperaturaPainel: (valor: boolean) => void
-    setMostrarDescricaoClimaPainel: (valor: boolean) => void
-    setMostrarCidadePainel: (valor: boolean) => void
-    setMostrarDataPainel: (valor: boolean) => void
-    setMostrarHoraPainel: (valor: boolean) => void
-    setCidadeClimaPainel: (valor: string) => void
-
-    setLatitudeClimaPainel: (valor: number) => void
-    setLongitudeClimaPainel: (valor: number) => void
-    setTimezoneClimaPainel: (valor: string) => void
-
-    mostrarTemperaturaPainel: boolean
-    mostrarDescricaoClimaPainel: boolean
-    mostrarCidadePainel: boolean
-    mostrarDataPainel: boolean
-    mostrarHoraPainel: boolean
-    cidadeClimaPainel: string
-    latitudeClimaPainel: number
-    longitudeClimaPainel: number
-    timezoneClimaPainel: string
-
-    salvarConfiguracoes: () => void
-}
-
-export default function AbaConfiguracaoPainel({
-    nomePainel,
-    subtitulo,
-    logo,
-    slogan,
-
-    modoLogo,
-    tamanhoLogoPainel,
-
-    tempoEntradaTarja,
-    tempoVisivelTarja,
-    tempoSaidaTarja,
-    tempoOcultaTarja,
-
-    mostrarLogoFaixaPainel,
-    mostrarRodapeNoticias,
-    mostrarTemperaturaPainel,
-    mostrarDescricaoClimaPainel,
-    mostrarCidadePainel,
-    mostrarDataPainel,
-    mostrarHoraPainel,
-    cidadeClimaPainel,
-
-    setNomePainel,
-    setSubtitulo,
-    setLogo,
-    setSlogan,
-
-    setModoLogo,
-    setTamanhoLogoPainel,
-
-    setTempoEntradaTarja,
-    setTempoVisivelTarja,
-    setTempoSaidaTarja,
-    setTempoOcultaTarja,
-
-    setMostrarLogoFaixaPainel,
-    setMostrarRodapeNoticias,
-
-    setMostrarTemperaturaPainel,
-    setMostrarDescricaoClimaPainel,
-    setMostrarCidadePainel,
-    setMostrarDataPainel,
-    setMostrarHoraPainel,
-    setCidadeClimaPainel,
-
-    setLatitudeClimaPainel,
-    setLongitudeClimaPainel,
-    setTimezoneClimaPainel,
-
-    salvarConfiguracoes
-}: Props) {
     const alturaLogoPreview =
         tamanhoLogoPainel === "pequeno"
             ? "h-10"
@@ -124,6 +25,11 @@ export default function AbaConfiguracaoPainel({
             : modoLogo === "card"
                 ? "bg-white/10 border border-white/15 p-3 rounded-2xl"
                 : "bg-white p-3 rounded-2xl"
+
+    async function salvarConfiguracoes() {
+        await salvarConfiguracoesPainel(config)
+        alert("Configurações salvas!")
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">
@@ -158,8 +64,8 @@ export default function AbaConfiguracaoPainel({
 
                         <input
                             type="text"
-                            value={nomePainel}
-                            onChange={(e) => setNomePainel(e.target.value)}
+                            value={config.nomePainel || ""}
+                            onChange={(e) => atualizarConfiguracoesDraft({ nomePainel: e.target.value })}
                             className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                             placeholder="Ex: ADUSEPS"
                         />
@@ -172,8 +78,8 @@ export default function AbaConfiguracaoPainel({
 
                         <input
                             type="text"
-                            value={subtitulo}
-                            onChange={(e) => setSubtitulo(e.target.value)}
+                            value={config.subtitulo || ""}
+                            onChange={(e) => atualizarConfiguracoesDraft({ subtitulo: e.target.value })}
                             className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                             placeholder="Ex: Painel Institucional"
                         />
@@ -199,8 +105,8 @@ export default function AbaConfiguracaoPainel({
 
                         <input
                             type="text"
-                            value={logo}
-                            onChange={(e) => setLogo(e.target.value)}
+                            value={config.logo || ""}
+                            onChange={(e) => atualizarConfiguracoesDraft({ logo: e.target.value })}
                             className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                             placeholder="https://... ou /logo.png"
                         />
@@ -214,7 +120,7 @@ export default function AbaConfiguracaoPainel({
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <button
                                 type="button"
-                                onClick={() => setModoLogo("transparente")}
+                                onClick={() => atualizarConfiguracoesDraft({ modoLogo: "transparente" })}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "transparente"
                                     ? "bg-blue-600 text-white"
                                     : "border border-zinc-700 bg-zinc-800 text-white"
@@ -225,7 +131,7 @@ export default function AbaConfiguracaoPainel({
 
                             <button
                                 type="button"
-                                onClick={() => setModoLogo("fundo")}
+                                onClick={() => atualizarConfiguracoesDraft({ modoLogo: "fundo" })}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "fundo"
                                     ? "bg-blue-600 text-white"
                                     : "border border-zinc-700 bg-zinc-800 text-white"
@@ -236,7 +142,7 @@ export default function AbaConfiguracaoPainel({
 
                             <button
                                 type="button"
-                                onClick={() => setModoLogo("card")}
+                                onClick={() => atualizarConfiguracoesDraft({ modoLogo: "card" })}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "card"
                                     ? "bg-blue-600 text-white"
                                     : "border border-zinc-700 bg-zinc-800 text-white"
@@ -255,7 +161,7 @@ export default function AbaConfiguracaoPainel({
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <button
                                 type="button"
-                                onClick={() => setTamanhoLogoPainel("pequeno")}
+                                onClick={() => atualizarConfiguracoesDraft({ tamanhoLogoPainel: "pequeno" })}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "pequeno"
                                     ? "bg-blue-600 text-white"
                                     : "border border-zinc-700 bg-zinc-800 text-white"
@@ -266,7 +172,7 @@ export default function AbaConfiguracaoPainel({
 
                             <button
                                 type="button"
-                                onClick={() => setTamanhoLogoPainel("medio")}
+                                onClick={() => atualizarConfiguracoesDraft({ tamanhoLogoPainel: "medio" })}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "medio"
                                     ? "bg-blue-600 text-white"
                                     : "border border-zinc-700 bg-zinc-800 text-white"
@@ -277,7 +183,7 @@ export default function AbaConfiguracaoPainel({
 
                             <button
                                 type="button"
-                                onClick={() => setTamanhoLogoPainel("grande")}
+                                onClick={() => atualizarConfiguracoesDraft({ tamanhoLogoPainel: "grande" })}
                                 className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "grande"
                                     ? "bg-blue-600 text-white"
                                     : "border border-zinc-700 bg-zinc-800 text-white"
@@ -313,8 +219,8 @@ export default function AbaConfiguracaoPainel({
 
                     <input
                         type="checkbox"
-                        checked={mostrarLogoFaixaPainel}
-                        onChange={(e) => setMostrarLogoFaixaPainel(e.target.checked)}
+                        checked={config.mostrarLogoFaixaPainel ?? false}
+                        onChange={(e) => atualizarConfiguracoesDraft({ mostrarLogoFaixaPainel: e.target.checked })}
                         className="h-5 w-5"
                     />
                 </label>
@@ -332,8 +238,8 @@ export default function AbaConfiguracaoPainel({
 
                     <input
                         type="checkbox"
-                        checked={mostrarRodapeNoticias}
-                        onChange={(e) => setMostrarRodapeNoticias(e.target.checked)}
+                        checked={config.mostrarRodapeNoticias ?? true}
+                        onChange={(e) => atualizarConfiguracoesDraft({ mostrarRodapeNoticias: e.target.checked })}
                         className="h-5 w-5"
                     />
                 </label>
@@ -345,8 +251,8 @@ export default function AbaConfiguracaoPainel({
 
                     <input
                         type="text"
-                        value={slogan}
-                        onChange={(e) => setSlogan(e.target.value)}
+                        value={config.slogan || ""}
+                        onChange={(e) => atualizarConfiguracoesDraft({ slogan: e.target.value })}
                         className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                         placeholder="Ex: Informação e compromisso com o associado"
                     />
@@ -365,27 +271,27 @@ export default function AbaConfiguracaoPainel({
                 <div className="grid gap-3">
                     <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
                         <span>Mostrar temperatura</span>
-                        <input type="checkbox" checked={mostrarTemperaturaPainel} onChange={(e) => setMostrarTemperaturaPainel(e.target.checked)} />
+                        <input type="checkbox" checked={config.mostrarTemperaturaPainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarTemperaturaPainel: e.target.checked })} />
                     </label>
 
                     <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
                         <span>Mostrar descrição do clima</span>
-                        <input type="checkbox" checked={mostrarDescricaoClimaPainel} onChange={(e) => setMostrarDescricaoClimaPainel(e.target.checked)} />
+                        <input type="checkbox" checked={config.mostrarDescricaoClimaPainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarDescricaoClimaPainel: e.target.checked })} />
                     </label>
 
                     <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
                         <span>Mostrar cidade</span>
-                        <input type="checkbox" checked={mostrarCidadePainel} onChange={(e) => setMostrarCidadePainel(e.target.checked)} />
+                        <input type="checkbox" checked={config.mostrarCidadePainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarCidadePainel: e.target.checked })} />
                     </label>
 
                     <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
                         <span>Mostrar data</span>
-                        <input type="checkbox" checked={mostrarDataPainel} onChange={(e) => setMostrarDataPainel(e.target.checked)} />
+                        <input type="checkbox" checked={config.mostrarDataPainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarDataPainel: e.target.checked })} />
                     </label>
 
                     <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
                         <span>Mostrar hora</span>
-                        <input type="checkbox" checked={mostrarHoraPainel} onChange={(e) => setMostrarHoraPainel(e.target.checked)} />
+                        <input type="checkbox" checked={config.mostrarHoraPainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarHoraPainel: e.target.checked })} />
                     </label>
 
                     <div>
@@ -394,14 +300,16 @@ export default function AbaConfiguracaoPainel({
                         </label>
 
                         <CidadeAutocomplete
-    value={cidadeClimaPainel}
-    onSelecionar={(cidade) => {
-        setCidadeClimaPainel(cidade.nome)
-        setLatitudeClimaPainel(cidade.latitude)
-        setLongitudeClimaPainel(cidade.longitude)
-        setTimezoneClimaPainel(cidade.timezone)
-    }}
-/>
+                            value={config.cidadeClimaPainel || ""}
+                            onSelecionar={(cidade) => {
+                                atualizarConfiguracoesDraft({
+                                    cidadeClimaPainel: cidade.nome,
+                                    latitudeClimaPainel: cidade.latitude,
+                                    longitudeClimaPainel: cidade.longitude,
+                                    timezoneClimaPainel: cidade.timezone
+                                })
+                            }}
+                        />
                     </div>
                 </div>
             </section>
@@ -425,8 +333,8 @@ export default function AbaConfiguracaoPainel({
                         <input
                             type="number"
                             min={0}
-                            value={tempoEntradaTarja}
-                            onChange={(e) => setTempoEntradaTarja(Number(e.target.value))}
+                            value={config.tempoEntradaTarja || 1}
+                            onChange={(e) => atualizarConfiguracoesDraft({ tempoEntradaTarja: Number(e.target.value) })}
                             className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                         />
                     </div>
@@ -439,8 +347,8 @@ export default function AbaConfiguracaoPainel({
                         <input
                             type="number"
                             min={1}
-                            value={tempoVisivelTarja}
-                            onChange={(e) => setTempoVisivelTarja(Number(e.target.value))}
+                            value={config.tempoVisivelTarja || 8}
+                            onChange={(e) => atualizarConfiguracoesDraft({ tempoVisivelTarja: Number(e.target.value) })}
                             className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                         />
                     </div>
@@ -453,8 +361,8 @@ export default function AbaConfiguracaoPainel({
                         <input
                             type="number"
                             min={0}
-                            value={tempoSaidaTarja}
-                            onChange={(e) => setTempoSaidaTarja(Number(e.target.value))}
+                            value={config.tempoSaidaTarja || 1}
+                            onChange={(e) => atualizarConfiguracoesDraft({ tempoSaidaTarja: Number(e.target.value) })}
                             className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                         />
                     </div>
@@ -467,8 +375,8 @@ export default function AbaConfiguracaoPainel({
                         <input
                             type="number"
                             min={0}
-                            value={tempoOcultaTarja}
-                            onChange={(e) => setTempoOcultaTarja(Number(e.target.value))}
+                            value={config.tempoOcultaTarja || 10}
+                            onChange={(e) => atualizarConfiguracoesDraft({ tempoOcultaTarja: Number(e.target.value) })}
                             className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
                         />
                     </div>
@@ -483,10 +391,10 @@ export default function AbaConfiguracaoPainel({
 
                 <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-[#071633] p-5">
                     <div className="flex items-center gap-4">
-                        {logo.trim() !== "" && (
+                        {(config.logo || "").trim() !== "" && (
                             <div className={classeLogoPreview}>
                                 <img
-                                    src={logo}
+                                    src={config.logo || ""}
                                     alt="Prévia da logo"
                                     className={`${alturaLogoPreview} w-auto object-contain`}
                                 />
@@ -495,18 +403,18 @@ export default function AbaConfiguracaoPainel({
 
                         <div className="min-w-0">
                             <h3 className="truncate text-2xl font-black text-white">
-                                {nomePainel || "Nome do painel"}
+                                {config.nomePainel || "Nome do painel"}
                             </h3>
 
                             <p className="truncate text-sm font-semibold text-white/65">
-                                {subtitulo || "Subtítulo do painel"}
+                                {config.subtitulo || "Subtítulo do painel"}
                             </p>
                         </div>
                     </div>
 
                     <div className="mt-5 rounded-xl bg-[#183b78] px-4 py-3">
                         <p className="truncate font-bold text-white">
-                            {slogan || "Slogan do rodapé"}
+                            {config.slogan || "Slogan do rodapé"}
                         </p>
                     </div>
                 </div>

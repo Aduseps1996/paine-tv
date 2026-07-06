@@ -1,8 +1,9 @@
-import type { Midia, ModeloTarja, ModoExibicaoMidia, TemplateMidia, TipoMidia } from "@/types/painel"
-import { atualizarMidia } from "@/lib/firestore/midias"
 import { useAbaMidiasModais } from "@/hooks/admin/useAbaMidiasModais"
+import { useNovaMidiaForm } from "@/hooks/admin/useNovaMidiaForm"
+import type { Midia, ModeloTarja, ModoExibicaoMidia, TemplateMidia, TipoMidia } from "@/types/painel"
+import { usePainelDraftContext } from "../context/PainelDraftContext"
 
-type Props = {
+export type AbaMidiasProps = {
     midias: Midia[]
     arquivo: string
     tipo: TipoMidia
@@ -69,8 +70,15 @@ type Props = {
 }
 
 /* Desestruturação */
-export default function AbaMidias({
-    midias,
+export default function AbaMidias() {
+    const {
+        draft,
+        atualizarMidiasDraft
+    } = usePainelDraftContext()
+
+    const midias = draft.midias
+
+    const {
     arquivo,
     tipo,
     template,
@@ -99,11 +107,6 @@ export default function AbaMidias({
     setQrcodeMidia,
     setCategoriaMidia,
     setCtaMidia,
-    adicionarMidia,
-    removerMidia,
-    alternarMidia,
-    carregarMidias,
-
     mostrarTarjaMidia,
     tarjaEtiquetaMidia,
     tarjaTituloMidia,
@@ -127,7 +130,75 @@ export default function AbaMidias({
     setModeloTarjaMidia,
     tarjaQrcodeMidia,
     setTarjaQrcodeMidia
-}: Props) {
+    } = useNovaMidiaForm({
+        totalMidias: midias.length,
+        carregarMidias: () => {}
+    })
+
+    const atualizarMidiaDraft = (id: string, dados: Partial<Midia>) => {
+        atualizarMidiasDraft(
+            midias.map((midia) =>
+                midia.id === id
+                    ? { ...midia, ...dados }
+                    : midia
+            )
+        )
+    }
+
+    const alternarMidiaDraft = (id: string, ativo: boolean) => {
+        atualizarMidiasDraft(
+            midias.map((midia) =>
+                midia.id === id
+                    ? { ...midia, ativo: !ativo }
+                    : midia
+            )
+        )
+    }
+
+    const removerMidiaDraft = (id: string) => {
+        atualizarMidiasDraft(
+            midias.filter((midia) => midia.id !== id)
+        )
+    }
+
+    const adicionarMidiaDraft = () => {
+        if (!arquivo.trim()) return
+
+        const novaMidia: Midia = {
+            id: `draft-${Date.now()}`,
+            tipo,
+            arquivo: arquivo.trim(),
+            ativo: true,
+            ordem: midias.length + 1,
+            duracao: 8,
+            template,
+            modoExibicao,
+            titulo: tituloMidia.trim(),
+            subtitulo: subtituloMidia.trim(),
+            rodape: rodapeMidia.trim(),
+            qrcode: qrcodeMidia.trim(),
+            categoria: categoriaMidia.trim(),
+            cta: ctaMidia.trim(),
+            mostrarTarja: mostrarTarjaMidia,
+            tarjaEtiqueta: tarjaEtiquetaMidia.trim(),
+            tarjaTitulo: tarjaTituloMidia.trim(),
+            tarjaSubtitulo: tarjaSubtituloMidia.trim(),
+            tempoEntradaTarja: tempoEntradaTarjaMidia,
+            tempoVisivelTarja: tempoVisivelTarjaMidia,
+            tempoSaidaTarja: tempoSaidaTarjaMidia,
+            tempoOcultaTarja: tempoOcultaTarjaMidia,
+            tempoInicialTarja: tempoInicialTarjaMidia,
+            modeloTarja: modeloTarjaMidia,
+            exibicaoProgramada: tipo === "youtube" ? true : programarExibicaoNovaMidia,
+            tipoExibicaoProgramada: tipo === "youtube" ? "youtube" : "midia",
+            inicioExibicao: inicioExibicaoNovaMidia,
+            fimExibicao: fimExibicaoNovaMidia,
+            linkYoutubeExibicao: tipo === "youtube" ? arquivo.trim() : "",
+            pesoExibicao: 1
+        }
+
+        atualizarMidiasDraft([...midias, novaMidia])
+    }
     const {
         modalTarjaAberto,
         setModalTarjaAberto,
@@ -303,7 +374,7 @@ export default function AbaMidias({
 
 
                     <button
-                        onClick={adicionarMidia}
+                        onClick={adicionarMidiaDraft}
                         className="rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110"
                     >
                         Adicionar mídia
@@ -465,11 +536,9 @@ export default function AbaMidias({
                                         onChange={(e) => {
                                             if (!midia.id) return
 
-                                            atualizarMidia(midia.id, {
+                                            atualizarMidiaDraft(midia.id, {
                                                 duracao: Number(e.target.value)
                                             })
-
-                                            carregarMidias()
                                         }}
                                         className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
                                     />
@@ -492,11 +561,9 @@ export default function AbaMidias({
                                     onChange={(e) => {
                                         if (!midia.id) return
 
-                                        atualizarMidia(midia.id, {
+                                        atualizarMidiaDraft(midia.id, {
                                             ordem: Number(e.target.value)
                                         })
-
-                                        carregarMidias()
                                     }}
                                     className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
                                 />
@@ -515,11 +582,9 @@ export default function AbaMidias({
                                     onChange={(e) => {
                                         if (!midia.id) return
 
-                                        atualizarMidia(midia.id, {
+                                        atualizarMidiaDraft(midia.id, {
                                             pesoExibicao: Number(e.target.value)
                                         })
-
-                                        carregarMidias()
                                     }}
                                     className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm"
                                 />
@@ -532,7 +597,7 @@ export default function AbaMidias({
                             <div className="mt-4 flex flex-wrap gap-3">
                                 <button
                                     onClick={() =>
-                                        midia.id && alternarMidia(midia.id, midia.ativo)
+                                        midia.id && alternarMidiaDraft(midia.id, midia.ativo)
                                     }
                                     className={`rounded-lg px-4 py-2 text-sm font-bold transition ${midia.ativo
                                         ? "bg-yellow-600 hover:bg-yellow-700"
@@ -562,7 +627,7 @@ export default function AbaMidias({
 
 
                                 <button
-                                    onClick={() => midia.id && removerMidia(midia.id)}
+                                    onClick={() => midia.id && removerMidiaDraft(midia.id)}
                                     className="rounded-lg bg-red-600 px-4 py-2 text-sm font-bold transition hover:bg-red-700"
                                 >
                                     Excluir
@@ -740,7 +805,7 @@ export default function AbaMidias({
                             <button
                                 onClick={() => {
                                     if (midiaEditando) {
-                                        atualizarMidia(midiaEditando, {
+                                        atualizarMidiaDraft(midiaEditando, {
                                             mostrarTarja: mostrarTarjaMidia,
                                             tarjaEtiqueta: tarjaEtiquetaMidia,
                                             tarjaTitulo: tarjaTituloMidia,
@@ -753,7 +818,6 @@ export default function AbaMidias({
                                             modeloTarja: modeloTarjaMidia,
                                             qrcode: tarjaQrcodeMidia
                                         })
-                                        carregarMidias()
                                     }
                                     setModalTarjaAberto(false)
                                     setMidiaEditando(null)
@@ -911,15 +975,13 @@ export default function AbaMidias({
                                         }
                                     }
 
-                                    await atualizarMidia(midiaExibicaoEditando, {
+                                    atualizarMidiaDraft(midiaExibicaoEditando, {
                                         exibicaoProgramada: ehYoutube ? true : exibicaoProgramada,
                                         tipoExibicaoProgramada: ehYoutube ? "youtube" : "midia",
                                         inicioExibicao,
                                         fimExibicao,
                                         linkYoutubeExibicao: ehYoutube ? linkYoutubeExibicao : ""
                                     })
-
-                                    carregarMidias()
 
                                     setModalExibicaoAberto(false)
                                     setMidiaExibicaoEditando(null)

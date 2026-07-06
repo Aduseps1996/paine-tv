@@ -11,19 +11,25 @@ import {
 } from "firebase/firestore"
 
 import { db } from "../lib/firebase"
-import type { Midia, Noticia } from "@/types/painel"
+import type { ConfiguracoesPainel, Midia, Noticia } from "@/types/painel"
 
 export default function RodapeNoticias({
     logo,
     slogan,
-    midiaAtual
+    midiaAtual,
+    modoPreview = false,
+    previewNoticias,
+    previewConfiguracoes
 }: {
     logo: string
     slogan: string
     midiaAtual?: Midia | null
+    modoPreview?: boolean
+    previewNoticias?: Noticia[]
+    previewConfiguracoes?: ConfiguracoesPainel
 }) {
     const [noticias, setNoticias] = useState<Noticia[]>([])
-    const [agora, setAgora] = useState(new Date())
+    const [agora, setAgora] = useState(() => new Date())
 
     const [tamanhoFonteRodape, setTamanhoFonteRodape] = useState(28)
     const [tamanhoFonteSlogan, setTamanhoFonteSlogan] = useState(18)
@@ -72,6 +78,8 @@ export default function RodapeNoticias({
             return false
         }
 
+        if (!agora) return false
+
         return agora >= inicio && agora <= fim
     }
 
@@ -84,6 +92,8 @@ export default function RodapeNoticias({
     }, [])
 
     useEffect(() => {
+        if (modoPreview) return
+
         const consulta = query(
             collection(db, "noticias"),
             orderBy("ordem", "asc")
@@ -101,9 +111,11 @@ export default function RodapeNoticias({
         })
 
         return () => unsubscribe()
-    }, [])
+    }, [modoPreview])
 
     useEffect(() => {
+        if (modoPreview) return
+
         const unsubscribe = onSnapshot(
             doc(db, "configuracoes", "geral"),
             (documento) => {
@@ -155,18 +167,38 @@ export default function RodapeNoticias({
         )
 
         return () => unsubscribe()
-    }, [])
+    }, [modoPreview])
 
-    const hora = agora.toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit"
-    })
+    const hora = agora
+        ? agora.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit"
+        })
+        : "--:--"
 
-    const data = agora.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
-    })
+    const data = agora
+        ? agora.toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric"
+        })
+        : ""
+
+    const dadosPreview = modoPreview ? previewConfiguracoes : undefined
+
+    const tamanhoFonteRodapeFinal = dadosPreview?.tamanhoFonteRodape || tamanhoFonteRodape
+    const tamanhoFonteSloganFinal = dadosPreview?.tamanhoFonteSlogan || tamanhoFonteSlogan
+    const tamanhoFonteHoraFinal = dadosPreview?.tamanhoFonteHora || tamanhoFonteHora
+    const alturaBarraNoticiasFinal = dadosPreview?.alturaBarraNoticias || alturaBarraNoticias
+    const duracaoAnimacaoNoticiasFinal =
+        dadosPreview?.duracaoAnimacaoNoticias || duracaoAnimacaoNoticias
+    const tamanhoLogoRodapeFinal = dadosPreview?.tamanhoLogoRodape || tamanhoLogoRodape
+    const tempoEntradaTarjaConfig = dadosPreview?.tempoEntradaTarja || tempoEntradaTarja
+    const tempoVisivelTarjaConfig = dadosPreview?.tempoVisivelTarja || tempoVisivelTarja
+    const tempoSaidaTarjaConfig = dadosPreview?.tempoSaidaTarja || tempoSaidaTarja
+    const tempoOcultaTarjaConfig = dadosPreview?.tempoOcultaTarja || tempoOcultaTarja
+    const mostrarRodapeNoticiasFinal =
+        dadosPreview?.mostrarRodapeNoticias ?? mostrarRodapeNoticias
 
     const mostrarTarjaFinal =
         Boolean(midiaAtual?.mostrarTarja) &&
@@ -182,18 +214,18 @@ export default function RodapeNoticias({
         midiaAtual?.tarjaSubtitulo || data
 
     const tempoEntradaTarjaFinal =
-        Number(midiaAtual?.tempoEntradaTarja || tempoEntradaTarja)
+        Number(midiaAtual?.tempoEntradaTarja || tempoEntradaTarjaConfig)
 
     const tempoVisivelTarjaFinal =
-        Number(midiaAtual?.tempoVisivelTarja || tempoVisivelTarja)
+        Number(midiaAtual?.tempoVisivelTarja || tempoVisivelTarjaConfig)
 
     const tempoSaidaTarjaFinal =
-        Number(midiaAtual?.tempoSaidaTarja || tempoSaidaTarja)
+        Number(midiaAtual?.tempoSaidaTarja || tempoSaidaTarjaConfig)
 
     const tempoOcultaTarjaFinal =
         Number(
             midiaAtual?.tempoOcultaTarja ||
-            tempoOcultaTarja
+            tempoOcultaTarjaConfig
         )
 
     const tempoInicialTarjaFinal =
@@ -202,7 +234,9 @@ export default function RodapeNoticias({
     const modeloTarjaFinal =
         midiaAtual?.modeloTarja ?? "telejornal"
 
-    const noticiasVisiveis = noticias.filter((noticia) => {
+    const noticiasBase = modoPreview ? previewNoticias || [] : noticias
+
+    const noticiasVisiveis = noticiasBase.filter((noticia) => {
         return noticiaEstaDentroDoHorario(noticia)
     })
 
@@ -342,7 +376,7 @@ export default function RodapeNoticias({
                 className="absolute left-0 right-0 z-30 pointer-events-none"
                 /* Altura da tarja */
                 style={{
-                    bottom: `${alturaBarraNoticias + 35}px`
+                    bottom: `${alturaBarraNoticiasFinal + 35}px`
                 }}
             >
                 {mostrarTarjaFinal && modeloTarjaFinal === "telejornal" && (
@@ -366,8 +400,8 @@ export default function RodapeNoticias({
                             {/* QR por trás */}
                             <div
                                 className={`absolute left-4 bottom-full z-0 transition-all duration-1000 ${mostrarQrTelejornal
-                                        ? "translate-y-0 opacity-100"
-                                        : "translate-y-full opacity-0"
+                                    ? "translate-y-0 opacity-100"
+                                    : "translate-y-full opacity-0"
                                     }`}
                             >
                                 {midiaAtual?.qrcode && (
@@ -416,7 +450,7 @@ export default function RodapeNoticias({
                                     <h2
                                         className="truncate font-black uppercase leading-none tracking-tight text-[#071b42]"
                                         style={{
-                                            fontSize: `clamp(18px, 1.55vw, ${Math.max(tamanhoFonteSlogan + 2, 26)}px)`
+                                            fontSize: `clamp(18px, 1.55vw, ${Math.max(tamanhoFonteSloganFinal + 2, 26)}px)`
                                         }}
                                     >
                                         {tituloTarjaFinal}
@@ -425,7 +459,7 @@ export default function RodapeNoticias({
                                     <p
                                         className="mt-2 truncate font-semibold text-[#334155]"
                                         style={{
-                                            fontSize: `${Math.max(tamanhoFonteSlogan - 2, 14)}px`
+                                            fontSize: `${Math.max(tamanhoFonteSloganFinal - 2, 14)}px`
                                         }}
                                     >
                                         {subtituloTarjaFinal}
@@ -440,7 +474,7 @@ export default function RodapeNoticias({
                                                 src={logo}
                                                 alt="Logo ADUSEPS"
                                                 className="w-auto object-contain"
-                                                style={{ height: `${tamanhoLogoRodape}px` }}
+                                                style={{ height: `${tamanhoLogoRodapeFinal}px` }}
                                             />
                                         </div>
                                     )}
@@ -449,7 +483,7 @@ export default function RodapeNoticias({
                                         <span
                                             className="font-black tracking-tight text-white drop-shadow"
                                             style={{
-                                                fontSize: `${tamanhoFonteHora}px`
+                                                fontSize: `${tamanhoFonteHoraFinal}px`
                                             }}
                                         >
                                             {hora}
@@ -508,8 +542,8 @@ export default function RodapeNoticias({
                 {mostrarTarjaFinal && modeloTarjaFinal === "live" && (
                     <div
                         className={`relative mx-auto w-[94vw] transition-all ${faseTarja === "entrando" || faseTarja === "visivel"
-                                ? "translate-x-0 opacity-100"
-                                : "-translate-x-[120%] opacity-0"
+                            ? "translate-x-0 opacity-100"
+                            : "-translate-x-[120%] opacity-0"
                             }`}
                         style={{
                             transitionDuration:
@@ -548,7 +582,7 @@ export default function RodapeNoticias({
                                 <h2
                                     className="font-black uppercase leading-tight text-white drop-shadow line-clamp-2"
                                     style={{
-                                        fontSize: `${Math.max(tamanhoFonteSlogan + 8, 26)}px`
+                                        fontSize: `${Math.max(tamanhoFonteSloganFinal + 8, 26)}px`
                                     }}
                                 >
                                     {tituloTarjaFinal}
@@ -560,7 +594,7 @@ export default function RodapeNoticias({
                                     <p
                                         className="truncate font-semibold text-white/75"
                                         style={{
-                                            fontSize: `${Math.max(tamanhoFonteSlogan - 2, 14)}px`
+                                            fontSize: `${Math.max(tamanhoFonteSloganFinal - 2, 14)}px`
                                         }}
                                     >
                                         {subtituloTarjaFinal}
@@ -595,7 +629,7 @@ export default function RodapeNoticias({
                                 <span
                                     className="relative mt-1 font-black leading-none tracking-tight text-white"
                                     style={{
-                                        fontSize: `${Math.max(tamanhoFonteHora + 2, 26)}px`
+                                        fontSize: `${Math.max(tamanhoFonteHoraFinal + 2, 26)}px`
                                     }}
                                 >
                                     {hora}
@@ -640,7 +674,7 @@ export default function RodapeNoticias({
 
                                     <span
                                         className="relative font-black leading-none drop-shadow"
-                                        style={{ fontSize: `${Math.max(tamanhoFonteHora + 2, 26)}px` }}
+                                        style={{ fontSize: `${Math.max(tamanhoFonteHoraFinal + 2, 26)}px` }}
                                     >
                                         {hora}
                                     </span>
@@ -662,7 +696,7 @@ export default function RodapeNoticias({
                                     <h2
                                         className="truncate font-black uppercase leading-none text-white drop-shadow"
                                         style={{
-                                            fontSize: `${Math.max(tamanhoFonteSlogan + 5, 23)}px`
+                                            fontSize: `${Math.max(tamanhoFonteSloganFinal + 5, 23)}px`
                                         }}
                                     >
                                         {tituloTarjaFinal}
@@ -672,7 +706,7 @@ export default function RodapeNoticias({
                                         <p
                                             className="mt-1 truncate font-semibold text-white/70"
                                             style={{
-                                                fontSize: `${Math.max(tamanhoFonteSlogan - 4, 13)}px`
+                                                fontSize: `${Math.max(tamanhoFonteSloganFinal - 4, 13)}px`
                                             }}
                                         >
                                             {subtituloTarjaFinal}
@@ -865,19 +899,19 @@ export default function RodapeNoticias({
             </div>
 
             {/* RODAPÉ DE NOTÍCIAS FIXO */}
-            {mostrarRodapeNoticias && (
+            {mostrarRodapeNoticiasFinal && (
                 <div
                     className="absolute bottom-0 left-0 w-full text-white z-20 overflow-hidden border-t border-white/10 shadow-[0_-18px_45px_rgba(0,0,0,0.45)]"
                 >
                     <div
                         className="bg-[#183b78]/95 flex items-center overflow-hidden px-[clamp(0.5rem,1.5vw,1.5rem)]"
-                        style={{ height: `${alturaBarraNoticias}px` }}
+                        style={{ height: `${alturaBarraNoticiasFinal}px` }}
                     >
                         <div
                             className="whitespace-nowrap animate-[marquee_linear_infinite] font-bold leading-none tracking-normal text-white will-change-transform [transform:translate3d(0,0,0)]"
                             style={{
-                                fontSize: `${tamanhoFonteRodape}px`,
-                                animationDuration: `${duracaoAnimacaoNoticias}s`
+                                fontSize: `${tamanhoFonteRodapeFinal}px`,
+                                animationDuration: `${duracaoAnimacaoNoticiasFinal}s`
                             }}
                         >
                             {noticiasVisiveis.map((noticia, index) => (
@@ -892,7 +926,7 @@ export default function RodapeNoticias({
                                     {index < noticiasVisiveis.length - 1 && (
                                         <span
                                             className="text-[#f15434] mx-[clamp(0.75rem,2vw,1.5rem)] opacity-90"
-                                            style={{ fontSize: `${tamanhoFonteRodape}px` }}
+                                            style={{ fontSize: `${tamanhoFonteRodapeFinal}px` }}
                                         >
                                             •
                                         </span>
