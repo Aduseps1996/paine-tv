@@ -79,60 +79,60 @@ export default function AbaMidias() {
     const midias = draft.midias
 
     const {
-    arquivo,
-    tipo,
-    template,
-    modoExibicao,
-    setModoExibicao,
-    tituloMidia,
-    subtituloMidia,
-    rodapeMidia,
-    qrcodeMidia,
-    categoriaMidia,
-    ctaMidia,
+        arquivo,
+        tipo,
+        template,
+        modoExibicao,
+        setModoExibicao,
+        tituloMidia,
+        subtituloMidia,
+        rodapeMidia,
+        qrcodeMidia,
+        categoriaMidia,
+        ctaMidia,
 
-    programarExibicaoNovaMidia,
-    setProgramarExibicaoNovaMidia,
-    inicioExibicaoNovaMidia,
-    setInicioExibicaoNovaMidia,
-    fimExibicaoNovaMidia,
-    setFimExibicaoNovaMidia,
+        programarExibicaoNovaMidia,
+        setProgramarExibicaoNovaMidia,
+        inicioExibicaoNovaMidia,
+        setInicioExibicaoNovaMidia,
+        fimExibicaoNovaMidia,
+        setFimExibicaoNovaMidia,
 
-    setArquivo,
-    setTipo,
-    setTemplate,
-    setTituloMidia,
-    setSubtituloMidia,
-    setRodapeMidia,
-    setQrcodeMidia,
-    setCategoriaMidia,
-    setCtaMidia,
-    mostrarTarjaMidia,
-    tarjaEtiquetaMidia,
-    tarjaTituloMidia,
-    tarjaSubtituloMidia,
-    tempoEntradaTarjaMidia,
-    tempoVisivelTarjaMidia,
-    tempoSaidaTarjaMidia,
-    tempoOcultaTarjaMidia,
+        setArquivo,
+        setTipo,
+        setTemplate,
+        setTituloMidia,
+        setSubtituloMidia,
+        setRodapeMidia,
+        setQrcodeMidia,
+        setCategoriaMidia,
+        setCtaMidia,
+        mostrarTarjaMidia,
+        tarjaEtiquetaMidia,
+        tarjaTituloMidia,
+        tarjaSubtituloMidia,
+        tempoEntradaTarjaMidia,
+        tempoVisivelTarjaMidia,
+        tempoSaidaTarjaMidia,
+        tempoOcultaTarjaMidia,
 
-    setMostrarTarjaMidia,
-    setTarjaEtiquetaMidia,
-    setTarjaTituloMidia,
-    setTarjaSubtituloMidia,
-    setTempoEntradaTarjaMidia,
-    setTempoVisivelTarjaMidia,
-    setTempoSaidaTarjaMidia,
-    setTempoOcultaTarjaMidia,
-    tempoInicialTarjaMidia,
-    setTempoInicialTarjaMidia,
-    modeloTarjaMidia,
-    setModeloTarjaMidia,
-    tarjaQrcodeMidia,
-    setTarjaQrcodeMidia
+        setMostrarTarjaMidia,
+        setTarjaEtiquetaMidia,
+        setTarjaTituloMidia,
+        setTarjaSubtituloMidia,
+        setTempoEntradaTarjaMidia,
+        setTempoVisivelTarjaMidia,
+        setTempoSaidaTarjaMidia,
+        setTempoOcultaTarjaMidia,
+        tempoInicialTarjaMidia,
+        setTempoInicialTarjaMidia,
+        modeloTarjaMidia,
+        setModeloTarjaMidia,
+        tarjaQrcodeMidia,
+        setTarjaQrcodeMidia
     } = useNovaMidiaForm({
         totalMidias: midias.length,
-        carregarMidias: () => {}
+        carregarMidias: () => { }
     })
 
     const atualizarMidiaDraft = (id: string, dados: Partial<Midia>) => {
@@ -283,47 +283,32 @@ export default function AbaMidias() {
                     </select>
 
                     {tipo !== "youtube" && (
-    <div className="grid gap-3">
-        <select
-            value={template}
-            onChange={(e) =>
-                setTemplate(
-                    e.target.value as
-                        | "cheio"
-                        | "informativo"
-                        | "institucional"
-                        | "urgente"
-                        | "painel"
-                )
-            }
-            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-        >
-            <option value="cheio">Banner cheio</option>
-            <option value="informativo">Informativo</option>
-            <option value="institucional">Institucional</option>
-            <option value="urgente">Urgente</option>
-            <option value="painel">Painel informativo</option>
-        </select>
+                        <div className="grid gap-3">
+                            <select
+                                value={template}
+                                onChange={(e) =>
+                                    setTemplate(
+                                        e.target.value as
+                                        | "cheio"
+                                        | "institucional"
+                                        | "painel"
+                                    )
+                                }
+                            >
+                                <option value="cheio">
+                                    Banner Cheio
+                                </option>
 
-        <select
-            value={modoExibicao}
-            onChange={(e) =>
-                setModoExibicao(
-                    e.target.value as "cover" | "contain"
-                )
-            }
-            className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 outline-none"
-        >
-            <option value="cover">
-                Preencher espaço (recomendado)
-            </option>
+                                <option value="institucional">
+                                    Institucional
+                                </option>
 
-            <option value="contain">
-                Mostrar mídia inteira
-            </option>
-        </select>
-    </div>
-)}
+                                <option value="painel">
+                                    Painel Informativo
+                                </option>
+                            </select>
+                        </div>
+                    )}
 
                     <div className="sm:col-span-2 rounded-2xl border border-zinc-700 bg-zinc-800/70 p-4 space-y-4">
                         <label className="flex items-center gap-3">
@@ -380,7 +365,7 @@ export default function AbaMidias() {
                         Adicionar mídia
                     </button>
 
-                    {(template === "institucional" || template === "urgente" || template === "painel") && (
+                    {(template === "institucional" || template === "painel") && (
                         <div className="md:col-span-4 mt-2 grid grid-cols-1 gap-4">
                             <input
                                 type="text"
@@ -489,11 +474,11 @@ export default function AbaMidias() {
                             <div className="mt-3 overflow-hidden rounded-[1.8rem] border border-zinc-700 bg-black">
                                 <div className="relative aspect-video bg-black">
                                     {midia.tipo === "imagem" && (
-    <img
-        src={midia.arquivo}
-        alt="Prévia da mídia"
-        className="absolute inset-0 w-full h-full object-contain bg-black"
-    />
+                                        <img
+                                            src={midia.arquivo}
+                                            alt="Prévia da mídia"
+                                            className="absolute inset-0 w-full h-full object-contain bg-black"
+                                        />
                                     )}
 
                                     {midia.tipo === "video" && (

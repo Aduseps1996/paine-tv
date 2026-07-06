@@ -2,9 +2,7 @@ export type TipoMidia = "imagem" | "video" | "youtube"
 
 export type TemplateMidia =
     | "cheio"
-    | "informativo"
     | "institucional"
-    | "urgente"
     | "painel"
 
 export type ModoExibicaoMidia = "cover" | "contain"

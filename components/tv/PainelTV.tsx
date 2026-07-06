@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Chamada from "@/components/Chamada"
-import BannerRotativo from "@/components/BannerRotativo"
+import BannerRotativo from "@/components/tv/banner/BannerRotativo"
 import RodapeNoticias from "@/components/RodapeNoticias"
 import Image from "next/image"
 
@@ -19,17 +19,17 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus"
 import type { ConfiguracoesPainel, Midia, Noticia } from "@/types/painel"
 
 type Props = {
-    modoPreview?: boolean
-    previewConfiguracoes?: ConfiguracoesPainel
-    previewMidias?: Midia[]
-    previewNoticias?: Noticia[]
+  modoPreview?: boolean
+  previewConfiguracoes?: ConfiguracoesPainel
+  previewMidias?: Midia[]
+  previewNoticias?: Noticia[]
 }
 
 export default function PainelTV({
-    modoPreview = false,
-    previewConfiguracoes,
-    previewMidias,
-    previewNoticias
+  modoPreview = false,
+  previewConfiguracoes,
+  previewMidias,
+  previewNoticias
 }: Props) {
 
   const [mostrarChamada, setMostrarChamada] = useState(false)
@@ -38,7 +38,7 @@ export default function PainelTV({
   const [guicheAtual, setGuicheAtual] = useState("Guichê 2")
   const ultimaChamadaIdRef = useRef("")
   const ultimaRepeticaoIdRef = useRef<number | null>(null)
-  const [painelIniciadoEm] = useState(() => Date.now())
+  const painelIniciadoEm = useRef(Date.now())
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
   const [logo, setLogo] = useState("")
@@ -54,7 +54,7 @@ export default function PainelTV({
 
   const [midiaAtualTv, setMidiaAtualTv] = useState<Midia | null>(null)
 
-  const tocarSomChamada = () => {
+  const tocarSomChamada = useCallback(() => {
     try {
       const audio = new Audio("/sons/chamada.mp3")
 
@@ -62,7 +62,7 @@ export default function PainelTV({
 
       audio.play().catch(() => { })
     } catch { }
-  }
+  }, [])
 
   const [montado, setMontado] = useState(false)
 
@@ -80,6 +80,7 @@ export default function PainelTV({
     const [fullscreenAtivado, setFullscreenAtivado] = useState(false)
   */
   useEffect(() => {
+    if (modoPreview) return
 
     const unsubscribe = onSnapshot(
       doc(db, "configuracoes", "geral"),
@@ -108,9 +109,10 @@ export default function PainelTV({
 
     return () => unsubscribe()
 
-  }, [])
+  }, [modoPreview])
 
   useEffect(() => {
+    if (modoPreview) return
 
     const unsubscribe = onSnapshot(
       doc(db, "painel_chamadas", "atual"),
@@ -130,7 +132,7 @@ export default function PainelTV({
           return
         }
 
-        if (criadoEmMs < painelIniciadoEm) {
+        if (criadoEmMs < painelIniciadoEm.current) {
           updateDoc(doc(db, "painel_chamadas", "atual"), {
             ativo: false
           })
@@ -190,31 +192,38 @@ export default function PainelTV({
 
     return () => unsubscribe()
 
-  }, [painelIniciadoEm])
+  }, [modoPreview])
+
+  const logoFinal = modoPreview ? previewConfiguracoes?.logo || "" : logo
+  const nomePainelFinal = modoPreview ? previewConfiguracoes?.nomePainel || "" : nomePainel
+  const subtituloFinal = modoPreview ? previewConfiguracoes?.subtitulo || "" : subtitulo
+  const modoLogoFinal = modoPreview ? previewConfiguracoes?.modoLogo || "fundo" : modoLogo
+  const tamanhoLogoPainelFinal = modoPreview ? previewConfiguracoes?.tamanhoLogoPainel || "medio" : tamanhoLogoPainel
+  const sloganFinal = modoPreview ? previewConfiguracoes?.slogan || "" : slogan
+  const fallbackFinal = modoPreview ? previewConfiguracoes?.fallback || fallback : fallback
 
   const tamanhoLogoClasse =
-    tamanhoLogoPainel === "pequeno"
+    tamanhoLogoPainelFinal === "pequeno"
       ? "h-[clamp(2rem,4vw,2.75rem)] w-[clamp(2rem,4vw,2.75rem)]"
-      : tamanhoLogoPainel === "grande"
+      : tamanhoLogoPainelFinal === "grande"
         ? "h-[clamp(3.5rem,7vw,5rem)] w-[clamp(3.5rem,7vw,5rem)]"
         : "h-[clamp(2.75rem,5vw,3.75rem)] w-[clamp(2.75rem,5vw,3.75rem)]"
 
   const modoLogoClasse =
-    modoLogo === "transparente"
+    modoLogoFinal === "transparente"
       ? "bg-transparent p-0 shadow-none"
-      : modoLogo === "card"
+      : modoLogoFinal === "card"
         ? "bg-black/25 border border-white/15 p-2 shadow-md backdrop-blur-sm"
         : "bg-white/95 p-2 shadow-md"
 
   return (
     <main
-      className={`text-white relative overflow-hidden ${
-        modoPreview ? "h-[1080px] w-[1920px]" : "w-screen h-screen"
-      }`}
+      className={`text-white relative overflow-hidden ${modoPreview ? "h-full w-full" : "w-screen h-screen"
+        }`}
     >
 
       <BannerRotativo
-        fallback={fallback}
+        fallback={fallbackFinal}
         onMidiaAtualChange={setMidiaAtualTv}
         modoPreview={modoPreview}
         previewMidias={previewMidias}
@@ -229,19 +238,19 @@ export default function PainelTV({
       <div className="absolute inset-0 z-[1]" />
 
       {(
-        logo.trim() !== "" ||
-        nomePainel.trim() !== "" ||
-        subtitulo.trim() !== ""
+        logoFinal.trim() !== "" ||
+        nomePainelFinal.trim() !== "" ||
+        subtituloFinal.trim() !== ""
       ) && (
 
           <div className="absolute top-[clamp(0.75rem,2vh,1.5rem)] left-[clamp(0.75rem,2vw,2rem)] z-10 flex items-center gap-[clamp(0.5rem,1.5vw,1rem)]">
 
-            {logo.trim() !== "" && (
+            {logoFinal.trim() !== "" && (
               <div
                 className={`flex ${tamanhoLogoClasse} items-center justify-center rounded-xl ${modoLogoClasse}`}
               >
                 <Image
-                  src={logo.startsWith("/") || logo.startsWith("http") ? logo : `/${logo}`}
+                  src={logoFinal.startsWith("/") || logoFinal.startsWith("http") ? logoFinal : `/${logoFinal}`}
                   alt="Logo ADUSEPS"
                   width={120}
                   height={120}
@@ -251,18 +260,18 @@ export default function PainelTV({
               </div>
             )}
 
-            {(nomePainel.trim() !== "" || subtitulo.trim() !== "") && (
+            {(nomePainelFinal.trim() !== "" || subtituloFinal.trim() !== "") && (
               <div className="flex flex-col">
 
-                {nomePainel.trim() !== "" && (
+                {nomePainelFinal.trim() !== "" && (
                   <h1 className="text-[clamp(1.2rem,2.5vw,2rem)] font-black tracking-[0.06em] leading-none text-white drop-shadow-sm">
-                    {nomePainel}
+                    {nomePainelFinal}
                   </h1>
                 )}
 
-                {subtitulo.trim() !== "" && (
+                {subtituloFinal.trim() !== "" && (
                   <span className="mt-2 text-[clamp(0.65rem,1vw,0.9rem)] font-medium text-white/75 tracking-[0.18em] uppercase">
-                    {subtitulo}
+                    {subtituloFinal}
                   </span>
                 )}
 
@@ -289,8 +298,8 @@ export default function PainelTV({
       )}
 
       <RodapeNoticias
-        logo={previewConfiguracoes?.logo || logo}
-        slogan={previewConfiguracoes?.slogan || slogan}
+        logo={logoFinal}
+        slogan={sloganFinal}
         midiaAtual={midiaAtualTv}
         modoPreview={modoPreview}
         previewNoticias={previewNoticias}
