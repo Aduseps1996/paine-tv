@@ -30,9 +30,10 @@ export default function BannerPainel({
     onErroMidia,
     onVideoEnded
 }: Props) {
-    const animacaoImagem = possuiRotacao
-        ? "scale-[1.02] animate-[zoomBanner_22s_linear_infinite]"
-        : ""
+    const alturaFaixa = Math.min(
+        112,
+        Math.max(72, Number(configuracoes.alturaBarraNoticias || 88))
+    )
 
     const horaPainel = agoraPainel
         ? agoraPainel.toLocaleTimeString("pt-BR", {
@@ -51,52 +52,39 @@ export default function BannerPainel({
 
     return (
         <div
-            className="absolute inset-0 overflow-hidden bg-[#58c9f3]"
+            className="absolute inset-0 grid overflow-hidden bg-black"
             style={{
-                ["--altura-faixa-painel" as string]: "clamp(78px, 9vh, 108px)"
+                gridTemplateColumns: "clamp(250px, 24vw, 390px) minmax(0, 1fr)",
+                gridTemplateRows: `minmax(0, 1fr) ${alturaFaixa}px`
             }}
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-[#7de2ff] via-[#4fc3ef] to-[#218bd6]" />
-
-            <div
-                className="absolute left-0 right-0 top-0 z-10 grid grid-cols-[clamp(260px,24vw,420px)_minmax(0,1fr)] gap-0 p-0"
-                style={{
-                    bottom: "var(--altura-faixa-painel)"
-                }}
-            >
+            <aside className="row-span-2 min-h-0 overflow-hidden">
                 <PainelClimaSidebar
                     clima={clima}
                     configuracoes={configuracoes}
                 />
+            </aside>
 
-                <main
-                    className="relative h-full min-w-0 overflow-hidden border border-white/10 border-l-white/20 bg-[#0F172A]"
-                    style={{
-                        boxShadow:
-                            "inset 0 1px 0 rgba(255,255,255,.10), 0 8px 30px rgba(0,0,0,.18)"
-                    }}
-                >
-                    <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-white/10 via-transparent to-[#0d5cff]/15" />
+            <main className="relative min-h-0 min-w-0 overflow-hidden bg-[#07111f]">
+                <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-white/8 via-transparent to-sky-500/10" />
 
-                    <MediaPlayer
-                        tipo={midiaAtual.tipo === "video" ? "video" : "imagem"}
-                        src={midiaAtual.arquivo}
-                        alt="Mídia principal"
-                        fallback={fallback}
-                        modoExibicao={midiaAtual.modoExibicao || "cover"}
-                        className={`relative z-0 ${midiaAtual.tipo === "imagem" ? animacaoImagem : ""}`}
-                        onErro={() => onErroMidia(midiaAtual)}
-                        onVideoEnded={onVideoEnded}
-                    />
-                </main>
-            </div>
+                <MediaPlayer
+                    midia={midiaAtual}
+                    fallback={fallback}
+                    possuiRotacao={possuiRotacao}
+                    onErroMidia={onErroMidia}
+                    onVideoEnded={onVideoEnded}
+                />
+            </main>
 
-            <PainelFaixaInferior
-                midiaAtual={midiaAtual}
-                configuracoes={configuracoes}
-                horaPainel={horaPainel}
-                dataPainel={dataPainel}
-            />
+            <footer className="relative min-h-0 overflow-hidden">
+                <PainelFaixaInferior
+                    midiaAtual={midiaAtual}
+                    configuracoes={configuracoes}
+                    horaPainel={horaPainel}
+                    dataPainel={dataPainel}
+                />
+            </footer>
         </div>
     )
 }
