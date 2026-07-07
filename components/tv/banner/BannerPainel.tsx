@@ -50,10 +50,15 @@ export default function BannerPainel({
         : ""
 
     return (
-        <div className="absolute inset-0 overflow-hidden bg-[#58c9f3]">
+        <div
+            className="absolute inset-0 overflow-hidden bg-[#58c9f3]"
+            style={{
+                ["--altura-faixa" as string]: "clamp(78px, 9vh, 108px)"
+            }}
+        >
             <div className="absolute inset-0 bg-gradient-to-br from-[#7de2ff] via-[#4fc3ef] to-[#218bd6]" />
 
-            <div className="relative z-10 grid h-[calc(100vh-clamp(78px,9vh,108px))] w-full grid-cols-[clamp(260px,24vw,420px)_minmax(0,1fr)] gap-0 p-0">
+            <div className="relative z-10 grid h-[calc(100%-var(--altura-faixa))] w-full grid-cols-[clamp(260px,24vw,420px)_minmax(0,1fr)] gap-0 p-0">
                 <PainelClimaSidebar
                     clima={clima}
                     configuracoes={configuracoes}
@@ -67,10 +72,11 @@ export default function BannerPainel({
                     }}
                 >
                     <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-white/10 via-transparent to-[#0d5cff]/15" />
+
                     <MediaPlayer
                         tipo={midiaAtual.tipo === "video" ? "video" : "imagem"}
                         src={midiaAtual.arquivo}
-                        alt="Midia principal"
+                        alt="Mídia principal"
                         fallback={fallback}
                         modoExibicao={midiaAtual.modoExibicao || "cover"}
                         className={`relative z-0 ${midiaAtual.tipo === "imagem" ? animacaoImagem : ""}`}
