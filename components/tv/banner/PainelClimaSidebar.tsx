@@ -128,7 +128,7 @@ export default function PainelClimaSidebar({
                     </div>
                 </section>
 
-                <section className="mt-auto shrink-0 rounded-[24px] border border-white/10 bg-black/15 p-3">
+                <section className="mb-10 shrink-0 rounded-[24px] border border-white/10 bg-black/15 p-3">
                     <p className="mb-3 text-[clamp(0.58rem,0.75vw,0.72rem)] font-black uppercase tracking-[0.2em] text-white/65">
                         Próximos dias
                     </p>

@@ -216,6 +216,8 @@ export default function PainelTV({
         ? "bg-black/25 border border-white/15 p-2 shadow-md backdrop-blur-sm"
         : "bg-white/95 p-2 shadow-md"
 
+  const midiaAtualEhPainelInformativo = midiaAtualTv?.template === "painel"
+
   return (
     <main
       className={`text-white relative overflow-hidden ${modoPreview ? "h-full w-full" : "w-screen h-screen"
@@ -297,15 +299,17 @@ export default function PainelTV({
         </div>
       )}
 
-      <RodapeNoticias
-        logo={logoFinal}
-        slogan={sloganFinal}
-        midiaAtual={midiaAtualTv}
-        modoPreview={modoPreview}
-        previewNoticias={previewNoticias}
-        previewConfiguracoes={previewConfiguracoes}
-      />
+      {!midiaAtualEhPainelInformativo && (
+        <RodapeNoticias
+          logo={logoFinal}
+          slogan={sloganFinal}
+          midiaAtual={midiaAtualTv}
+          modoPreview={modoPreview}
+          previewNoticias={previewNoticias}
+          previewConfiguracoes={previewConfiguracoes}
+        />
+      )}
 
     </main>
   )
-} 
+}

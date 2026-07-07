@@ -53,19 +53,24 @@ export default function BannerPainel({
         <div
             className="absolute inset-0 overflow-hidden bg-[#58c9f3]"
             style={{
-                ["--altura-faixa" as string]: "clamp(78px, 9vh, 108px)"
+                ["--altura-faixa-painel" as string]: "clamp(78px, 9vh, 108px)"
             }}
         >
             <div className="absolute inset-0 bg-gradient-to-br from-[#7de2ff] via-[#4fc3ef] to-[#218bd6]" />
 
-            <div className="relative z-10 grid h-[calc(100%-var(--altura-faixa))] w-full grid-cols-[clamp(260px,24vw,420px)_minmax(0,1fr)] gap-0 p-0">
+            <div
+                className="absolute left-0 right-0 top-0 z-10 grid grid-cols-[clamp(260px,24vw,420px)_minmax(0,1fr)] gap-0 p-0"
+                style={{
+                    bottom: "var(--altura-faixa-painel)"
+                }}
+            >
                 <PainelClimaSidebar
                     clima={clima}
                     configuracoes={configuracoes}
                 />
 
                 <main
-                    className="relative h-full min-w-0 overflow-hidden rounded-none border border-white/10 border-l-white/20 bg-[#0F172A]"
+                    className="relative h-full min-w-0 overflow-hidden border border-white/10 border-l-white/20 bg-[#0F172A]"
                     style={{
                         boxShadow:
                             "inset 0 1px 0 rgba(255,255,255,.10), 0 8px 30px rgba(0,0,0,.18)"
