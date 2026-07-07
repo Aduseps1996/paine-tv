@@ -19,11 +19,16 @@ export default function CidadeAutocomplete({
   const [texto, setTexto] = useState(value)
   const [resultado, setResultado] = useState<CidadeEncontrada[]>([])
   const [carregando, setCarregando] = useState(false)
+  const [aberto, setAberto] = useState(false)
 
-  const timeout = useRef<NodeJS.Timeout | null>(null)
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    setTexto(value)
+    const id = setTimeout(() => {
+      setTexto(value)
+    }, 0)
+
+    return () => clearTimeout(id)
   }, [value])
 
   useEffect(() => {
@@ -32,7 +37,6 @@ export default function CidadeAutocomplete({
     }
 
     if (texto.trim().length < 2) {
-      setResultado([])
       return
     }
 
@@ -56,23 +60,33 @@ export default function CidadeAutocomplete({
   }, [texto])
 
   return (
-    <div className="relative">
+    <div className="relative z-[9999]">
 
       <input
         value={texto}
-        onChange={(e) => setTexto(e.target.value)}
+        onFocus={() => setAberto(true)}
+        onChange={(e) => {
+          const novoTexto = e.target.value
+
+          setAberto(true)
+          setTexto(novoTexto)
+
+          if (novoTexto.trim().length < 2) {
+            setResultado([])
+          }
+        }}
         placeholder="Digite uma cidade..."
         className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
       />
 
-      {carregando && (
-        <div className="mt-2 text-sm text-zinc-400">
+      {aberto && carregando && (
+        <div className="absolute left-0 right-0 top-full z-[9999] mt-2 rounded-2xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm text-zinc-400 shadow-2xl">
           Procurando cidades...
         </div>
       )}
 
-      {resultado.length > 0 && (
-        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+      {aberto && resultado.length > 0 && (
+        <div className="absolute left-0 right-0 top-full z-[9999] mt-2 max-h-72 overflow-y-auto rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl">
 
           {resultado.map((cidade) => (
             <button
@@ -84,6 +98,7 @@ export default function CidadeAutocomplete({
                 )
 
                 setResultado([])
+                setAberto(false)
 
                 onSelecionar(cidade)
               }}

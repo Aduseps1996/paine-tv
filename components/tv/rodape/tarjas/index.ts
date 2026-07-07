@@ -1,0 +1,5 @@
+export { default as Compacta } from "./Compacta"
+export { default as Digital } from "./Digital"
+export { default as Infobar } from "./Infobar"
+export { default as Live } from "./Live"
+export { default as Telejornal } from "./Telejornal"

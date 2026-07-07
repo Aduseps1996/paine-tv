@@ -29,153 +29,224 @@ export default function AbaConfiguracaoTipografia({
 
     salvarConfiguracoes
 }: Props) {
-    return (
-        <div className="space-y-4 sm:space-y-6">
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:p-6">
-                <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-300">
-                    Estilo
+    const velocidadeTexto =
+        duracaoAnimacaoNoticias >= 170
+            ? "Lenta"
+            : duracaoAnimacaoNoticias <= 130
+                ? "Rápida"
+                : "Normal"
+
+    function classeOpcao(ativa: boolean) {
+        return ativa
+            ? "border-sky-400/40 bg-sky-500/15 text-white shadow-[0_14px_35px_rgba(14,165,233,0.16)]"
+            : "border-white/10 bg-zinc-950/60 text-zinc-300"
+    }
+
+    function ControleNumero({
+        titulo,
+        descricao,
+        valor,
+        minimo,
+        maximo,
+        sufixo,
+        onChange
+    }: {
+        titulo: string
+        descricao: string
+        valor: number
+        minimo: number
+        maximo: number
+        sufixo: string
+        onChange: (valor: number) => void
+    }) {
+        return (
+            <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h3 className="text-xl font-black">
+                            {titulo}
+                        </h3>
+
+                        <p className="mt-2 text-sm text-zinc-400">
+                            {descricao}
+                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-3 text-right">
+                        <p className="text-2xl font-black">
+                            {valor}
+                        </p>
+
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                            {sufixo}
+                        </p>
+                    </div>
                 </div>
-                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
-                    Tipografia e medidas
-                </h1>
 
-                <p className="mt-2 max-w-2xl text-sm text-zinc-400 sm:text-base">
-                    Ajuste o tamanho dos textos, altura do rodapé e velocidade das notícias.
-                </p>
+                <div className="mt-5">
+                    <input
+                        type="range"
+                        min={minimo}
+                        max={maximo}
+                        value={valor}
+                        onChange={(e) => onChange(Number(e.target.value))}
+                        className="w-full"
+                    />
+
+                    <div className="mt-2 flex justify-between text-xs font-bold text-zinc-500">
+                        <span>{minimo}</span>
+                        <span>{maximo}</span>
+                    </div>
+                </div>
+
+                <input
+                    type="number"
+                    min={minimo}
+                    max={maximo}
+                    value={valor}
+                    onChange={(e) => onChange(Number(e.target.value))}
+                    className="mt-4"
+                />
             </div>
+        )
+    }
 
-            <div className="rounded-[28px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:p-6">
-                <h2 className="mb-6 text-xl sm:text-2xl font-bold">
-                    Configurações do rodapé
+    return (
+        <div className="space-y-8">
+            <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.22)] sm:p-7">
+                <div>
+                    <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.32em] text-sky-300">
+                        Estilo visual
+                    </div>
+
+                    <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
+                        Tipografia e medidas
+                    </h1>
+
+                    <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400 sm:text-base">
+                        Ajuste fontes, altura do rodapé e velocidade das notícias exibidas na TV.
+                    </p>
+                </div>
+            </section>
+
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {[
+                    {
+                        label: "Fonte notícias",
+                        value: `${tamanhoFonteRodape}px`,
+                        desc: "tamanho do letreiro"
+                    },
+                    {
+                        label: "Fonte slogan",
+                        value: `${tamanhoFonteSlogan}px`,
+                        desc: "texto institucional"
+                    },
+                    {
+                        label: "Fonte hora",
+                        value: `${tamanhoFonteHora}px`,
+                        desc: "relógio do painel"
+                    },
+                    {
+                        label: "Rodapé",
+                        value: `${alturaBarraNoticias}px`,
+                        desc: "altura da barra"
+                    }
+                ].map((card) => (
+                    <div
+                        key={card.label}
+                        className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
+                    >
+                        <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
+                            {card.label}
+                        </p>
+
+                        <div className="mt-4 text-4xl font-black">
+                            {card.value}
+                        </div>
+
+                        <p className="mt-3 text-sm text-zinc-400">
+                            {card.desc}
+                        </p>
+                    </div>
+                ))}
+            </section>
+
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
+                    Fontes
                 </h2>
 
-                <div className="grid grid-cols-1 gap-5">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-zinc-300">
-                            Fonte das notícias
-                        </label>
+                <p className="mt-2 text-sm text-zinc-400">
+                    Controle o tamanho dos principais textos exibidos na TV.
+                </p>
 
-                        <input
-                            type="range"
-                            min={12}
-                            max={80}
-                            value={tamanhoFonteRodape}
-                            onChange={(e) =>
-                                setTamanhoFonteRodape(Number(e.target.value))
-                            }
-                            className="w-full"
-                        />
+                <div className="mt-6 grid gap-5 xl:grid-cols-3">
+                    <ControleNumero
+                        titulo="Fonte das notícias"
+                        descricao="Tamanho do texto que corre no rodapé."
+                        valor={tamanhoFonteRodape}
+                        minimo={12}
+                        maximo={80}
+                        sufixo="px"
+                        onChange={setTamanhoFonteRodape}
+                    />
 
-                        <input
-                            type="number"
-                            min={12}
-                            max={80}
-                            value={tamanhoFonteRodape}
-                            onChange={(e) =>
-                                setTamanhoFonteRodape(Number(e.target.value))
-                            }
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
-                        />
-                    </div>
+                    <ControleNumero
+                        titulo="Fonte da tarja / slogan"
+                        descricao="Tamanho do texto institucional e chamadas."
+                        valor={tamanhoFonteSlogan}
+                        minimo={12}
+                        maximo={60}
+                        sufixo="px"
+                        onChange={setTamanhoFonteSlogan}
+                    />
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-zinc-300">
-                            Altura da barra de notícias
-                        </label>
+                    <ControleNumero
+                        titulo="Fonte da hora"
+                        descricao="Tamanho do relógio exibido no painel."
+                        valor={tamanhoFonteHora}
+                        minimo={12}
+                        maximo={70}
+                        sufixo="px"
+                        onChange={setTamanhoFonteHora}
+                    />
+                </div>
+            </section>
 
-                        <input
-                            type="range"
-                            min={30}
-                            max={100}
-                            value={alturaBarraNoticias}
-                            onChange={(e) =>
-                                setAlturaBarraNoticias(Number(e.target.value))
-                            }
-                            className="w-full"
-                        />
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
+                    Rodapé de notícias
+                </h2>
 
-                        <input
-                            type="number"
-                            min={30}
-                            max={100}
-                            value={alturaBarraNoticias}
-                            onChange={(e) =>
-                                setAlturaBarraNoticias(Number(e.target.value))
-                            }
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
-                        />
-                    </div>
+                <p className="mt-2 text-sm text-zinc-400">
+                    Defina a altura da barra e a velocidade de passagem das mensagens.
+                </p>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-zinc-300">
-                            Fonte da tarja / slogan
-                        </label>
+                <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
+                    <ControleNumero
+                        titulo="Altura da barra"
+                        descricao="Altura visual do rodapé de notícias."
+                        valor={alturaBarraNoticias}
+                        minimo={30}
+                        maximo={100}
+                        sufixo="px"
+                        onChange={setAlturaBarraNoticias}
+                    />
 
-                        <input
-                            type="range"
-                            min={12}
-                            max={60}
-                            value={tamanhoFonteSlogan}
-                            onChange={(e) =>
-                                setTamanhoFonteSlogan(Number(e.target.value))
-                            }
-                            className="w-full"
-                        />
-
-                        <input
-                            type="number"
-                            min={12}
-                            max={60}
-                            value={tamanhoFonteSlogan}
-                            onChange={(e) =>
-                                setTamanhoFonteSlogan(Number(e.target.value))
-                            }
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-zinc-300">
-                            Fonte da hora
-                        </label>
-
-                        <input
-                            type="range"
-                            min={12}
-                            max={70}
-                            value={tamanhoFonteHora}
-                            onChange={(e) =>
-                                setTamanhoFonteHora(Number(e.target.value))
-                            }
-                            className="w-full"
-                        />
-
-                        <input
-                            type="number"
-                            min={12}
-                            max={70}
-                            value={tamanhoFonteHora}
-                            onChange={(e) =>
-                                setTamanhoFonteHora(Number(e.target.value))
-                            }
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
-                        />
-                    </div>
-
-                    <div className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
-                        <label className="text-sm font-bold text-zinc-300">
+                    <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
+                        <h3 className="text-xl font-black">
                             Velocidade das notícias
-                        </label>
+                        </h3>
 
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <p className="mt-2 text-sm text-zinc-400">
+                            Quanto maior o número, mais devagar as notícias passam.
+                        </p>
+
+                        <div className="mt-5 grid gap-3">
                             <button
                                 type="button"
                                 onClick={() => setDuracaoAnimacaoNoticias(180)}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    duracaoAnimacaoNoticias === 180
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${classeOpcao(duracaoAnimacaoNoticias === 180)}`}
                             >
                                 Lenta
                             </button>
@@ -183,11 +254,7 @@ export default function AbaConfiguracaoTipografia({
                             <button
                                 type="button"
                                 onClick={() => setDuracaoAnimacaoNoticias(150)}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    duracaoAnimacaoNoticias === 150
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${classeOpcao(duracaoAnimacaoNoticias === 150)}`}
                             >
                                 Normal
                             </button>
@@ -195,11 +262,7 @@ export default function AbaConfiguracaoTipografia({
                             <button
                                 type="button"
                                 onClick={() => setDuracaoAnimacaoNoticias(120)}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${
-                                    duracaoAnimacaoNoticias === 120
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-zinc-700 bg-zinc-800 text-white"
-                                }`}
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${classeOpcao(duracaoAnimacaoNoticias === 120)}`}
                             >
                                 Rápida
                             </button>
@@ -213,17 +276,72 @@ export default function AbaConfiguracaoTipografia({
                             onChange={(e) =>
                                 setDuracaoAnimacaoNoticias(Number(e.target.value))
                             }
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
+                            className="mt-4"
                         />
 
-                        <p className="text-xs text-zinc-500">
-                            Quanto maior o número, mais devagar as notícias passam.
-                        </p>
+                        <div className="mt-4 rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
+                            <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-500">
+                                Velocidade atual
+                            </p>
+
+                            <p className="mt-2 text-2xl font-black">
+                                {velocidadeTexto}
+                            </p>
+
+                            <p className="mt-1 text-sm text-zinc-400">
+                                {duracaoAnimacaoNoticias}s de animação
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <div className="mb-6">
+                    <h2 className="text-2xl font-black sm:text-3xl">
+                        Prévia visual
+                    </h2>
+
+                    <p className="mt-2 text-sm text-zinc-400">
+                        Simulação rápida do rodapé com os tamanhos configurados.
+                    </p>
+                </div>
+
+                <div className="overflow-hidden rounded-[26px] border border-white/10 bg-[#071633] p-5">
+                    <div className="mb-4 flex items-center justify-between gap-4">
+                        <div>
+                            <p
+                                className="font-black text-white"
+                                style={{
+                                    fontSize: `${tamanhoFonteSlogan}px`
+                                }}
+                            >
+                                ADUSEPS
+                            </p>
+
+                            <p className="text-sm text-white/55">
+                                Painel Institucional
+                            </p>
+                        </div>
+
+                        <div
+                            className="font-black text-white"
+                            style={{
+                                fontSize: `${tamanhoFonteHora}px`
+                            }}
+                        >
+                            12:48
+                        </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-2xl border border-zinc-700 bg-[#183b78]/95 py-4">
+                    <div
+                        className="overflow-hidden rounded-2xl bg-[#183b78] px-4"
+                        style={{
+                            height: `${alturaBarraNoticias}px`
+                        }}
+                    >
                         <div
-                            className="whitespace-nowrap font-bold text-white"
+                            className="flex h-full items-center whitespace-nowrap font-bold text-white"
                             style={{
                                 fontSize: `${tamanhoFonteRodape}px`
                             }}
@@ -240,14 +358,24 @@ export default function AbaConfiguracaoTipografia({
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <button
-                    onClick={salvarConfiguracoes}
-                    className="mt-6 w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-6 py-4 font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110 sm:w-auto"
-                >
-                    Salvar tipografia
-                </button>
-            </div>
+            <section className="rounded-[26px] border border-amber-400/20 bg-amber-500/10 p-5">
+                <p className="font-black text-amber-200">
+                    Alterações salvas no rascunho
+                </p>
+
+                <p className="mt-2 text-sm text-amber-100/80">
+                    Para enviar essas configurações para a TV, volte para a página Início e clique em Publicar na TV.
+                </p>
+            </section>
+
+            <button
+                onClick={salvarConfiguracoes}
+                className="rounded-2xl border border-sky-300/20 bg-sky-500 px-6 py-4 text-sm font-black text-white shadow-[0_14px_35px_rgba(14,165,233,0.22)]"
+            >
+                Salvar tipografia
+            </button>
         </div>
     )
 }

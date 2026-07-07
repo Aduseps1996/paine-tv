@@ -150,15 +150,15 @@ export default function AbaInicio() {
                 <div className="mx-auto max-w-6xl rounded-[32px] border-8 border-zinc-950 bg-black p-4 shadow-2xl">
                     <div className="relative overflow-hidden rounded-[24px] border border-zinc-800 bg-black">
                         <div className="relative aspect-video overflow-hidden bg-black">
-    <div className="absolute inset-0">
-        <PainelTV
-            modoPreview
-            previewConfiguracoes={draft.configuracoes}
-            previewMidias={draft.midias}
-            previewNoticias={draft.noticias}
-        />
-    </div>
-</div>
+                            <div className="absolute inset-0">
+                                <PainelTV
+                                    modoPreview
+                                    previewConfiguracoes={draft.configuracoes}
+                                    previewMidias={draft.midias}
+                                    previewNoticias={draft.noticias}
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="mx-auto mt-4 h-4 w-32 rounded-full bg-zinc-950" />

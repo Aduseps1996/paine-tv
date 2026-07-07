@@ -7,12 +7,10 @@ import type { ModeloTarja, ModoExibicaoMidia, TemplateMidia, TipoMidia } from "@
 
 type UseNovaMidiaFormParams = {
     totalMidias: number
-    carregarMidias: () => void
 }
 
 export function useNovaMidiaForm({
-    totalMidias,
-    carregarMidias
+    totalMidias
 }: UseNovaMidiaFormParams) {
     const [arquivo, setArquivo] = useState("")
     const [tipo, setTipo] = useState<TipoMidia>("imagem")
@@ -145,7 +143,6 @@ export function useNovaMidiaForm({
         })
 
         limparFormulario()
-        carregarMidias()
     }
 
     return {

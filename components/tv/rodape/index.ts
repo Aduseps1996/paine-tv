@@ -1,0 +1,6 @@
+export { default as BarraNoticias } from "./BarraNoticias"
+export { default as LogoRodape } from "./LogoRodape"
+export { default as QRCodeRodape } from "./QRCodeRodape"
+export { default as RelogioRodape } from "./RelogioRodape"
+export { default as RodapeNoticias } from "./RodapeNoticias"
+export { default as TarjaTV } from "./TarjaTV.tsx"

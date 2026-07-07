@@ -1,5 +1,4 @@
 import CidadeAutocomplete from "./clima/CidadeAutocomplete"
-import { salvarConfiguracoesPainel } from "@/lib/firestore/configuracoes"
 import { usePainelDraftContext } from "../context/PainelDraftContext"
 
 type ModoLogo = "transparente" | "fundo" | "card"
@@ -11,6 +10,10 @@ export default function AbaConfiguracaoPainel() {
 
     const modoLogo = (config.modoLogo || "fundo") as ModoLogo
     const tamanhoLogoPainel = (config.tamanhoLogoPainel || "medio") as TamanhoLogo
+
+    const logoConfigurada = (config.logo || "").trim() !== ""
+    const rodapeAtivo = config.mostrarRodapeNoticias ?? true
+    const cidade = config.cidadeClimaPainel || "Recife"
 
     const alturaLogoPreview =
         tamanhoLogoPainel === "pequeno"
@@ -26,37 +29,90 @@ export default function AbaConfiguracaoPainel() {
                 ? "bg-white/10 border border-white/15 p-3 rounded-2xl"
                 : "bg-white p-3 rounded-2xl"
 
-    async function salvarConfiguracoes() {
-        await salvarConfiguracoesPainel(config)
-        alert("Configurações salvas!")
+    function cardOpcao(ativo: boolean) {
+        return ativo
+            ? "border-sky-400/40 bg-sky-500/15 text-white shadow-[0_14px_35px_rgba(14,165,233,0.16)]"
+            : "border-white/10 bg-zinc-950/60 text-zinc-300"
     }
 
     return (
-        <div className="space-y-4 sm:space-y-6">
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] sm:p-6">
-                <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-300">
-                    Configuração
+        <div className="space-y-8">
+            <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.22)] sm:p-7">
+                <div>
+                    <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.32em] text-sky-300">
+                        Identidade visual
+                    </div>
+
+                    <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
+                        Configuração do painel
+                    </h1>
+
+                    <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400 sm:text-base">
+                        Ajuste topo, logo, rodapé, clima e tarjas. Tudo fica no rascunho até ser publicado na página Início.
+                    </p>
                 </div>
-                <h1 className="mt-3 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
-                    Configuração do painel
-                </h1>
+            </section>
 
-                <p className="mt-2 max-w-2xl text-sm text-zinc-400 sm:text-base">
-                    Configure separadamente topo, logo, rodapé e tarjas da TV.
-                </p>
-            </div>
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+                    <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
+                        Logo
+                    </p>
+                    <p className="mt-4 text-3xl font-black">
+                        {logoConfigurada ? "Ativa" : "Vazia"}
+                    </p>
+                    <p className="mt-3 text-sm text-zinc-400">
+                        {logoConfigurada ? "Logo configurada." : "Nenhuma logo definida."}
+                    </p>
+                </div>
 
-            {/* TOPO */}
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-bold">
+                <div className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+                    <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
+                        Rodapé
+                    </p>
+                    <p className="mt-4 text-3xl font-black">
+                        {rodapeAtivo ? "Ativo" : "Inativo"}
+                    </p>
+                    <p className="mt-3 text-sm text-zinc-400">
+                        Faixa de notícias inferior.
+                    </p>
+                </div>
+
+                <div className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+                    <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
+                        Cidade
+                    </p>
+                    <p className="mt-4 text-3xl font-black">
+                        {cidade}
+                    </p>
+                    <p className="mt-3 text-sm text-zinc-400">
+                        Usada no clima do painel.
+                    </p>
+                </div>
+
+                <div className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+                    <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
+                        Tarjas
+                    </p>
+                    <p className="mt-4 text-3xl font-black">
+                        Padrão
+                    </p>
+                    <p className="mt-3 text-sm text-zinc-400">
+                        Tempos globais configurados.
+                    </p>
+                </div>
+            </section>
+
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
                     Topo da TV
                 </h2>
 
-                <p className="mt-1 mb-5 text-sm text-zinc-400">
+                <p className="mt-2 text-sm text-zinc-400">
                     Informações principais exibidas na parte superior do painel.
                 </p>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
                     <div>
                         <label className="mb-2 block text-sm font-bold text-zinc-300">
                             Nome do painel
@@ -65,8 +121,9 @@ export default function AbaConfiguracaoPainel() {
                         <input
                             type="text"
                             value={config.nomePainel || ""}
-                            onChange={(e) => atualizarConfiguracoesDraft({ nomePainel: e.target.value })}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({ nomePainel: e.target.value })
+                            }
                             placeholder="Ex: ADUSEPS"
                         />
                     </div>
@@ -79,25 +136,25 @@ export default function AbaConfiguracaoPainel() {
                         <input
                             type="text"
                             value={config.subtitulo || ""}
-                            onChange={(e) => atualizarConfiguracoesDraft({ subtitulo: e.target.value })}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({ subtitulo: e.target.value })
+                            }
                             placeholder="Ex: Painel Institucional"
                         />
                     </div>
                 </div>
             </section>
 
-            {/* LOGO */}
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-bold">
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
                     Logo
                 </h2>
 
-                <p className="mt-1 mb-5 text-sm text-zinc-400">
-                    Controle como a logo será exibida no painel.
+                <p className="mt-2 text-sm text-zinc-400">
+                    Controle a imagem, o fundo e o tamanho da logo no topo da TV.
                 </p>
 
-                <div className="space-y-5">
+                <div className="mt-6 space-y-6">
                     <div>
                         <label className="mb-2 block text-sm font-bold text-zinc-300">
                             URL ou caminho da logo
@@ -106,47 +163,45 @@ export default function AbaConfiguracaoPainel() {
                         <input
                             type="text"
                             value={config.logo || ""}
-                            onChange={(e) => atualizarConfiguracoesDraft({ logo: e.target.value })}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
-                            placeholder="https://... ou /logo.png"
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({ logo: e.target.value })
+                            }
+                            placeholder="https://... ou /logos/logo.png"
                         />
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
+                        <label className="mb-3 block text-sm font-bold text-zinc-300">
                             Modo da logo
                         </label>
 
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div className="grid gap-3 sm:grid-cols-3">
                             <button
                                 type="button"
-                                onClick={() => atualizarConfiguracoesDraft({ modoLogo: "transparente" })}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "transparente"
-                                    ? "bg-blue-600 text-white"
-                                    : "border border-zinc-700 bg-zinc-800 text-white"
-                                    }`}
+                                onClick={() =>
+                                    atualizarConfiguracoesDraft({ modoLogo: "transparente" })
+                                }
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(modoLogo === "transparente")}`}
                             >
                                 Sem fundo
                             </button>
 
                             <button
                                 type="button"
-                                onClick={() => atualizarConfiguracoesDraft({ modoLogo: "fundo" })}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "fundo"
-                                    ? "bg-blue-600 text-white"
-                                    : "border border-zinc-700 bg-zinc-800 text-white"
-                                    }`}
+                                onClick={() =>
+                                    atualizarConfiguracoesDraft({ modoLogo: "fundo" })
+                                }
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(modoLogo === "fundo")}`}
                             >
                                 Fundo branco
                             </button>
 
                             <button
                                 type="button"
-                                onClick={() => atualizarConfiguracoesDraft({ modoLogo: "card" })}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${modoLogo === "card"
-                                    ? "bg-blue-600 text-white"
-                                    : "border border-zinc-700 bg-zinc-800 text-white"
-                                    }`}
+                                onClick={() =>
+                                    atualizarConfiguracoesDraft({ modoLogo: "card" })
+                                }
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(modoLogo === "card")}`}
                             >
                                 Card discreto
                             </button>
@@ -154,148 +209,183 @@ export default function AbaConfiguracaoPainel() {
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
+                        <label className="mb-3 block text-sm font-bold text-zinc-300">
                             Tamanho da logo
                         </label>
 
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div className="grid gap-3 sm:grid-cols-3">
                             <button
                                 type="button"
-                                onClick={() => atualizarConfiguracoesDraft({ tamanhoLogoPainel: "pequeno" })}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "pequeno"
-                                    ? "bg-blue-600 text-white"
-                                    : "border border-zinc-700 bg-zinc-800 text-white"
-                                    }`}
+                                onClick={() =>
+                                    atualizarConfiguracoesDraft({ tamanhoLogoPainel: "pequeno" })
+                                }
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(tamanhoLogoPainel === "pequeno")}`}
                             >
                                 Pequena
                             </button>
 
                             <button
                                 type="button"
-                                onClick={() => atualizarConfiguracoesDraft({ tamanhoLogoPainel: "medio" })}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "medio"
-                                    ? "bg-blue-600 text-white"
-                                    : "border border-zinc-700 bg-zinc-800 text-white"
-                                    }`}
+                                onClick={() =>
+                                    atualizarConfiguracoesDraft({ tamanhoLogoPainel: "medio" })
+                                }
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(tamanhoLogoPainel === "medio")}`}
                             >
                                 Média
                             </button>
 
                             <button
                                 type="button"
-                                onClick={() => atualizarConfiguracoesDraft({ tamanhoLogoPainel: "grande" })}
-                                className={`rounded-xl px-4 py-3 font-bold transition ${tamanhoLogoPainel === "grande"
-                                    ? "bg-blue-600 text-white"
-                                    : "border border-zinc-700 bg-zinc-800 text-white"
-                                    }`}
+                                onClick={() =>
+                                    atualizarConfiguracoesDraft({ tamanhoLogoPainel: "grande" })
+                                }
+                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(tamanhoLogoPainel === "grande")}`}
                             >
                                 Grande
                             </button>
                         </div>
                     </div>
+
+                    <div className="overflow-hidden rounded-[26px] border border-white/10 bg-[#071633] p-5">
+                        <p className="mb-4 text-xs font-black uppercase tracking-[0.25em] text-zinc-400">
+                            Prévia rápida da logo
+                        </p>
+
+                        <div className="flex items-center gap-4">
+                            {logoConfigurada && (
+                                <div className={classeLogoPreview}>
+                                    <img
+                                        src={config.logo || ""}
+                                        alt="Prévia da logo"
+                                        className={`${alturaLogoPreview} w-auto object-contain`}
+                                    />
+                                </div>
+                            )}
+
+                            <div className="min-w-0">
+                                <h3 className="truncate text-2xl font-black text-white">
+                                    {config.nomePainel || "Nome do painel"}
+                                </h3>
+
+                                <p className="truncate text-sm font-semibold text-white/65">
+                                    {config.subtitulo || "Subtítulo do painel"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            {/* RODAPÉ */}
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-bold">
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
                     Rodapé
                 </h2>
 
-                <p className="mt-1 mb-5 text-sm text-zinc-400">
-                    Texto institucional fixo usado como slogan do painel.
+                <p className="mt-2 text-sm text-zinc-400">
+                    Controle a faixa inferior, a logo no rodapé e o slogan institucional.
                 </p>
 
-                <label className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
-                    <div>
-                        <p className="font-bold text-white">
-                            Mostrar logo na faixa inferior do Painel Informativo
-                        </p>
+                <div className="mt-6 space-y-4">
+                    <label className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4">
+                        <div>
+                            <p className="font-bold text-white">
+                                Mostrar logo na faixa inferior
+                            </p>
 
-                        <p className="text-sm text-zinc-400">
-                            Usa a mesma logo cadastrada, sem alterar a logo do topo.
-                        </p>
-                    </div>
+                            <p className="mt-1 text-sm text-zinc-400">
+                                Usa a mesma logo cadastrada, sem alterar a logo do topo.
+                            </p>
+                        </div>
 
-                    <input
-                        type="checkbox"
-                        checked={config.mostrarLogoFaixaPainel ?? false}
-                        onChange={(e) => atualizarConfiguracoesDraft({ mostrarLogoFaixaPainel: e.target.checked })}
-                        className="h-5 w-5"
-                    />
-                </label>
-
-                <label className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
-                    <div>
-                        <p className="font-bold text-white">
-                            Mostrar rodapé de notícias
-                        </p>
-
-                        <p className="text-sm text-zinc-400">
-                            Liga ou desliga a faixa de notícias rolando na parte inferior da TV.
-                        </p>
-                    </div>
-
-                    <input
-                        type="checkbox"
-                        checked={config.mostrarRodapeNoticias ?? true}
-                        onChange={(e) => atualizarConfiguracoesDraft({ mostrarRodapeNoticias: e.target.checked })}
-                        className="h-5 w-5"
-                    />
-                </label>
-
-                <div>
-                    <label className="mb-2 block text-sm font-bold text-zinc-300">
-                        Slogan do rodapé
+                        <input
+                            type="checkbox"
+                            checked={config.mostrarLogoFaixaPainel ?? false}
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({
+                                    mostrarLogoFaixaPainel: e.target.checked
+                                })
+                            }
+                        />
                     </label>
 
-                    <input
-                        type="text"
-                        value={config.slogan || ""}
-                        onChange={(e) => atualizarConfiguracoesDraft({ slogan: e.target.value })}
-                        className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
-                        placeholder="Ex: Informação e compromisso com o associado"
-                    />
+                    <label className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4">
+                        <div>
+                            <p className="font-bold text-white">
+                                Mostrar rodapé de notícias
+                            </p>
+
+                            <p className="mt-1 text-sm text-zinc-400">
+                                Liga ou desliga a faixa de notícias rolando.
+                            </p>
+                        </div>
+
+                        <input
+                            type="checkbox"
+                            checked={config.mostrarRodapeNoticias ?? true}
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({
+                                    mostrarRodapeNoticias: e.target.checked
+                                })
+                            }
+                        />
+                    </label>
+
+                    <div>
+                        <label className="mb-2 block text-sm font-bold text-zinc-300">
+                            Slogan do rodapé
+                        </label>
+
+                        <input
+                            type="text"
+                            value={config.slogan || ""}
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({ slogan: e.target.value })
+                            }
+                            placeholder="Ex: Informação e compromisso com o associado"
+                        />
+                    </div>
                 </div>
             </section>
 
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-bold">
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
                     Painel Informativo
                 </h2>
 
-                <p className="mt-1 mb-5 text-sm text-zinc-400">
+                <p className="mt-2 text-sm text-zinc-400">
                     Controle os elementos exibidos no template com clima, mídia principal e faixa inferior.
                 </p>
 
-                <div className="grid gap-3">
-                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
-                        <span>Mostrar temperatura</span>
-                        <input type="checkbox" checked={config.mostrarTemperaturaPainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarTemperaturaPainel: e.target.checked })} />
-                    </label>
+                <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                    {[
+                        ["Mostrar temperatura", "mostrarTemperaturaPainel"],
+                        ["Mostrar descrição do clima", "mostrarDescricaoClimaPainel"],
+                        ["Mostrar cidade", "mostrarCidadePainel"],
+                        ["Mostrar data", "mostrarDataPainel"],
+                        ["Mostrar hora", "mostrarHoraPainel"]
+                    ].map(([label, key]) => (
+                        <label
+                            key={key}
+                            className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4"
+                        >
+                            <span className="font-bold text-white">
+                                {label}
+                            </span>
 
-                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
-                        <span>Mostrar descrição do clima</span>
-                        <input type="checkbox" checked={config.mostrarDescricaoClimaPainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarDescricaoClimaPainel: e.target.checked })} />
-                    </label>
+                            <input
+                                type="checkbox"
+                                checked={(config as any)[key] ?? true}
+                                onChange={(e) =>
+                                    atualizarConfiguracoesDraft({
+                                        [key]: e.target.checked
+                                    })
+                                }
+                            />
+                        </label>
+                    ))}
 
-                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
-                        <span>Mostrar cidade</span>
-                        <input type="checkbox" checked={config.mostrarCidadePainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarCidadePainel: e.target.checked })} />
-                    </label>
-
-                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
-                        <span>Mostrar data</span>
-                        <input type="checkbox" checked={config.mostrarDataPainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarDataPainel: e.target.checked })} />
-                    </label>
-
-                    <label className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-4">
-                        <span>Mostrar hora</span>
-                        <input type="checkbox" checked={config.mostrarHoraPainel ?? true} onChange={(e) => atualizarConfiguracoesDraft({ mostrarHoraPainel: e.target.checked })} />
-                    </label>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-semibold text-zinc-300">
+                    <div className="lg:col-span-2">
+                        <label className="mb-2 block text-sm font-bold text-zinc-300">
                             Cidade exibida
                         </label>
 
@@ -314,84 +404,90 @@ export default function AbaConfiguracaoPainel() {
                 </div>
             </section>
 
-            {/* TARJA */}
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-bold">
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
                     Padrão das tarjas
                 </h2>
 
-                <p className="mt-1 mb-5 text-sm text-zinc-400">
-                    Esses tempos serão usados automaticamente pelas mídias que possuírem tarja ativa e não tiverem tempos próprios configurados.
+                <p className="mt-2 text-sm text-zinc-400">
+                    Tempos globais usados pelas mídias com tarja ativa.
                 </p>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div>
                         <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Tempo de entrada
+                            Entrada
                         </label>
-
                         <input
                             type="number"
                             min={0}
                             value={config.tempoEntradaTarja || 1}
-                            onChange={(e) => atualizarConfiguracoesDraft({ tempoEntradaTarja: Number(e.target.value) })}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({
+                                    tempoEntradaTarja: Number(e.target.value)
+                                })
+                            }
                         />
                     </div>
 
                     <div>
                         <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Tempo visível
+                            Visível
                         </label>
-
                         <input
                             type="number"
                             min={1}
                             value={config.tempoVisivelTarja || 8}
-                            onChange={(e) => atualizarConfiguracoesDraft({ tempoVisivelTarja: Number(e.target.value) })}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({
+                                    tempoVisivelTarja: Number(e.target.value)
+                                })
+                            }
                         />
                     </div>
 
                     <div>
                         <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Tempo de saída
+                            Saída
                         </label>
-
                         <input
                             type="number"
                             min={0}
                             value={config.tempoSaidaTarja || 1}
-                            onChange={(e) => atualizarConfiguracoesDraft({ tempoSaidaTarja: Number(e.target.value) })}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({
+                                    tempoSaidaTarja: Number(e.target.value)
+                                })
+                            }
                         />
                     </div>
 
                     <div>
                         <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Tempo oculta
+                            Oculta
                         </label>
-
                         <input
                             type="number"
                             min={0}
                             value={config.tempoOcultaTarja || 10}
-                            onChange={(e) => atualizarConfiguracoesDraft({ tempoOcultaTarja: Number(e.target.value) })}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 outline-none"
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({
+                                    tempoOcultaTarja: Number(e.target.value)
+                                })
+                            }
                         />
                     </div>
                 </div>
             </section>
 
-            {/* PRÉVIA */}
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-bold">
-                    Prévia rápida
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
+                    Prévia do painel
                 </h2>
 
-                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-[#071633] p-5">
+                <div className="mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#071633] p-5">
                     <div className="flex items-center gap-4">
-                        {(config.logo || "").trim() !== "" && (
+                        {logoConfigurada && (
                             <div className={classeLogoPreview}>
                                 <img
                                     src={config.logo || ""}
@@ -420,12 +516,15 @@ export default function AbaConfiguracaoPainel() {
                 </div>
             </section>
 
-            <button
-                onClick={salvarConfiguracoes}
-                className="w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-6 py-4 font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110 sm:w-auto"
-            >
-                Salvar configurações do painel
-            </button>
+            <section className="rounded-[26px] border border-amber-400/20 bg-amber-500/10 p-5">
+                <p className="font-black text-amber-200">
+                    Alterações salvas no rascunho
+                </p>
+
+                <p className="mt-2 text-sm text-amber-100/80">
+                    Para enviar essas configurações para a TV, volte para a página Início e clique em Publicar na TV.
+                </p>
+            </section>
         </div>
     )
 }

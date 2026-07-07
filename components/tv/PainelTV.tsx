@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import Chamada from "@/components/Chamada"
 import BannerRotativo from "@/components/tv/banner/BannerRotativo"
-import RodapeNoticias from "@/components/RodapeNoticias"
+import RodapeNoticias from "@/components/tv/rodape/RodapeNoticias"
 import Image from "next/image"
 
 import {
