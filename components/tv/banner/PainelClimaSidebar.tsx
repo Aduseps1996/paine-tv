@@ -27,12 +27,17 @@ export default function PainelClimaSidebar({
     const erro = Boolean(clima.erroClima)
 
     return (
-        <aside className="relative h-full min-h-0 overflow-hidden border-r border-white/15 bg-[#0d5cff]/60 text-white backdrop-blur-md">
+        <aside
+            className="relative min-h-0 overflow-hidden border-r border-white/15 bg-[#0d5cff]/60 text-white backdrop-blur-md"
+            style={{
+                height: `calc(100vh - ${configuracoes.alturaBarraNoticias || 80}px)`
+            }}
+        >
             <div className="absolute inset-0 bg-gradient-to-b from-[#78ddff]/35 via-[#0d5cff]/35 to-[#063ea8]/80" />
             <div className="absolute -left-20 top-10 h-56 w-56 rounded-full bg-white/20 blur-3xl" />
             <div className="absolute bottom-16 right-[-90px] h-64 w-64 rounded-full bg-[#7de2ff]/20 blur-3xl" />
 
-            <div className="relative z-10 flex h-full min-h-0 flex-col px-[clamp(1rem,1.45vw,1.5rem)] py-[clamp(1rem,1.5vh,1.45rem)]">
+            <div className="relative z-10 flex h-full min-h-0 flex-col justify-between px-[clamp(0.75rem,1.1vw,1.2rem)] py-[clamp(0.65rem,1vh,1rem)]">
                 <header className="shrink-0 text-center">
                     <p className="text-[clamp(0.62rem,0.78vw,0.82rem)] font-black uppercase tracking-[0.24em] text-white/70">
                         Previsão do tempo
