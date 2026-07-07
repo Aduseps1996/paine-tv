@@ -32,8 +32,8 @@ export default function PainelClimaSidebar({
             <div className="absolute -left-20 top-10 h-56 w-56 rounded-full bg-white/20 blur-3xl" />
             <div className="absolute bottom-16 right-[-90px] h-64 w-64 rounded-full bg-[#7de2ff]/20 blur-3xl" />
 
-            <div className="relative z-10 flex h-full min-h-0 flex-col gap-[clamp(1.5rem,1.05vh,1.15rem)] overflow-hidden px-[clamp(0.7rem,1vw,1.1rem)] py-[clamp(0.55rem,0.85vh,0.9rem)]">
-                <header className="shrink-0 text-center mt-15">
+            <div className="relative z-10 grid h-full min-h-0 grid-rows-[auto_auto_auto_auto_minmax(0,1fr)] gap-2 overflow-hidden px-3 py-3">
+                <header className="shrink-0 text-center">
                     <p className="text-[clamp(0.56rem,0.7vw,0.76rem)] font-black uppercase tracking-[0.2em] text-white/70">
                         Previsão do tempo
                     </p>
@@ -123,7 +123,7 @@ export default function PainelClimaSidebar({
                     </div>
                 </section>
 
-                <section className="shrink-0 rounded-[20px] border border-white/10 bg-black/15 p-2.5">
+                <section className="min-h-0 overflow-hidden rounded-[18px] border border-white/10 bg-black/15 p-2">
                     <p className="mb-2 text-[clamp(0.52rem,0.68vw,0.68rem)] font-black uppercase tracking-[0.16em] text-white/65">
                         Próximos dias
                     </p>
@@ -135,7 +135,7 @@ export default function PainelClimaSidebar({
                         ).map((dia) => (
                             <div
                                 key={dia.data}
-                                className="rounded-xl border border-white/10 bg-white/[0.11] px-2 py-2.5 text-center"
+                                className="rounded-lg border border-white/10 bg-white/[0.11] px-1 py-1.5 text-center"
                             >
                                 <p className="text-[clamp(0.58rem,0.72vw,0.68rem)] font-black uppercase text-white/65">
                                     {formatarDiaCurto(dia.data)}
@@ -155,7 +155,7 @@ export default function PainelClimaSidebar({
                             [1, 2, 3].map((indice) => (
                                 <div
                                     key={indice}
-                                    className="rounded-xl border border-white/10 bg-white/[0.11] px-2 py-2.5 text-center"
+                                    className="rounded-lg border border-white/10 bg-white/[0.11] px-1 py-1.5 text-center"
                                 >
                                     <p className="text-[clamp(0.58rem,0.72vw,0.68rem)] font-black text-white/65">
                                         --

@@ -30,7 +30,7 @@ export default function PainelFaixaInferior({
         <div className="grid h-full w-full grid-cols-[minmax(0,1fr)_260px] items-center overflow-hidden bg-gradient-to-r from-[#063ea8] via-[#0d5cff] to-[#063ea8]">
             
             <div className="min-w-0 overflow-hidden px-5">
-                <p className="truncate text-[34px] font-black leading-none">
+                <p className="truncate text-[28px] font-black leading-none">
                     {textoFaixa}
                 </p>
             </div>
