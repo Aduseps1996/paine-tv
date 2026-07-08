@@ -42,47 +42,67 @@ export default function BannerInstitucional({
 
             <div className="absolute inset-0 bg-gradient-to-r from-[#071633]/85 via-[#071633]/45 to-transparent" />
 
-            <div className="absolute left-[clamp(1rem,4vw,3.5rem)] top-1/2 w-[min(88vw,560px)] -translate-y-1/2">
+            <div className="absolute left-[clamp(1rem,4vw,3.5rem)] top-1/2 w-[min(92vw,660px)] -translate-y-1/2">
                 <div className="rounded-[2rem] border border-white/10 bg-black/35 p-[clamp(1.25rem,3vw,2.5rem)] shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
-                    <div className="mb-6 inline-flex items-center rounded-full border border-[#34bcf8]/30 bg-[#34bcf8]/15 px-5 py-2">
-                        <span className="text-sm font-black uppercase tracking-[0.18em] text-[#34bcf8]">
+                    <div className="mb-5 inline-flex items-center rounded-full border border-[#34bcf8]/25 bg-[#34bcf8]/12 px-4 py-1.5">
+                        <span className="text-xs font-black uppercase tracking-[0.18em] text-[#34bcf8]">
                             {midiaAtual.categoria || "ADUSEPS"}
                         </span>
                     </div>
 
-                    <h1 className="text-[clamp(2rem,4vw,3rem)] font-black leading-[1.05] text-white">
+                    <h1 className="text-[clamp(2.4rem,4.8vw,3.6rem)] font-black leading-[1.05] text-white">
                         {midiaAtual.titulo || "Informacao e acolhimento ao associado"}
                     </h1>
 
-                    <p className="mt-6 text-[clamp(1rem,1.8vw,1.25rem)] leading-relaxed text-white/80">
+                    <p className="mt-4 text-[clamp(1rem,1.8vw,1.25rem)] leading-7 text-white/80">
                         {midiaAtual.subtitulo || "Servicos institucionais, comunicados e conteudos importantes exibidos em tempo real para melhor atendimento."}
                     </p>
 
                     <div className="mt-10 flex items-center gap-4">
                         <div className="h-1 w-16 rounded-full bg-[#34bcf8]" />
 
-                        <span className="text-sm font-bold uppercase tracking-[0.22em] text-white/60">
+                        <span className="text-xs font-bold uppercase tracking-[0.22em] text-white/60">
                             {midiaAtual.rodape || "Painel Institucional"}
                         </span>
                     </div>
 
                     {midiaAtual.qrcode && midiaAtual.qrcode.trim() !== "" && (
-                        <div className="mt-8 flex items-center gap-5 rounded-2xl border border-white/10 bg-white/10 p-4">
-                            <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(midiaAtual.qrcode)}`}
-                                alt="QR Code"
-                                className="h-28 w-28 rounded-xl bg-white p-2"
-                            />
+                        <div className="mt-8 rounded-3xl border border-white/10 bg-white/8 p-5">
 
-                            <div>
-                                <p className="text-sm font-bold uppercase tracking-[0.22em] text-white/55">
-                                    Acesse pelo celular
-                                </p>
+                            <div className="flex items-center gap-6">
 
-                                <p className="mt-2 text-lg font-semibold text-white/85">
-                                    {midiaAtual.cta || "Aponte a camera para o QR Code"}
-                                </p>
+                                <img
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
+                                        midiaAtual.qrcode
+                                    )}`}
+                                    alt="QR Code"
+                                    className="h-32 w-32 shrink-0 rounded-2xl bg-white p-2"
+                                />
+
+                                <div className="min-w-0">
+
+                                    <p className="text-xs font-black uppercase tracking-[0.28em] text-[#7ddfff]">
+                                        Escaneie o QR Code
+                                    </p>
+
+                                    <h3 className="mt-2 text-2xl font-black text-white">
+                                        {midiaAtual.cta || "Acesse agora"}
+                                    </h3>
+
+                                    <p className="mt-3 text-base leading-relaxed text-white/75">
+                                        Utilize a câmera do celular para abrir o conteúdo instantaneamente.
+                                    </p>
+
+                                </div>
+
                             </div>
+
+                            <div className="mt-5 h-px bg-white/10" />
+
+                            <p className="mt-4 text-xs font-bold uppercase tracking-[0.25em] text-white/45">
+                                {midiaAtual.rodape || "Painel Institucional"}
+                            </p>
+
                         </div>
                     )}
                 </div>

@@ -160,6 +160,18 @@ export function useRotacaoMidias({
 
     const midiaAtual = midiasValidas[indiceSeguro]
 
+    const indiceProximaMidia =
+    midiasValidas.length > 1
+        ? indiceSeguro + 1 >= midiasValidas.length
+            ? 0
+            : indiceSeguro + 1
+        : null
+
+    const proximaMidia =
+        indiceProximaMidia !== null
+            ? midiasValidas[indiceProximaMidia]
+            : null
+
     const avancarMidia = useCallback(() => {
         if (midiasValidas.length <= 1) return
 
@@ -276,6 +288,7 @@ export function useRotacaoMidias({
         possuiRotacao: midiasValidas.length > 1,
         assinaturaMidias,
         agoraPainel,
+        proximaMidia,
         avancarMidia,
         marcarMidiaComErro,
         lidarComErroVideo,

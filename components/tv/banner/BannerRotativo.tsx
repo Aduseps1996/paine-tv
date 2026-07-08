@@ -75,6 +75,7 @@ export default function BannerRotativo({
     const {
         midias: midiasRotacao,
         midiaAtual,
+        proximaMidia,
         possuiRotacao,
         agoraPainel,
         marcarMidiaComErro,
@@ -126,6 +127,20 @@ export default function BannerRotativo({
 
     const templateAtual = midiaAtual.template || "cheio"
 
+    const preloadProximaMidia =
+        proximaMidia &&
+            proximaMidia.tipo === "imagem" &&
+            proximaMidia.arquivo &&
+            !midiaEhYoutube(proximaMidia) ? (
+            <img
+                src={proximaMidia.arquivo}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute h-0 w-0 opacity-0"
+                key={`preload-${obterAssinaturaMidia(proximaMidia)}`}
+            />
+        ) : null
+
     const templateProps: BannerTemplateProps = {
         midiaAtual,
         fallback,
@@ -137,33 +152,48 @@ export default function BannerRotativo({
         onVideoEnded: reiniciarOuAvancarVideo
     }
 
-    switch (templateAtual) {
-        case "escala-juridica":
-            return (
-                <EscalaJuridicaPainel
-                    configuracoes={configuracoesBanner}
-                    clima={clima}
-                />
-            )
+    function renderizarTemplate() {
+        switch (templateAtual) {
+            case "escala-juridica":
+                return (
+                    <EscalaJuridicaPainel
+                        configuracoes={configuracoesBanner}
+                        clima={clima}
+                    />
+                )
 
-        case "painel":
-            return (
-                <BannerPainel
-                    midiaAtual={midiaAtual}
-                    configuracoes={configuracoesBanner}
-                    clima={clima}
-                    fallback={fallback}
-                    possuiRotacao={possuiRotacao}
-                    agoraPainel={agoraPainel}
-                    onErroMidia={marcarMidiaComErro}
-                    onVideoEnded={reiniciarOuAvancarVideo}
-                />
-            )
+            case "painel":
+                return (
+                    <BannerPainel
+                        midiaAtual={midiaAtual}
+                        configuracoes={configuracoesBanner}
+                        clima={clima}
+                        fallback={fallback}
+                        possuiRotacao={possuiRotacao}
+                        agoraPainel={agoraPainel}
+                        onErroMidia={marcarMidiaComErro}
+                        onVideoEnded={reiniciarOuAvancarVideo}
+                    />
+                )
 
-        case "institucional":
-            return <BannerInstitucional {...templateProps} />
+            case "institucional":
+                return <BannerInstitucional {...templateProps} />
 
-        default:
-            return <BannerCheio {...templateProps} />
+            default:
+                return <BannerCheio {...templateProps} />
+        }
     }
+
+    return (
+        <>
+            {preloadProximaMidia}
+
+            <div
+                key={chaveMidiaAtual}
+                className="absolute inset-0 animate-[entradaMidia_650ms_ease-out]"
+            >
+                {renderizarTemplate()}
+            </div>
+        </>
+    )
 }

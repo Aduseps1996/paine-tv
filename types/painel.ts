@@ -48,6 +48,14 @@ export type Midia = {
     tempoOcultaTarja?: number
     tempoInicialTarja?: number
     modeloTarja?: ModeloTarja
+
+    // Controle do arquivo
+    versao?: number
+    atualizadoEm?: string
+    tamanhoBytes?: number
+    mimeType?: string
+    storagePath?: string
+    hashArquivo?: string
 }
 
 export type NovaMidia = Omit<Midia, "id">

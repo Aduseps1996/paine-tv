@@ -10,7 +10,7 @@ export default function BannerCheio({
     onVideoEnded
 }: BannerTemplateProps) {
     const areaMidia =
-        "absolute inset-x-0 top-0 bottom-[clamp(88px,10vh,132px)] h-auto w-full object-cover"
+        "absolute inset-0 h-full w-full object-cover"
 
     return (
         <>
