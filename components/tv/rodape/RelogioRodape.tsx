@@ -1,4 +1,8 @@
-"use client"
+export default function RelogioRodape() {
+    return null
+}
+
+/* "use client"
 
 import { usePainelRelogio } from "@/hooks/tv/usePainelRelogio"
 
@@ -29,3 +33,6 @@ export default function RelogioRodape({
         </div>
     )
 }
+ */
+
+"use client"
