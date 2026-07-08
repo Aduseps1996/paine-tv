@@ -1,9 +1,9 @@
 "use client"
 
 import { CalendarDays, Scale } from "lucide-react"
-import { useEffect, useState } from "react"
 
 import { useEscalaJuridicaPainel } from "@/hooks/tv/useEscalaJuridicaPainel"
+import { useModoTelaPainel } from "@/hooks/tv/useModoTelaPainel"
 import type { ClimaPainel, ConfiguracoesBanner } from "./utils"
 
 type Props = {
@@ -76,21 +76,8 @@ export default function EscalaJuridicaPainel({
     clima
 }: Props) {
     const escala = useEscalaJuridicaPainel()
+    const { modoCompacto } = useModoTelaPainel()
     const agora = new Date()
-    const [larguraTela, setLarguraTela] = useState(1920)
-
-    useEffect(() => {
-        function atualizarLargura() {
-            setLarguraTela(window.innerWidth)
-        }
-
-        atualizarLargura()
-        window.addEventListener("resize", atualizarLargura)
-
-        return () => window.removeEventListener("resize", atualizarLargura)
-    }, [])
-
-    const modoTvStick = larguraTela < 1200
 
     const hora = agora.toLocaleTimeString("pt-BR", {
         hour: "2-digit",
@@ -116,7 +103,7 @@ export default function EscalaJuridicaPainel({
         return indiceDia > indiceAtual
     }).slice(0, 3)
 
-    if (modoTvStick) {
+    if (modoCompacto) {
         return (
             <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
