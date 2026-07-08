@@ -246,7 +246,7 @@ export default function EscalaJuridicaPainel({
                                 {diasCompactos.map((dia) => (
                                     <div
                                         key={dia.id}
-                                        className={`rounded-lg border px-2.5 py-1.5 ${
+                                        className={`rounded-xl border px-3 py-2 ${
                                             dia.atual
                                                 ? "border-sky-300/45 bg-sky-400/20"
                                                 : "border-white/10 bg-black/18"
@@ -255,14 +255,31 @@ export default function EscalaJuridicaPainel({
                                         <p className="text-xs font-black uppercase tracking-[0.12em]">
                                             {dia.nome}
                                         </p>
+                                        <div className="mt-1.5 grid grid-cols-2 gap-3">
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase text-sky-100/70">
+                                                    Manhã
+                                                </p>
 
-                                        <p className="mt-1 line-clamp-1 text-[11px] font-bold text-white/85">
-                                            M: {dia.manha.length > 0 ? dia.manha.join(", ") : "—"}
-                                        </p>
+                                                <p className="mt-0.5 line-clamp-2 text-[11px] font-bold leading-snug text-white/90">
+                                                    {dia.manha.length > 0
+                                                        ? dia.manha.join(", ")
+                                                        : "—"}
+                                                </p>
+                                            </div>
 
-                                        <p className="line-clamp-1 text-[11px] font-bold text-white/85">
-                                            T: {dia.tarde.length > 0 ? dia.tarde.join(", ") : "—"}
-                                        </p>
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase text-sky-100/70">
+                                                    Tarde
+                                                </p>
+
+                                                <p className="mt-0.5 line-clamp-2 text-[11px] font-bold leading-snug text-white/90">
+                                                    {dia.tarde.length > 0
+                                                        ? dia.tarde.join(", ")
+                                                        : "—"}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
