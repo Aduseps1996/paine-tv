@@ -125,6 +125,7 @@ export function useEscalaJuridicaPainel() {
 
         return {
             carregando,
+            possuiDocumento: Boolean(dados),
             semanaTexto: dados?.semana || "",
             diaAtual,
             nomeDiaAtual: nomesDias[diaAtual],

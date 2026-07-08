@@ -127,9 +127,14 @@ export default function EscalaJuridicaPainel({
 
                             <p className="mt-2 text-[clamp(1rem,1.3vw,1.45rem)] font-bold text-white/75">
                                 {escala.semanaTexto || "Semana atual"}
-                                <p className="mt-1 text-sm font-bold text-yellow-300">
-                                    DEBUG: manhã {escala.manhaHoje.length} | tarde {escala.tardeHoje.length}
-                                </p>
+                            </p>
+
+                            <p className="mt-2 text-[clamp(1rem,1.3vw,1.45rem)] font-bold text-white/75">
+                                {escala.semanaTexto || "Semana atual"}
+                            </p>
+
+                            <p className="mt-1 text-sm font-bold text-yellow-300">
+                                DEBUG: doc {escala.possuiDocumento ? "SIM" : "NÃO"} | manhã {escala.manhaHoje.length} | tarde {escala.tardeHoje.length}
                             </p>
                         </div>
                     </div>
