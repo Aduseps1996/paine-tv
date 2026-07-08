@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { CalendarDays, Scale } from "lucide-react"
 
 import { useEscalaJuridicaPainel } from "@/hooks/tv/useEscalaJuridicaPainel"
@@ -77,7 +78,12 @@ export default function EscalaJuridicaPainel({
     clima
 }: Props) {
     const escala = useEscalaJuridicaPainel()
+    const [viewport, setViewport] = useState("")
     const agora = new Date()
+
+    useEffect(() => {
+        setViewport(`${window.innerWidth} × ${window.innerHeight}`)
+    }, [])
 
     const hora = agora.toLocaleTimeString("pt-BR", {
         hour: "2-digit",
@@ -97,6 +103,10 @@ export default function EscalaJuridicaPainel({
 
     return (
         <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
+            <div className="fixed bottom-2 right-2 z-[9999] rounded bg-black/80 px-2 py-1 text-white">
+                {viewport}
+            </div>
+
             <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
             <div className="absolute -left-32 top-10 h-80 w-80 rounded-full bg-sky-300/25 blur-3xl" />
             <div className="absolute right-[-120px] top-[-80px] h-96 w-96 rounded-full bg-white/15 blur-3xl" />
@@ -127,14 +137,6 @@ export default function EscalaJuridicaPainel({
 
                             <p className="mt-2 text-[clamp(1rem,1.3vw,1.45rem)] font-bold text-white/75">
                                 {escala.semanaTexto || "Semana atual"}
-                            </p>
-
-                            <p className="mt-2 text-[clamp(1rem,1.3vw,1.45rem)] font-bold text-white/75">
-                                {escala.semanaTexto || "Semana atual"}
-                            </p>
-
-                            <p className="mt-1 text-sm font-bold text-yellow-300">
-                                DEBUG: doc {escala.possuiDocumento ? "SIM" : "NÃO"} | manhã {escala.manhaHoje.length} | tarde {escala.tardeHoje.length}
                             </p>
                         </div>
                     </div>
