@@ -109,6 +109,14 @@ export default function EscalaJuridicaPainel({
             ? "--"
             : `${clima.temperaturaAtual}°`
 
+    const diasCompactos = escala.semana.filter((dia) => {
+        const ordem = ["segunda", "terca", "quarta", "quinta", "sexta"]
+        const indiceAtual = ordem.indexOf(escala.diaAtual)
+        const indiceDia = ordem.indexOf(dia.id)
+
+        return indiceDia >= indiceAtual
+    }).slice(0, 3)
+
     if (modoTvStick) {
         return (
             <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
@@ -235,7 +243,7 @@ export default function EscalaJuridicaPainel({
                             </div>
 
                             <div className="space-y-1.5">
-                                {escala.semana.map((dia) => (
+                                {diasCompactos.map((dia) => (
                                     <div
                                         key={dia.id}
                                         className={`rounded-lg border px-2.5 py-1.5 ${
