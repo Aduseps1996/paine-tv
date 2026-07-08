@@ -49,11 +49,10 @@ function CardTurno({
 }) {
     return (
         <div
-            className={`rounded-2xl border p-3 shadow-[0_16px_40px_rgba(0,0,0,0.22)] backdrop-blur-md ${
-                destaque
+            className={`rounded-2xl border p-3 shadow-[0_16px_40px_rgba(0,0,0,0.22)] backdrop-blur-md ${destaque
                     ? "border-sky-300/35 bg-sky-400/20"
                     : "border-white/15 bg-white/10"
-            }`}
+                }`}
         >
             <div className="mb-4 flex items-center justify-between gap-4 2xl:mb-5">
                 <div>
@@ -114,7 +113,7 @@ export default function EscalaJuridicaPainel({
         const indiceAtual = ordem.indexOf(escala.diaAtual)
         const indiceDia = ordem.indexOf(dia.id)
 
-        return indiceDia >= indiceAtual
+        return indiceDia > indiceAtual
     }).slice(0, 3)
 
     if (modoTvStick) {
@@ -174,7 +173,7 @@ export default function EscalaJuridicaPainel({
                                 </h2>
 
                                 <p className="mt-1 text-xs font-bold uppercase text-white/60">
-                                    08h às 12h
+                                    08h às 13h
                                 </p>
 
                                 <div className="mt-2 space-y-1.5">
@@ -205,7 +204,7 @@ export default function EscalaJuridicaPainel({
                                 </h2>
 
                                 <p className="mt-1 text-xs font-bold uppercase text-white/60">
-                                    13h às 17h
+                                    13h às 18h
                                 </p>
 
                                 <div className="mt-2 space-y-1.5">
@@ -242,47 +241,74 @@ export default function EscalaJuridicaPainel({
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                                {diasCompactos.map((dia) => (
-                                    <div
-                                        key={dia.id}
-                                        className={`rounded-xl border px-3 py-2 ${
-                                            dia.atual
-                                                ? "border-sky-300/45 bg-sky-400/20"
-                                                : "border-white/10 bg-black/18"
-                                        }`}
-                                    >
-                                        <p className="text-xs font-black uppercase tracking-[0.12em]">
-                                            {dia.nome}
-                                        </p>
-                                        <div className="mt-1.5 grid grid-cols-2 gap-3">
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase text-sky-100/70">
-                                                    Manhã
-                                                </p>
+                            <div className="mb-2 rounded-xl border border-amber-300/30 bg-amber-300/10 px-3 py-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-100/80">
+                                    Coordenação da tarde
+                                </p>
 
-                                                <p className="mt-0.5 line-clamp-2 text-[11px] font-bold leading-snug text-white/90">
-                                                    {dia.manha.length > 0
-                                                        ? dia.manha.join(", ")
-                                                        : "—"}
-                                                </p>
-                                            </div>
+                                <p className="mt-1 line-clamp-2 text-sm font-black uppercase leading-snug text-white">
+                                    {(escala.coordenacaoHoje || []).length > 0
+                                        ? escala.coordenacaoHoje.join(", ")
+                                        : "Sem atendimento de coordenação"}
+                                </p>
+                            </div>
 
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase text-sky-100/70">
-                                                    Tarde
-                                                </p>
+                            {diasCompactos.length === 0 ? (
+                                <div className="rounded-xl border border-white/10 bg-black/18 px-3 py-4 text-center">
+                                    <p className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
+                                        Próximos atendimentos
+                                    </p>
 
-                                                <p className="mt-0.5 line-clamp-2 text-[11px] font-bold leading-snug text-white/90">
-                                                    {dia.tarde.length > 0
-                                                        ? dia.tarde.join(", ")
-                                                        : "—"}
-                                                </p>
+                                    <p className="mt-2 text-sm font-bold text-white">
+                                        Nova escala na próxima semana.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-1.5">
+                                    {diasCompactos.map((dia) => (
+                                        <div
+                                            key={dia.id}
+                                            className={`rounded-xl border px-3 py-2 ${dia.atual
+                                                    ? "border-sky-300/45 bg-sky-400/20"
+                                                    : "border-white/10 bg-black/18"
+                                                }`}
+                                        >
+                                            <p className="text-xs font-black uppercase tracking-[0.12em]">
+                                                {dia.nome}
+                                            </p>
+                                            <div className="mt-1.5 grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <p className="text-[10px] font-black uppercase text-sky-100/70">
+                                                        Manhã
+                                                    </p>
+
+                                                    <p className="mt-0.5 line-clamp-2 text-[11px] font-bold leading-snug text-white/90">
+                                                        {dia.manha.length > 0
+                                                            ? dia.manha.join(", ")
+                                                            : "—"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-[10px] font-black uppercase text-sky-100/70">
+                                                        Tarde
+                                                    </p>
+
+                                                    <p className="mt-0.5 line-clamp-2 text-[11px] font-bold leading-snug text-white/90">
+                                                        {dia.tarde.length > 0 ||
+                                                            dia.coordenacao.length > 0
+                                                            ? [
+                                                                ...dia.tarde,
+                                                                ...dia.coordenacao.map((nome) => `${nome} (coord.)`)
+                                                            ].join(", ")
+                                                            : "—"}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </aside>
                     </main>
                 </div>
@@ -348,16 +374,27 @@ export default function EscalaJuridicaPainel({
                     <div className="grid gap-4 lg:grid-rows-2 2xl:gap-5">
                         <CardTurno
                             titulo={`Hoje • ${escala.nomeDiaAtual}`}
-                            horario="Manhã • 08h às 12h"
+                            horario="Manhã • 08h às 13h"
                             nomes={escala.manhaHoje}
                             destaque
                         />
 
                         <CardTurno
                             titulo={`Hoje • ${escala.nomeDiaAtual}`}
-                            horario="Tarde • 13h às 17h"
+                            horario="Tarde • 13h às 18h"
                             nomes={escala.tardeHoje}
                         />
+                        {(escala.coordenacaoHoje || []).length > 0 && (
+                            <div className="mt-3 rounded-xl border border-amber-300/30 bg-amber-300/10 px-4 py-3">
+                                <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-100/80">
+                                    Coordenação
+                                </p>
+
+                                <p className="mt-1 truncate text-xl font-black uppercase text-white">
+                                    {escala.coordenacaoHoje.join(", ")}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <aside className="flex min-h-0 flex-col rounded-[22px] border border-white/15 bg-white/10 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-md 2xl:rounded-[28px] 2xl:p-5">
@@ -381,11 +418,10 @@ export default function EscalaJuridicaPainel({
                             {escala.semana.map((dia) => (
                                 <div
                                     key={dia.id}
-                                    className={`rounded-xl border px-3 py-2 ${
-                                        dia.atual
+                                    className={`rounded-xl border px-3 py-2 ${dia.atual
                                             ? "border-sky-300/45 bg-sky-400/20"
                                             : "border-white/10 bg-black/18"
-                                    }`}
+                                        }`}
                                 >
                                     <p className="text-sm font-black uppercase tracking-[0.16em] text-white">
                                         {dia.nome}
@@ -397,9 +433,7 @@ export default function EscalaJuridicaPainel({
                                                 Manhã
                                             </p>
                                             <p className="mt-1 line-clamp-2 font-bold text-white/90">
-                                                {dia.manha.length > 0
-                                                    ? dia.manha.join(", ")
-                                                    : "—"}
+                                                {dia.manha.length > 0 ? dia.manha.join(", ") : "—"}
                                             </p>
                                         </div>
 
@@ -408,8 +442,14 @@ export default function EscalaJuridicaPainel({
                                                 Tarde
                                             </p>
                                             <p className="mt-1 line-clamp-2 font-bold text-white/90">
-                                                {dia.tarde.length > 0
-                                                    ? dia.tarde.join(", ")
+                                                {[
+                                                    ...(dia.tarde ?? []),
+                                                    ...(dia.coordenacao ?? []).map((nome) => `${nome} (coord.)`)
+                                                ].length > 0
+                                                    ? [
+                                                        ...(dia.tarde ?? []),
+                                                        ...(dia.coordenacao ?? []).map((nome) => `${nome} (coord.)`)
+                                                    ].join(", ")
                                                     : "—"}
                                             </p>
                                         </div>

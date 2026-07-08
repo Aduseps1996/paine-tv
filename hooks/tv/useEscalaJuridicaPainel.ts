@@ -8,7 +8,7 @@ import { db } from "@/lib/firebase"
 type Turno = "manha" | "tarde"
 type DiaSemana = "segunda" | "terca" | "quarta" | "quinta" | "sexta"
 
-type Atividade = "atendimento"
+type Atividade = "atendimento" | "coordenacao"
 
 type EscalaOperacional = Record<
     DiaSemana,
@@ -35,6 +35,8 @@ const nomesDias: Record<DiaSemana, string> = {
     quinta: "Quinta",
     sexta: "Sexta"
 }
+
+
 
 function obterDiaAtual(): DiaSemana {
     const dia = new Date().getDay()
@@ -115,12 +117,17 @@ export function useEscalaJuridicaPainel() {
             escalaSemana?.[proximoDia]?.tarde?.atendimento
         )
 
+        const coordenacaoHoje = limparLista(
+            escalaSemana?.[diaAtual]?.tarde?.coordenacao
+        )
+
         const semana = diasSemana.map((dia) => ({
             id: dia,
             nome: nomesDias[dia],
             atual: dia === diaAtual,
             manha: limparLista(escalaSemana?.[dia]?.manha?.atendimento),
-            tarde: limparLista(escalaSemana?.[dia]?.tarde?.atendimento)
+            tarde: limparLista(escalaSemana?.[dia]?.tarde?.atendimento),
+            coordenacao: limparLista(escalaSemana?.[dia]?.tarde?.coordenacao)
         }))
 
         return {
@@ -133,6 +140,7 @@ export function useEscalaJuridicaPainel() {
             nomeProximoDia: nomesDias[proximoDia],
             manhaHoje,
             tardeHoje,
+            coordenacaoHoje,
             manhaProximoDia,
             tardeProximoDia,
             semana,
