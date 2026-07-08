@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarDays, Clock3, Scale } from "lucide-react"
+import { CalendarDays, Scale } from "lucide-react"
 
 import { useEscalaJuridicaPainel } from "@/hooks/tv/useEscalaJuridicaPainel"
 import type { ClimaPainel, ConfiguracoesBanner } from "./utils"
@@ -65,7 +65,6 @@ function CardTurno({
                     </h3>
                 </div>
 
-                
             </div>
 
             <ListaNomes nomes={nomes} />
@@ -104,7 +103,7 @@ export default function EscalaJuridicaPainel({
             <div className="absolute bottom-[-140px] left-1/3 h-96 w-96 rounded-full bg-blue-950/70 blur-3xl" />
 
             <div className="relative z-10 flex h-full flex-col p-3">
-                <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="flex min-w-0 items-center gap-4">
                         {configuracoes.logo && (
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-xl">
@@ -150,8 +149,8 @@ export default function EscalaJuridicaPainel({
                     </div>
                 </header>
 
-                <main className="mt-4 grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[1.15fr_0.85fr] 2xl:gap-5">
-                    <div className="grid gap-4 xl:grid-rows-2 2xl:gap-5">
+                <main className="mt-4 grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1.15fr_0.85fr] 2xl:gap-5">
+                    <div className="grid gap-4 lg:grid-rows-2 2xl:gap-5">
                         <CardTurno
                             titulo={`Hoje • ${escala.nomeDiaAtual}`}
                             horario="Manhã • 08h às 12h"
