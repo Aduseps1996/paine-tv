@@ -7,6 +7,19 @@ export type CidadeEncontrada = {
   timezone: string
 }
 
+type ResultadoGeocoding = {
+  name: string
+  admin1?: string
+  country?: string
+  latitude: number
+  longitude: number
+  timezone: string
+}
+
+type RespostaGeocoding = {
+  results?: ResultadoGeocoding[]
+}
+
 export async function buscarCidades(nome: string): Promise<CidadeEncontrada[]> {
   if (!nome.trim()) return []
 
@@ -20,13 +33,13 @@ export async function buscarCidades(nome: string): Promise<CidadeEncontrada[]> {
     throw new Error("Erro ao buscar cidade.")
   }
 
-  const dados = await resposta.json()
+  const dados = (await resposta.json()) as RespostaGeocoding
 
   if (!dados.results) {
     return []
   }
 
-  return dados.results.map((cidade: any) => ({
+  return dados.results.map((cidade) => ({
     nome: cidade.name,
     estado: cidade.admin1 ?? "",
     pais: cidade.country ?? "",

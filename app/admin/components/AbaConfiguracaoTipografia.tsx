@@ -14,6 +14,77 @@ type Props = {
     salvarConfiguracoes: () => void
 }
 
+type ControleNumeroProps = {
+    titulo: string
+    descricao: string
+    valor: number
+    minimo: number
+    maximo: number
+    sufixo: string
+    onChange: (valor: number) => void
+}
+
+function ControleNumero({
+    titulo,
+    descricao,
+    valor,
+    minimo,
+    maximo,
+    sufixo,
+    onChange
+}: ControleNumeroProps) {
+    return (
+        <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h3 className="text-xl font-black">
+                        {titulo}
+                    </h3>
+
+                    <p className="mt-2 text-sm text-zinc-400">
+                        {descricao}
+                    </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-3 text-right">
+                    <p className="text-2xl font-black">
+                        {valor}
+                    </p>
+
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                        {sufixo}
+                    </p>
+                </div>
+            </div>
+
+            <div className="mt-5">
+                <input
+                    type="range"
+                    min={minimo}
+                    max={maximo}
+                    value={valor}
+                    onChange={(e) => onChange(Number(e.target.value))}
+                    className="w-full"
+                />
+
+                <div className="mt-2 flex justify-between text-xs font-bold text-zinc-500">
+                    <span>{minimo}</span>
+                    <span>{maximo}</span>
+                </div>
+            </div>
+
+            <input
+                type="number"
+                min={minimo}
+                max={maximo}
+                value={valor}
+                onChange={(e) => onChange(Number(e.target.value))}
+                className="mt-4"
+            />
+        </div>
+    )
+}
+
 export default function AbaConfiguracaoTipografia({
     tamanhoFonteRodape,
     tamanhoFonteSlogan,
@@ -40,75 +111,6 @@ export default function AbaConfiguracaoTipografia({
         return ativa
             ? "border-sky-400/40 bg-sky-500/15 text-white shadow-[0_14px_35px_rgba(14,165,233,0.16)]"
             : "border-white/10 bg-zinc-950/60 text-zinc-300"
-    }
-
-    function ControleNumero({
-        titulo,
-        descricao,
-        valor,
-        minimo,
-        maximo,
-        sufixo,
-        onChange
-    }: {
-        titulo: string
-        descricao: string
-        valor: number
-        minimo: number
-        maximo: number
-        sufixo: string
-        onChange: (valor: number) => void
-    }) {
-        return (
-            <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <h3 className="text-xl font-black">
-                            {titulo}
-                        </h3>
-
-                        <p className="mt-2 text-sm text-zinc-400">
-                            {descricao}
-                        </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-3 text-right">
-                        <p className="text-2xl font-black">
-                            {valor}
-                        </p>
-
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                            {sufixo}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="mt-5">
-                    <input
-                        type="range"
-                        min={minimo}
-                        max={maximo}
-                        value={valor}
-                        onChange={(e) => onChange(Number(e.target.value))}
-                        className="w-full"
-                    />
-
-                    <div className="mt-2 flex justify-between text-xs font-bold text-zinc-500">
-                        <span>{minimo}</span>
-                        <span>{maximo}</span>
-                    </div>
-                </div>
-
-                <input
-                    type="number"
-                    min={minimo}
-                    max={maximo}
-                    value={valor}
-                    onChange={(e) => onChange(Number(e.target.value))}
-                    className="mt-4"
-                />
-            </div>
-        )
     }
 
     return (

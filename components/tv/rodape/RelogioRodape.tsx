@@ -1,10 +1,29 @@
-
 "use client"
 
-export default function RelogioRodape() {
-    return null
+import { usePainelRelogio } from "@/hooks/tv/usePainelRelogio"
+
+type RelogioRodapeProps = {
+    tamanhoFonteHora?: number
+    className?: string
 }
 
+export default function RelogioRodape({
+    tamanhoFonteHora = 34,
+    className = ""
+}: RelogioRodapeProps) {
+    const { hora } = usePainelRelogio()
+
+    return (
+        <div
+            className={`flex items-center font-black tabular-nums leading-none text-white ${className}`}
+            style={{
+                fontSize: `${tamanhoFonteHora}px`
+            }}
+        >
+            {hora}
+        </div>
+    )
+}
 
 /* "use client"
 

@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 
 import { useTarjaPainel } from "@/hooks/tv/useTarjaPainel"
-import type { ConfiguracoesPainel, Midia } from "@/types/painel"
+import type { ConfiguracoesPainel, Midia, ModeloTarja } from "@/types/painel"
 
 type TarjaTVProps = {
     logo: string
@@ -12,7 +12,7 @@ type TarjaTVProps = {
     hora: string
     midiaAtual?: Midia | null
     mostrarTarja: boolean
-    modeloTarja: string
+    modeloTarja: ModeloTarja
     tamanhoFonteSlogan: number
     tamanhoFonteHora: number
     tamanhoLogoRodape: number
@@ -47,12 +47,11 @@ export default function TarjaTV({
     temperaturaAtual,
     codigoClimaAtual,
     erroClima,
-    configuracoes,
     midiaId
 }: TarjaTVProps) {
     const { faseTarja, mostrarQrTelejornal } = useTarjaPainel({
         mostrarTarja,
-        modeloTarja: modeloTarja as any,
+        modeloTarja,
         tempoEntradaTarja,
         tempoVisivelTarja,
         tempoSaidaTarja,
@@ -65,7 +64,7 @@ export default function TarjaTV({
     const tituloTarjaFinal = midiaAtual?.tarjaTitulo || slogan || "Informação e compromisso com o associado"
     const subtituloTarjaFinal = midiaAtual?.tarjaSubtitulo || data
 
-    const mostrarModelo = useMemo(() => mostrarTarja && modeloTarja !== "", [mostrarTarja, modeloTarja])
+    const mostrarModelo = useMemo(() => mostrarTarja, [mostrarTarja])
 
     if (!mostrarModelo) {
         return null

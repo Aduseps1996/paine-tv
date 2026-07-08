@@ -30,8 +30,8 @@ export function useTarjaPainel({
 
     useEffect(() => {
         if (!mostrarTarja || modeloTarja !== "telejornal") {
-            setMostrarQrTelejornal(false)
-            return
+            const timer = setTimeout(() => setMostrarQrTelejornal(false), 0)
+            return () => clearTimeout(timer)
         }
 
         const timerReset = setTimeout(() => setMostrarQrTelejornal(false), 0)
@@ -45,8 +45,8 @@ export function useTarjaPainel({
 
     useEffect(() => {
         if (!mostrarTarja) {
-            setFaseTarja("oculta")
-            return
+            const timer = setTimeout(() => setFaseTarja("oculta"), 0)
+            return () => clearTimeout(timer)
         }
 
         let ativo = true

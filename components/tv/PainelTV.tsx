@@ -38,7 +38,7 @@ export default function PainelTV({
   const [guicheAtual, setGuicheAtual] = useState("Guichê 2")
   const ultimaChamadaIdRef = useRef("")
   const ultimaRepeticaoIdRef = useRef<number | null>(null)
-  const painelIniciadoEm = useRef(Date.now())
+  const [painelIniciadoEm] = useState(() => Date.now())
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
   const [logo, setLogo] = useState("")
@@ -132,7 +132,7 @@ export default function PainelTV({
           return
         }
 
-        if (criadoEmMs < painelIniciadoEm.current) {
+        if (criadoEmMs < painelIniciadoEm) {
           updateDoc(doc(db, "painel_chamadas", "atual"), {
             ativo: false
           })
@@ -192,7 +192,7 @@ export default function PainelTV({
 
     return () => unsubscribe()
 
-  }, [modoPreview])
+  }, [modoPreview, painelIniciadoEm, tocarSomChamada])
 
   const logoFinal = modoPreview ? previewConfiguracoes?.logo || "" : logo
   const nomePainelFinal = modoPreview ? previewConfiguracoes?.nomePainel || "" : nomePainel

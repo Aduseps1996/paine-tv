@@ -1,8 +1,17 @@
 import CidadeAutocomplete from "./clima/CidadeAutocomplete"
 import { usePainelDraftContext } from "../context/PainelDraftContext"
+import type { ConfiguracoesPainel } from "@/types/painel"
 
 type ModoLogo = "transparente" | "fundo" | "card"
 type TamanhoLogo = "pequeno" | "medio" | "grande"
+type ChavePainelInformativo = keyof Pick<
+    ConfiguracoesPainel,
+    | "mostrarTemperaturaPainel"
+    | "mostrarDescricaoClimaPainel"
+    | "mostrarCidadePainel"
+    | "mostrarDataPainel"
+    | "mostrarHoraPainel"
+>
 
 export default function AbaConfiguracaoPainel() {
     const { draft, atualizarConfiguracoesDraft } = usePainelDraftContext()
@@ -374,7 +383,7 @@ export default function AbaConfiguracaoPainel() {
 
                             <input
                                 type="checkbox"
-                                checked={(config as any)[key] ?? true}
+                                checked={config[key as ChavePainelInformativo] ?? true}
                                 onChange={(e) =>
                                     atualizarConfiguracoesDraft({
                                         [key]: e.target.checked
