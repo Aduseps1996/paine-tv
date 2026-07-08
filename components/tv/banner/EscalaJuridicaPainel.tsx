@@ -48,7 +48,7 @@ function CardTurno({
 }) {
     return (
         <div
-            className={`rounded-[22px] border p-4 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-md 2xl:rounded-[28px] 2xl:p-5 ${
+            className={`rounded-2xl border p-3 shadow-[0_16px_40px_rgba(0,0,0,0.22)] backdrop-blur-md ${
                 destaque
                     ? "border-sky-300/35 bg-sky-400/20"
                     : "border-white/15 bg-white/10"
@@ -60,14 +60,12 @@ function CardTurno({
                         {titulo}
                     </p>
 
-                    <h3 className="mt-2 text-[clamp(1.55rem,2.1vw,2.55rem)] font-black uppercase leading-none text-white">
+                    <h3 className="mt-1 text-[clamp(1.35rem,1.8vw,2rem)] font-black uppercase leading-none text-white">
                         {horario}
                     </h3>
                 </div>
 
-                <div className="rounded-xl border border-white/15 bg-black/20 p-3 2xl:rounded-2xl">
-                    <Clock3 className="h-7 w-7 text-white 2xl:h-8 2xl:w-8" />
-                </div>
+                
             </div>
 
             <ListaNomes nomes={nomes} />
@@ -105,11 +103,11 @@ export default function EscalaJuridicaPainel({
             <div className="absolute right-[-120px] top-[-80px] h-96 w-96 rounded-full bg-white/15 blur-3xl" />
             <div className="absolute bottom-[-140px] left-1/3 h-96 w-96 rounded-full bg-blue-950/70 blur-3xl" />
 
-            <div className="relative z-10 flex h-full flex-col p-4 md:p-5 2xl:p-6">
+            <div className="relative z-10 flex h-full flex-col p-3">
                 <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                     <div className="flex min-w-0 items-center gap-4">
                         {configuracoes.logo && (
-                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white p-2 shadow-2xl 2xl:h-20 2xl:w-20">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-xl">
                                 <img
                                     src={configuracoes.logo}
                                     alt="Logo"
@@ -124,7 +122,7 @@ export default function EscalaJuridicaPainel({
                                 Atendimento jurídico presencial
                             </div>
 
-                            <h1 className="mt-3 text-[clamp(2rem,3vw,3.25rem)] font-black uppercase leading-none tracking-tight text-white drop-shadow-2xl">
+                            <h1 className="mt-2 text-[clamp(1.7rem,2.4vw,2.6rem)] font-black uppercase leading-none tracking-tight text-white drop-shadow-2xl">
                                 Escala de atendimento
                             </h1>
 
@@ -134,8 +132,8 @@ export default function EscalaJuridicaPainel({
                         </div>
                     </div>
 
-                    <div className="rounded-[22px] border border-white/15 bg-black/25 px-5 py-4 text-right shadow-2xl backdrop-blur-md">
-                        <p className="text-[clamp(2rem,2.7vw,3rem)] font-black leading-none">
+                    <div className="rounded-2xl border border-white/15 bg-black/25 px-4 py-3 text-right shadow-xl backdrop-blur-md">
+                        <p className="text-[clamp(1.3rem,1.8vw,2rem)] font-black leading-none">
                             {hora}
                         </p>
 
