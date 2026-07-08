@@ -89,8 +89,14 @@ export default function ModalNovaMidia({
             subtitulo: subtitulo.trim(),
             rodape: rodape.trim(),
             categoria: categoria.trim(),
-            cta: template === "institucional" ? cta.trim() : "",
-            qrcode: template === "institucional" ? qrcode.trim() : tarjaQrcode.trim(),
+            cta:
+                template === "institucional" || template === "social"
+                    ? cta.trim()
+                    : "",
+            qrcode:
+                template === "institucional" || template === "social"
+                    ? qrcode.trim()
+                    : tarjaQrcode.trim(),
             exibicaoProgramada: ehYoutube ? true : programarExibicao,
             tipoExibicaoProgramada: ehYoutube ? "youtube" : "midia",
             inicioExibicao,
@@ -182,6 +188,7 @@ export default function ModalNovaMidia({
                                         <option value="cheio">Banner Cheio</option>
                                         <option value="institucional">Institucional</option>
                                         <option value="painel">Painel Informativo</option>
+                                        <option value="social">Redes Sociais</option>
                                     </select>
                                 )}
                             </div>
@@ -245,6 +252,58 @@ export default function ModalNovaMidia({
                                     <input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Texto principal da faixa inferior" />
                                     <textarea value={subtitulo} onChange={(e) => setSubtitulo(e.target.value)} placeholder="Texto complementar" className="min-h-24 resize-none" />
                                     <input value={rodape} onChange={(e) => setRodape(e.target.value)} placeholder="Rodapé / chamada curta" />
+                                </div>
+                            </section>
+                        )}
+
+                        {!ehYoutube && template === "social" && (
+                            <section className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
+                                <h3 className="text-xl font-black">
+                                    Redes Sociais
+                                </h3>
+
+                                <p className="mt-2 text-sm text-zinc-400">
+                                    Template ideal para Instagram, Facebook, TikTok, YouTube ou Site.
+                                    Exibe QR Code, chamada para ação e mídia vertical.
+                                </p>
+
+                                <div className="mt-5 grid gap-4">
+                                    <input
+                                        value={categoria}
+                                        onChange={(e) => setCategoria(e.target.value)}
+                                        placeholder="Categoria (Ex: ACOMPANHE)"
+                                    />
+
+                                    <input
+                                        value={titulo}
+                                        onChange={(e) => setTitulo(e.target.value)}
+                                        placeholder="Título principal"
+                                    />
+
+                                    <textarea
+                                        value={subtitulo}
+                                        onChange={(e) => setSubtitulo(e.target.value)}
+                                        className="min-h-28 resize-none"
+                                        placeholder="Descrição"
+                                    />
+
+                                    <input
+                                        value={cta}
+                                        onChange={(e) => setCta(e.target.value)}
+                                        placeholder="Chamada para ação"
+                                    />
+
+                                    <input
+                                        value={rodape}
+                                        onChange={(e) => setRodape(e.target.value)}
+                                        placeholder="Texto inferior"
+                                    />
+
+                                    <input
+                                        value={qrcode}
+                                        onChange={(e) => setQrcode(e.target.value)}
+                                        placeholder="Link do QR Code"
+                                    />
                                 </div>
                             </section>
                         )}

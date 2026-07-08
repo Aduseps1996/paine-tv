@@ -5,6 +5,8 @@ export type TemplateMidia =
     | "institucional"
     | "painel"
     | "escala-juridica"
+    | "social"
+
 
 export type ModoExibicaoMidia = "cover" | "contain"
 

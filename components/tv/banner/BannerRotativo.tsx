@@ -9,6 +9,7 @@ import type { ConfiguracoesPainel, Midia, Noticia } from "@/types/painel"
 import BannerCheio from "./BannerCheio"
 import EscalaJuridicaPainel from "./EscalaJuridicaPainel"
 import BannerInstitucional from "./BannerInstitucional"
+import BannerSocial from "./BannerSocial"
 import BannerPainel from "./BannerPainel"
 import BannerYoutube from "./BannerYoutube"
 import {
@@ -178,6 +179,9 @@ export default function BannerRotativo({
 
             case "institucional":
                 return <BannerInstitucional {...templateProps} />
+
+            case "social":
+                return <BannerSocial {...templateProps} />
 
             default:
                 return <BannerCheio {...templateProps} />
