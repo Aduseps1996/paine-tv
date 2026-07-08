@@ -1,6 +1,10 @@
+
+"use client"
+
 export default function RelogioRodape() {
     return null
 }
+
 
 /* "use client"
 
@@ -34,5 +38,3 @@ export default function RelogioRodape({
     )
 }
  */
-
-"use client"
