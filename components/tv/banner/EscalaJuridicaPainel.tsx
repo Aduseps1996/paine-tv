@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { CalendarDays, Scale } from "lucide-react"
+import { useEffect, useState } from "react"
 
 import { useEscalaJuridicaPainel } from "@/hooks/tv/useEscalaJuridicaPainel"
 import type { ClimaPainel, ConfiguracoesBanner } from "./utils"
@@ -65,7 +65,6 @@ function CardTurno({
                         {horario}
                     </h3>
                 </div>
-
             </div>
 
             <ListaNomes nomes={nomes} />
@@ -78,12 +77,21 @@ export default function EscalaJuridicaPainel({
     clima
 }: Props) {
     const escala = useEscalaJuridicaPainel()
-    const [viewport, setViewport] = useState("")
     const agora = new Date()
+    const [larguraTela, setLarguraTela] = useState(1920)
 
     useEffect(() => {
-        setViewport(`${window.innerWidth} × ${window.innerHeight}`)
+        function atualizarLargura() {
+            setLarguraTela(window.innerWidth)
+        }
+
+        atualizarLargura()
+        window.addEventListener("resize", atualizarLargura)
+
+        return () => window.removeEventListener("resize", atualizarLargura)
     }, [])
+
+    const modoTvStick = larguraTela < 1200
 
     const hora = agora.toLocaleTimeString("pt-BR", {
         hour: "2-digit",
@@ -101,12 +109,164 @@ export default function EscalaJuridicaPainel({
             ? "--"
             : `${clima.temperaturaAtual}°`
 
+    if (modoTvStick) {
+        return (
+            <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
+
+                <div className="relative z-10 flex h-full flex-col p-3">
+                    <header className="flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                            {configuracoes.logo && (
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white p-1.5">
+                                    <img
+                                        src={configuracoes.logo}
+                                        alt="Logo"
+                                        className="max-h-full max-w-full object-contain"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-sky-100/85">
+                                    <Scale className="h-3.5 w-3.5" />
+                                    Atendimento jurídico presencial
+                                </div>
+
+                                <h1 className="mt-1 truncate text-2xl font-black uppercase leading-none">
+                                    Escala de atendimento
+                                </h1>
+
+                                <p className="mt-1 truncate text-xs font-bold text-white/70">
+                                    {escala.semanaTexto || "Semana atual"}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="shrink-0 rounded-xl border border-white/15 bg-black/25 px-3 py-2 text-right">
+                            <p className="text-xl font-black leading-none">
+                                {hora}
+                            </p>
+
+                            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
+                                {temperatura} • {clima.cidade}
+                            </p>
+                        </div>
+                    </header>
+
+                    <main className="mt-3 grid min-h-0 flex-1 grid-cols-[1.15fr_0.85fr] gap-3">
+                        <section className="grid min-h-0 grid-rows-2 gap-3">
+                            <div className="min-h-0 rounded-2xl border border-sky-300/35 bg-sky-400/20 p-3">
+                                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-sky-100/80">
+                                    Hoje • {escala.nomeDiaAtual}
+                                </p>
+
+                                <h2 className="mt-1 text-2xl font-black uppercase leading-none">
+                                    Manhã
+                                </h2>
+
+                                <p className="mt-1 text-xs font-bold uppercase text-white/60">
+                                    08h às 12h
+                                </p>
+
+                                <div className="mt-2 space-y-1.5">
+                                    {escala.manhaHoje.length > 0 ? (
+                                        escala.manhaHoje.slice(0, 4).map((nome) => (
+                                            <div
+                                                key={nome}
+                                                className="rounded-lg bg-white/12 px-3 py-1.5"
+                                            >
+                                                <p className="truncate text-lg font-black uppercase leading-tight">
+                                                    {nome}
+                                                </p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-2xl font-black text-white/35">—</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="min-h-0 rounded-2xl border border-white/15 bg-white/10 p-3">
+                                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-sky-100/80">
+                                    Hoje • {escala.nomeDiaAtual}
+                                </p>
+
+                                <h2 className="mt-1 text-2xl font-black uppercase leading-none">
+                                    Tarde
+                                </h2>
+
+                                <p className="mt-1 text-xs font-bold uppercase text-white/60">
+                                    13h às 17h
+                                </p>
+
+                                <div className="mt-2 space-y-1.5">
+                                    {escala.tardeHoje.length > 0 ? (
+                                        escala.tardeHoje.slice(0, 4).map((nome) => (
+                                            <div
+                                                key={nome}
+                                                className="rounded-lg bg-white/12 px-3 py-1.5"
+                                            >
+                                                <p className="truncate text-lg font-black uppercase leading-tight">
+                                                    {nome}
+                                                </p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-2xl font-black text-white/35">—</p>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+
+                        <aside className="min-h-0 rounded-2xl border border-white/15 bg-white/10 p-3">
+                            <div className="mb-2 flex items-center gap-2">
+                                <CalendarDays className="h-5 w-5 text-white" />
+
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-100/75">
+                                        Semana
+                                    </p>
+
+                                    <h2 className="text-lg font-black uppercase leading-none">
+                                        Próximos dias
+                                    </h2>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                {escala.semana.map((dia) => (
+                                    <div
+                                        key={dia.id}
+                                        className={`rounded-lg border px-2.5 py-1.5 ${
+                                            dia.atual
+                                                ? "border-sky-300/45 bg-sky-400/20"
+                                                : "border-white/10 bg-black/18"
+                                        }`}
+                                    >
+                                        <p className="text-xs font-black uppercase tracking-[0.12em]">
+                                            {dia.nome}
+                                        </p>
+
+                                        <p className="mt-1 line-clamp-1 text-[11px] font-bold text-white/85">
+                                            M: {dia.manha.length > 0 ? dia.manha.join(", ") : "—"}
+                                        </p>
+
+                                        <p className="line-clamp-1 text-[11px] font-bold text-white/85">
+                                            T: {dia.tarde.length > 0 ? dia.tarde.join(", ") : "—"}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </aside>
+                    </main>
+                </div>
+            </section>
+        )
+    }
+
     return (
         <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
-            <div className="fixed bottom-2 right-2 z-[9999] rounded bg-black/80 px-2 py-1 text-white">
-                {viewport}
-            </div>
-
             <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
             <div className="absolute -left-32 top-10 h-80 w-80 rounded-full bg-sky-300/25 blur-3xl" />
             <div className="absolute right-[-120px] top-[-80px] h-96 w-96 rounded-full bg-white/15 blur-3xl" />
