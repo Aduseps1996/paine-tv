@@ -4,6 +4,7 @@ export type TemplateMidia =
     | "cheio"
     | "institucional"
     | "painel"
+    | "escala-juridica"
 
 export type ModoExibicaoMidia = "cover" | "contain"
 
@@ -102,6 +103,8 @@ export type ConfiguracoesPainel = {
     mostrarCidadePainel?: boolean
     mostrarDataPainel?: boolean
     mostrarHoraPainel?: boolean
+    mostrarEscalaJuridicaTv?: boolean
+    duracaoEscalaJuridicaTv?: number
     cidadeClimaPainel?: string
     latitudeClimaPainel?: number
     longitudeClimaPainel?: number

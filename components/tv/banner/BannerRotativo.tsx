@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
 import { useClimaPainel } from "@/hooks/tv/useClimaPainel"
 import { usePainelData } from "@/hooks/tv/usePainelData"
 import { useRotacaoMidias } from "@/hooks/tv/useRotacaoMidias"
 import type { ConfiguracoesPainel, Midia, Noticia } from "@/types/painel"
 import BannerCheio from "./BannerCheio"
+import EscalaJuridicaPainel from "./EscalaJuridicaPainel"
 import BannerInstitucional from "./BannerInstitucional"
 import BannerPainel from "./BannerPainel"
 import BannerYoutube from "./BannerYoutube"
@@ -34,12 +35,42 @@ export default function BannerRotativo({
     previewMidias,
     previewNoticias
 }: Props) {
+    const ultimaMidiaNotificadaRef = useRef<string | null>(null)
+
     const { midias, configuracoes } = usePainelData({
         modoPreview,
         previewConfiguracoes,
         previewMidias,
         previewNoticias
     })
+
+    const configuracoesBanner = normalizarConfiguracoesBanner(configuracoes)
+
+    const mostrarEscalaJuridicaTv =
+        configuracoesBanner.mostrarEscalaJuridicaTv ?? false
+
+    const duracaoEscalaJuridicaTv =
+        Math.max(5, Number(configuracoesBanner.duracaoEscalaJuridicaTv || 15))
+
+    const midiasComEscalaJuridica: Midia[] = useMemo(() => {
+        if (!mostrarEscalaJuridicaTv) {
+            return midias
+        }
+
+        return [
+            ...midias,
+            {
+                id: "escala-juridica-tv",
+                tipo: "imagem",
+                arquivo: "__escala_juridica__",
+                ativo: true,
+                ordem: 999,
+                duracao: duracaoEscalaJuridicaTv,
+                pesoExibicao: 1,
+                template: "escala-juridica"
+            }
+        ]
+    }, [duracaoEscalaJuridicaTv, midias, mostrarEscalaJuridicaTv])
 
     const {
         midias: midiasRotacao,
@@ -50,12 +81,20 @@ export default function BannerRotativo({
         lidarComErroVideo,
         reiniciarOuAvancarVideo,
         lidarComErroImagem
-    } = useRotacaoMidias({ midias, fallback })
+    } = useRotacaoMidias({ midias: midiasComEscalaJuridica, fallback })
 
-    const configuracoesBanner = normalizarConfiguracoesBanner(configuracoes)
     const clima = useClimaPainel(configuracoesBanner)
 
     useEffect(() => {
+        const assinaturaAtual = midiaAtual
+            ? obterAssinaturaMidia(midiaAtual)
+            : "sem-midia"
+
+        if (ultimaMidiaNotificadaRef.current === assinaturaAtual) {
+            return
+        }
+
+        ultimaMidiaNotificadaRef.current = assinaturaAtual
         onMidiaAtualChange?.(midiaAtual || null)
     }, [midiaAtual, onMidiaAtualChange])
 
@@ -99,6 +138,14 @@ export default function BannerRotativo({
     }
 
     switch (templateAtual) {
+        case "escala-juridica":
+            return (
+                <EscalaJuridicaPainel
+                    configuracoes={configuracoesBanner}
+                    clima={clima}
+                />
+            )
+
         case "painel":
             return (
                 <BannerPainel

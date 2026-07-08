@@ -415,6 +415,57 @@ export default function AbaConfiguracaoPainel() {
 
             <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
                 <h2 className="text-2xl font-black sm:text-3xl">
+                    Escala jurídica na TV
+                </h2>
+
+                <p className="mt-2 text-sm text-zinc-400">
+                    Exibe automaticamente os advogados do atendimento presencial usando a escala semanal já cadastrada.
+                </p>
+
+                <div className="mt-6 space-y-4">
+                    <label className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4">
+                        <div>
+                            <p className="font-bold text-white">
+                                Mostrar escala jurídica na TV
+                            </p>
+
+                            <p className="mt-1 text-sm text-zinc-400">
+                                A escala entra automaticamente na rotação dos banners.
+                            </p>
+                        </div>
+
+                        <input
+                            type="checkbox"
+                            checked={config.mostrarEscalaJuridicaTv ?? false}
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({
+                                    mostrarEscalaJuridicaTv: e.target.checked
+                                })
+                            }
+                        />
+                    </label>
+
+                    <div>
+                        <label className="mb-2 block text-sm font-bold text-zinc-300">
+                            Tempo da escala na tela
+                        </label>
+
+                        <input
+                            type="number"
+                            min={5}
+                            value={config.duracaoEscalaJuridicaTv || 15}
+                            onChange={(e) =>
+                                atualizarConfiguracoesDraft({
+                                    duracaoEscalaJuridicaTv: Number(e.target.value)
+                                })
+                            }
+                        />
+                    </div>
+                </div>
+            </section>
+
+            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
+                <h2 className="text-2xl font-black sm:text-3xl">
                     Padrão das tarjas
                 </h2>
 
