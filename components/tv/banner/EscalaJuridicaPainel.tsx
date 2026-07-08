@@ -13,20 +13,20 @@ type Props = {
 function ListaNomes({ nomes }: { nomes: string[] }) {
     if (nomes.length === 0) {
         return (
-            <p className="text-2xl font-black text-white/35">
+            <p className="text-xl font-black text-white/35">
                 —
             </p>
         )
     }
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-2 2xl:space-y-3">
             {nomes.slice(0, 4).map((nome) => (
                 <div
                     key={nome}
-                    className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 shadow-[0_14px_35px_rgba(0,0,0,0.18)] backdrop-blur-sm"
+                    className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 shadow-[0_14px_35px_rgba(0,0,0,0.18)] backdrop-blur-sm 2xl:rounded-2xl 2xl:px-5 2xl:py-3"
                 >
-                    <p className="truncate text-xl font-black uppercase tracking-tight text-white 2xl:text-2xl">
+                    <p className="truncate text-[clamp(1rem,1.2vw,1.35rem)] font-black uppercase tracking-tight text-white">
                         {nome}
                     </p>
                 </div>
@@ -48,25 +48,25 @@ function CardTurno({
 }) {
     return (
         <div
-            className={`rounded-[26px] border p-5 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-md 2xl:rounded-[34px] 2xl:p-7 ${
+            className={`rounded-[22px] border p-4 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-md 2xl:rounded-[28px] 2xl:p-5 ${
                 destaque
                     ? "border-sky-300/35 bg-sky-400/20"
                     : "border-white/15 bg-white/10"
             }`}
         >
-            <div className="mb-6 flex items-center justify-between gap-4">
+            <div className="mb-4 flex items-center justify-between gap-4 2xl:mb-5">
                 <div>
-                    <p className="text-sm font-black uppercase tracking-[0.35em] text-sky-100/80">
+                    <p className="text-[clamp(0.65rem,0.8vw,0.85rem)] font-black uppercase tracking-[0.24em] text-sky-100/80">
                         {titulo}
                     </p>
 
-                    <h3 className="mt-2 text-3xl font-black uppercase leading-none text-white md:text-4xl 2xl:text-5xl">
+                    <h3 className="mt-2 text-[clamp(1.55rem,2.1vw,2.55rem)] font-black uppercase leading-none text-white">
                         {horario}
                     </h3>
                 </div>
 
-                <div className="rounded-2xl border border-white/15 bg-black/20 p-4">
-                    <Clock3 className="h-9 w-9 text-white" />
+                <div className="rounded-xl border border-white/15 bg-black/20 p-3 2xl:rounded-2xl">
+                    <Clock3 className="h-7 w-7 text-white 2xl:h-8 2xl:w-8" />
                 </div>
             </div>
 
@@ -105,11 +105,11 @@ export default function EscalaJuridicaPainel({
             <div className="absolute right-[-120px] top-[-80px] h-96 w-96 rounded-full bg-white/15 blur-3xl" />
             <div className="absolute bottom-[-140px] left-1/3 h-96 w-96 rounded-full bg-blue-950/70 blur-3xl" />
 
-            <div className="relative z-10 flex h-full flex-col p-5 md:p-7 2xl:p-10">
-                <header className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                    <div className="flex min-w-0 items-center gap-5">
+            <div className="relative z-10 flex h-full flex-col p-4 md:p-5 2xl:p-6">
+                <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div className="flex min-w-0 items-center gap-4">
                         {configuracoes.logo && (
-                            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-3xl bg-white p-3 shadow-2xl">
+                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white p-2 shadow-2xl 2xl:h-20 2xl:w-20">
                                 <img
                                     src={configuracoes.logo}
                                     alt="Logo"
@@ -119,31 +119,31 @@ export default function EscalaJuridicaPainel({
                         )}
 
                         <div className="min-w-0">
-                            <div className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.35em] text-sky-100 backdrop-blur-sm">
-                                <Scale className="h-5 w-5" />
+                            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[clamp(0.65rem,0.75vw,0.85rem)] font-black uppercase tracking-[0.22em] text-sky-100 backdrop-blur-sm">
+                                <Scale className="h-4 w-4" />
                                 Atendimento jurídico presencial
                             </div>
 
-                            <h1 className="mt-4 text-4xl font-black uppercase leading-none tracking-tight text-white drop-shadow-2xl md:text-5xl 2xl:text-6xl">
+                            <h1 className="mt-3 text-[clamp(2rem,3vw,3.25rem)] font-black uppercase leading-none tracking-tight text-white drop-shadow-2xl">
                                 Escala de atendimento
                             </h1>
 
-                            <p className="mt-3 text-2xl font-bold text-white/75">
+                            <p className="mt-2 text-[clamp(1rem,1.3vw,1.45rem)] font-bold text-white/75">
                                 {escala.semanaTexto || "Semana atual"}
                             </p>
                         </div>
                     </div>
 
-                    <div className="rounded-[28px] border border-white/15 bg-black/25 px-6 py-5 text-right shadow-2xl backdrop-blur-md">
-                        <p className="text-5xl font-black leading-none">
+                    <div className="rounded-[22px] border border-white/15 bg-black/25 px-5 py-4 text-right shadow-2xl backdrop-blur-md">
+                        <p className="text-[clamp(2rem,2.7vw,3rem)] font-black leading-none">
                             {hora}
                         </p>
 
-                        <p className="mt-2 max-w-[360px] text-sm font-bold uppercase tracking-[0.2em] text-white/70">
+                        <p className="mt-2 max-w-[320px] text-xs font-bold uppercase tracking-[0.16em] text-white/70 2xl:text-sm">
                             {data}
                         </p>
 
-                        <div className="mt-4 flex items-center justify-end gap-2 text-xl font-black text-sky-100">
+                        <div className="mt-3 flex items-center justify-end gap-2 text-lg font-black text-sky-100">
                             <span>{temperatura}</span>
                             <span className="text-sm uppercase tracking-[0.2em] text-white/55">
                                 {clima.cidade}
@@ -152,8 +152,8 @@ export default function EscalaJuridicaPainel({
                     </div>
                 </header>
 
-                <main className="mt-6 grid min-h-0 flex-1 grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr] 2xl:gap-7">
-                    <div className="grid gap-5 xl:grid-rows-2 2xl:gap-7">
+                <main className="mt-4 grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[1.15fr_0.85fr] 2xl:gap-5">
+                    <div className="grid gap-4 xl:grid-rows-2 2xl:gap-5">
                         <CardTurno
                             titulo={`Hoje • ${escala.nomeDiaAtual}`}
                             horario="Manhã • 08h às 12h"
@@ -168,38 +168,38 @@ export default function EscalaJuridicaPainel({
                         />
                     </div>
 
-                    <aside className="flex min-h-0 flex-col rounded-[26px] border border-white/15 bg-white/10 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-md 2xl:rounded-[34px] 2xl:p-6">
+                    <aside className="flex min-h-0 flex-col rounded-[22px] border border-white/15 bg-white/10 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-md 2xl:rounded-[28px] 2xl:p-5">
                         <div className="flex items-center gap-3">
-                            <div className="rounded-2xl bg-white/15 p-3">
-                                <CalendarDays className="h-8 w-8 text-white" />
+                            <div className="rounded-xl bg-white/15 p-3">
+                                <CalendarDays className="h-6 w-6 text-white 2xl:h-7 2xl:w-7" />
                             </div>
 
                             <div>
-                                <p className="text-sm font-black uppercase tracking-[0.3em] text-sky-100/75">
+                                <p className="text-xs font-black uppercase tracking-[0.22em] text-sky-100/75">
                                     Resumo semanal
                                 </p>
 
-                                <h2 className="text-3xl font-black uppercase text-white">
+                                <h2 className="text-2xl font-black uppercase text-white">
                                     Atendimento
                                 </h2>
                             </div>
                         </div>
 
-                        <div className="mt-5 min-h-0 flex-1 space-y-3 overflow-hidden">
+                        <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-hidden">
                             {escala.semana.map((dia) => (
                                 <div
                                     key={dia.id}
-                                    className={`rounded-2xl border px-4 py-3 ${
+                                    className={`rounded-xl border px-3 py-2 ${
                                         dia.atual
                                             ? "border-sky-300/45 bg-sky-400/20"
                                             : "border-white/10 bg-black/18"
                                     }`}
                                 >
-                                    <p className="text-base font-black uppercase tracking-[0.2em] text-white">
+                                    <p className="text-sm font-black uppercase tracking-[0.16em] text-white">
                                         {dia.nome}
                                     </p>
 
-                                    <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
+                                    <div className="mt-1.5 grid grid-cols-2 gap-3 text-xs 2xl:text-sm">
                                         <div>
                                             <p className="font-black uppercase text-sky-100/70">
                                                 Manhã
@@ -226,8 +226,8 @@ export default function EscalaJuridicaPainel({
                             ))}
                         </div>
 
-                        <footer className="mt-5 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-center">
-                            <p className="text-sm font-bold uppercase tracking-[0.16em] text-white/65">
+                        <footer className="mt-4 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-center">
+                            <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/65">
                                 Escala sujeita a alterações conforme necessidade do setor jurídico.
                             </p>
                         </footer>
