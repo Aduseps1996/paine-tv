@@ -50,6 +50,12 @@ export type Midia = {
     tempoOcultaTarja?: number
     tempoInicialTarja?: number
     modeloTarja?: ModeloTarja
+    thumbnailUrl?: string
+    thumbnailStoragePath?: string
+    duracaoVideo?: number
+    larguraVideo?: number
+    alturaVideo?: number
+    orientacaoVideo?: "vertical" | "horizontal" | "quadrado"
 
     // Controle do arquivo
     versao?: number

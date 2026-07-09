@@ -7,6 +7,8 @@ import type {
     TemplateMidia,
     TipoMidia
 } from "@/types/painel"
+import { gerarMetadadosVideo } from "@/utils/videoMidia"
+import { uploadMidiaParaStorage } from "@/utils/uploadMidia"
 
 type Props = {
     midias: Midia[]
@@ -23,6 +25,24 @@ export default function ModalNovaMidia({
     const [tipo, setTipo] = useState<TipoMidia>("imagem")
     const [template, setTemplate] = useState<TemplateMidia>("cheio")
     const [modoExibicao, setModoExibicao] = useState<ModoExibicaoMidia>("cover")
+    const [arquivoLocalNome, setArquivoLocalNome] = useState("")
+    const [arquivoLocalTamanho, setArquivoLocalTamanho] = useState<number | null>(null)
+    const [uploadProgresso, setUploadProgresso] = useState(0)
+    const [enviandoUpload, setEnviandoUpload] = useState(false)
+    const [uploadConcluido, setUploadConcluido] = useState(false)
+    const [storagePath, setStoragePath] = useState("")
+    const [mimeType, setMimeType] = useState("")
+    const [tamanhoBytes, setTamanhoBytes] = useState<number | null>(null)
+    const [tamanhoOriginalBytes, setTamanhoOriginalBytes] = useState<number | null>(null)
+    const [tamanhoOtimizadoBytes, setTamanhoOtimizadoBytes] = useState<number | null>(null)
+    const [foiOtimizado, setFoiOtimizado] = useState(false)
+
+    const [thumbnailUrl, setThumbnailUrl] = useState("")
+    const [thumbnailStoragePath, setThumbnailStoragePath] = useState("")
+    const [duracaoVideo, setDuracaoVideo] = useState<number | undefined>()
+    const [larguraVideo, setLarguraVideo] = useState<number | undefined>()
+    const [alturaVideo, setAlturaVideo] = useState<number | undefined>()
+    const [orientacaoVideo, setOrientacaoVideo] = useState<"vertical" | "horizontal" | "quadrado" | undefined>()
 
     const [titulo, setTitulo] = useState("")
     const [subtitulo, setSubtitulo] = useState("")
@@ -64,6 +84,74 @@ export default function ModalNovaMidia({
         modeloTarja === "live" ||
         modeloTarja === "digital"
 
+    function formatarMB(bytes: number | null) {
+        if (bytes === null) return "--"
+        return `${(bytes / 1024 / 1024).toFixed(2)} MB`
+    }
+
+    async function selecionarArquivoLocal(file: File | null) {
+        if (!file) return
+
+        if (tipo === "youtube") {
+            alert("Upload local não é usado para YouTube/Live.")
+            return
+        }
+
+        try {
+            setEnviandoUpload(true)
+            setUploadConcluido(false)
+            setUploadProgresso(0)
+            setTamanhoOriginalBytes(null)
+            setTamanhoOtimizadoBytes(null)
+            setFoiOtimizado(false)
+            setArquivoLocalNome(file.name)
+            setArquivoLocalTamanho(file.size)
+
+            if (tipo === "video" && file.size > 30 * 1024 * 1024) {
+                const continuar = confirm(
+                    "Este vídeo está acima de 30 MB. Ele ainda pode ser enviado se tiver até 80 MB, mas pode consumir mais internet na TV. Deseja continuar?"
+                )
+
+                if (!continuar) {
+                    setEnviandoUpload(false)
+                    return
+                }
+            }
+
+            const resultado = await uploadMidiaParaStorage(file, tipo, setUploadProgresso)
+
+            setArquivo(resultado.url)
+            setStoragePath(resultado.storagePath)
+            setMimeType(resultado.mimeType)
+            setTamanhoBytes(resultado.tamanhoBytes)
+            setTamanhoOriginalBytes(resultado.tamanhoOriginalBytes)
+            setTamanhoOtimizadoBytes(resultado.tamanhoOtimizadoBytes)
+            setFoiOtimizado(resultado.foiOtimizado)
+            setUploadConcluido(true)
+
+            if (tipo === "video") {
+                const metadados = await gerarMetadadosVideo(file)
+
+                const thumb = await uploadMidiaParaStorage(
+                    metadados.thumbnailFile,
+                    "imagem"
+                )
+
+                setThumbnailUrl(thumb.url)
+                setThumbnailStoragePath(thumb.storagePath)
+                setDuracaoVideo(metadados.duracaoVideo)
+                setLarguraVideo(metadados.larguraVideo)
+                setAlturaVideo(metadados.alturaVideo)
+                setOrientacaoVideo(metadados.orientacaoVideo)
+            }
+        } catch (erro) {
+            console.error(erro)
+            alert(erro instanceof Error ? erro.message : "Erro ao enviar arquivo.")
+        } finally {
+            setEnviandoUpload(false)
+        }
+    }
+
     function salvarNoRascunho() {
         if (!arquivo.trim()) {
             alert("Informe o arquivo/link da mídia.")
@@ -79,6 +167,11 @@ export default function ModalNovaMidia({
             id: `draft-${Date.now()}`,
             tipo,
             arquivo: arquivo.trim(),
+            storagePath: storagePath || "",
+            mimeType: mimeType || "",
+            tamanhoBytes: tamanhoBytes || undefined,
+            versao: 1,
+            atualizadoEm: new Date().toISOString(),
             ativo: true,
             ordem: midias.length + 1,
             duracao: 8,
@@ -111,7 +204,13 @@ export default function ModalNovaMidia({
             tempoVisivelTarja,
             tempoSaidaTarja,
             tempoOcultaTarja,
-            tempoInicialTarja
+            tempoInicialTarja,
+            thumbnailUrl,
+            thumbnailStoragePath,
+            duracaoVideo,
+            larguraVideo,
+            alturaVideo,
+            orientacaoVideo
         }
 
         atualizarMidiasDraft([...midias, novaMidia])
@@ -155,9 +254,140 @@ export default function ModalNovaMidia({
                             </p>
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                                {!ehYoutube && (
+                                    <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
+                                        <p className="text-sm font-black text-white">
+                                            Arquivo local
+                                        </p>
+
+                                        <p className="mt-1 text-xs text-zinc-400">
+                                            Envie imagem ou vídeo direto para o Firebase Storage.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                                            <label className="w-fit cursor-pointer rounded-xl border border-sky-400/30 bg-sky-500/15 px-4 py-3 text-sm font-black text-sky-200 transition hover:bg-sky-500/25">
+                                                Selecionar arquivo
+                                                <input
+                                                    type="file"
+                                                    accept={tipo === "video" ? "video/mp4" : "image/jpeg,image/png,image/webp"}
+                                                    className="hidden"
+                                                    disabled={enviandoUpload}
+                                                    onChange={(e) => selecionarArquivoLocal(e.target.files?.[0] || null)}
+                                                />
+                                            </label>
+
+                                            {arquivoLocalNome && (
+                                                <div className="min-w-0 text-sm">
+                                                    <p className="truncate font-bold text-white">
+                                                        {arquivoLocalNome}
+                                                    </p>
+
+                                                    {arquivoLocalTamanho !== null && (
+                                                        <p className="text-xs text-zinc-400">
+                                                            {formatarMB(arquivoLocalTamanho)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {tipo === "video" && arquivoLocalTamanho !== null && (
+                                            <div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 p-3 text-xs text-amber-100">
+                                                <p className="font-black uppercase tracking-[0.16em]">
+                                                    Atenção ao tamanho do vídeo
+                                                </p>
+
+                                                <p className="mt-2">
+                                                    Vídeo selecionado: {formatarMB(arquivoLocalTamanho)}
+                                                </p>
+
+                                                <p>
+                                                    Recomendado: até 30 MB
+                                                </p>
+
+                                                <p>
+                                                    Limite máximo: 80 MB
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {tipo === "video" && duracaoVideo && larguraVideo && alturaVideo && (
+                                            <div className="mt-3 rounded-xl border border-sky-400/20 bg-sky-500/10 p-3 text-xs text-sky-100">
+                                                <p className="font-black uppercase tracking-[0.16em]">
+                                                    Informações do vídeo
+                                                </p>
+
+                                                <p className="mt-2">
+                                                    Duração: {Math.floor(duracaoVideo / 60)}:{String(Math.round(duracaoVideo % 60)).padStart(2, "0")}
+                                                </p>
+
+                                                <p>
+                                                    Resolução: {larguraVideo} × {alturaVideo}
+                                                </p>
+
+                                                <p>
+                                                    Orientação: {orientacaoVideo}
+                                                </p>
+
+                                                {thumbnailUrl && (
+                                                    <img
+                                                        src={thumbnailUrl}
+                                                        alt="Thumbnail do vídeo"
+                                                        className="mt-3 aspect-video w-full rounded-lg object-cover"
+                                                    />
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {(enviandoUpload || uploadConcluido) && (
+                                            <div className="mt-4">
+                                                <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                                                    <div
+                                                        className="h-full rounded-full bg-sky-400 transition-all"
+                                                        style={{ width: `${uploadProgresso}%` }}
+                                                    />
+                                                </div>
+
+                                                <p className="mt-2 text-xs font-bold text-zinc-300">
+                                                    {uploadConcluido
+                                                        ? "Upload concluído."
+                                                        : `Enviando... ${uploadProgresso}%`}
+                                                </p>
+
+                                                {uploadConcluido && tamanhoOriginalBytes !== null && tamanhoOtimizadoBytes !== null && (
+                                                    <div className="mt-3 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-3 text-xs text-emerald-100">
+                                                        <p className="font-black uppercase tracking-[0.16em]">
+                                                            Otimização
+                                                        </p>
+
+                                                        <p className="mt-2">
+                                                            Original: {(tamanhoOriginalBytes / 1024 / 1024).toFixed(2)} MB
+                                                        </p>
+
+                                                        <p>
+                                                            Final: {(tamanhoOtimizadoBytes / 1024 / 1024).toFixed(2)} MB
+                                                        </p>
+
+                                                        <p className="mt-1 font-bold">
+                                                            {foiOtimizado
+                                                                ? `Economia: ${Math.max(
+                                                                    0,
+                                                                    Math.round(
+                                                                        100 - (tamanhoOtimizadoBytes / tamanhoOriginalBytes) * 100
+                                                                    )
+                                                                )}%`
+                                                                : "Arquivo mantido no tamanho original."}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <input
                                     type="text"
-                                    placeholder={ehYoutube ? "Link do YouTube / Live" : "URL da imagem ou vídeo"}
+                                    placeholder={ehYoutube ? "Link do YouTube / Live" : "URL externa ou arquivo enviado automaticamente"}
                                     value={arquivo}
                                     onChange={(e) => setArquivo(e.target.value)}
                                     className="sm:col-span-2"

@@ -14,6 +14,7 @@ import type {
     Midia,
     Noticia
 } from "@/types/painel"
+import { excluirMidiaStorage } from "@/utils/excluirMidiaStorage"
 
 type PainelDraft = {
     configuracoes: ConfiguracoesPainel
@@ -44,6 +45,23 @@ const estadoVazio: PainelDraft = {
 }
 
 const PainelDraftContext = createContext<PainelDraftContextValue | null>(null)
+
+async function limparMidiasRemovidasDoStorage(
+    midiasPublicadas: Midia[],
+    midiasDraft: Midia[]
+) {
+    const idsDraft = new Set(midiasDraft.map((midia) => midia.id))
+
+    const midiasRemovidas = midiasPublicadas.filter(
+        (midia) => !idsDraft.has(midia.id)
+    )
+
+    await Promise.all(
+        midiasRemovidas.map((midia) =>
+            excluirMidiaStorage(midia.storagePath)
+        )
+    )
+}
 
 export function PainelDraftProvider({
     children
@@ -101,13 +119,17 @@ export function PainelDraftProvider({
     const publicar = useCallback(async () => {
         try {
             setPublicando(true)
+
+            await limparMidiasRemovidasDoStorage(publicado.midias, draft.midias)
+
             await publicarPainel(draft)
             setPublicado(draft)
+
             alert("Painel publicado na TV!")
         } finally {
             setPublicando(false)
         }
-    }, [draft])
+    }, [draft, publicado])
 
     const value = useMemo(
         () => ({

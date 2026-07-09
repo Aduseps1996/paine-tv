@@ -35,25 +35,57 @@ export default function MidiaCard({
     children
 }: Props) {
     const titulo = obterTituloMidia(midia)
+    const orientacaoVideoLabel = midia.orientacaoVideo
+        ? {
+            horizontal: "Horizontal",
+            vertical: "Vertical",
+            quadrado: "Quadrado"
+        }[midia.orientacaoVideo]
+        : null
 
     return (
         <article className="overflow-hidden rounded-[30px] border border-white/10 bg-zinc-900/85 shadow-[0_24px_70px_rgba(0,0,0,0.28)]">
             <div className="relative aspect-video overflow-hidden bg-black">
+
                 {midia.tipo === "imagem" && (
                     <img
                         src={midia.arquivo}
                         alt={titulo}
-                        className="absolute inset-0 h-full w-full object-contain"
+                        className="absolute inset-0 h-full w-full object-cover"
                     />
                 )}
 
                 {midia.tipo === "video" && (
-                    <video
-                        src={midia.arquivo}
-                        muted
-                        controls
-                        className="absolute inset-0 h-full w-full object-contain"
-                    />
+                    <>
+                        {midia.thumbnailUrl ? (
+                            <img
+                                src={midia.thumbnailUrl}
+                                alt={titulo}
+                                className="absolute inset-0 h-full w-full object-cover"
+                            />
+                        ) : (
+                            <video
+                                src={midia.arquivo}
+                                muted
+                                controls
+                                className="absolute inset-0 h-full w-full object-contain"
+                            />
+                        )}
+
+                        {midia.thumbnailUrl && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/70 backdrop-blur-sm transition-transform duration-200 hover:scale-110">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="white"
+                                        className="ml-1 h-7 w-7"
+                                    >
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 {midia.tipo === "youtube" && (
@@ -89,6 +121,35 @@ export default function MidiaCard({
                         <p className="mt-2 max-w-xl break-all text-sm text-zinc-500">
                             {midia.arquivo}
                         </p>
+
+                        {midia.tipo === "video" && (
+                            <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-zinc-300">
+                                {midia.duracaoVideo && (
+                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+                                        Duração: {Math.floor(midia.duracaoVideo / 60)}:
+                                        {String(midia.duracaoVideo % 60).padStart(2, "0")}
+                                    </span>
+                                )}
+
+                                {midia.larguraVideo && midia.alturaVideo && (
+                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+                                        {midia.larguraVideo} × {midia.alturaVideo}
+                                    </span>
+                                )}
+
+                                {midia.orientacaoVideo && (
+                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+                                        {orientacaoVideoLabel}
+                                    </span>
+                                )}
+
+                                {midia.tamanhoBytes && (
+                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+                                        {(midia.tamanhoBytes / 1024 / 1024).toFixed(2)} MB
+                                    </span>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <span className="w-fit rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-black text-zinc-300">
@@ -167,11 +228,10 @@ export default function MidiaCard({
                     <button
                         type="button"
                         onClick={() => onToggleExibicao(midia)}
-                        className={`rounded-2xl px-4 py-3 text-sm font-black ${
-                            exibirExibicao
-                                ? "border border-sky-300/30 bg-sky-500 text-white"
-                                : "border border-white/10 bg-white/[0.04] text-zinc-200"
-                        }`}
+                        className={`rounded-2xl px-4 py-3 text-sm font-black ${exibirExibicao
+                            ? "border border-sky-300/30 bg-sky-500 text-white"
+                            : "border border-white/10 bg-white/[0.04] text-zinc-200"
+                            }`}
                     >
                         Configurar exibição
                     </button>
@@ -179,11 +239,10 @@ export default function MidiaCard({
                     <button
                         type="button"
                         onClick={() => onToggleTarja(midia)}
-                        className={`rounded-2xl px-4 py-3 text-sm font-black ${
-                            exibirTarja
-                                ? "border border-sky-300/30 bg-sky-500 text-white"
-                                : "border border-white/10 bg-white/[0.04] text-zinc-200"
-                        }`}
+                        className={`rounded-2xl px-4 py-3 text-sm font-black ${exibirTarja
+                            ? "border border-sky-300/30 bg-sky-500 text-white"
+                            : "border border-white/10 bg-white/[0.04] text-zinc-200"
+                            }`}
                     >
                         Tarja
                     </button>

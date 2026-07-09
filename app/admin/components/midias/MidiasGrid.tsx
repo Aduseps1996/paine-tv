@@ -5,6 +5,8 @@ import type { Midia } from "@/types/painel"
 import MidiaCard from "./MidiaCard"
 import PainelExibicao from "./PainelExibicao"
 import PainelTarja from "./PainelTarja"
+import { excluirMidiaStorage } from "@/utils/excluirMidiaStorage"
+
 
 type Props = {
     midias: Midia[]
@@ -78,10 +80,14 @@ export default function MidiasGrid({
         })
     }
 
-    function excluirMidia(midia: Midia) {
-        const confirmar = confirm("Deseja remover esta mídia do rascunho?")
+    async function excluirMidia(midia: Midia) {
+        const confirmar = confirm(
+            "Deseja remover esta mídia do rascunho?"
+        )
 
         if (!confirmar) return
+
+        await excluirMidiaStorage(midia.storagePath)
 
         atualizarMidiasDraft(
             todasMidias.filter((item) => item.id !== midia.id)

@@ -67,6 +67,16 @@ export default function PainelTV({
   const [montado, setMontado] = useState(false)
 
   useEffect(() => {
+    if (!("serviceWorker" in navigator)) return
+
+    navigator.serviceWorker
+      .register("/painel-sw.js")
+      .catch((erro) => {
+        console.error("Erro ao registrar Service Worker:", erro)
+      })
+  }, [])
+
+  useEffect(() => {
     const timeout = window.setTimeout(() => {
       setMontado(true)
     }, 0)
