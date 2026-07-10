@@ -92,6 +92,16 @@ export type Noticia = {
 
 export type NovaNoticia = Omit<Noticia, "id">
 
+export type AvisoUrgente = {
+    id: string
+    ativo: boolean
+    titulo: string
+    mensagem: string
+    categoria?: "normal" | "urgente" | "atencao"
+    inicioExibicao?: string
+    fimExibicao?: string
+}
+
 export type ModoLogo = "transparente" | "fundo" | "card"
 
 export type TamanhoLogoPainel = "pequeno" | "medio" | "grande"

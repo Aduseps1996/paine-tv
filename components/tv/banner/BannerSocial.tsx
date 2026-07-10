@@ -31,9 +31,8 @@ export default function BannerSocial({
             <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0d9cff] via-[#064bb8] to-[#020617]" />
                 <div className="absolute -left-24 top-[-90px] h-72 w-72 rounded-full bg-cyan-300/25 blur-3xl" />
-                <div className="absolute bottom-[-120px] right-[-80px] h-80 w-80 rounded-full bg-blue-950/80 blur-3xl" />
 
-                <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_230px] gap-4 px-6 py-5">
+                <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_285px] gap-4 px-6 py-5">
                     <div className="flex min-w-0 flex-col justify-center">
                         <div className="w-fit rounded-full bg-gradient-to-r from-cyan-300 to-cyan-500 px-4 py-1.5">
                             <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white">
@@ -76,8 +75,8 @@ export default function BannerSocial({
                         </div>
                     </div>
 
-                    <div className="flex min-h-0 items-center justify-center">
-                        <div className="relative aspect-[9/16] h-full max-h-[520px] rounded-[2.3rem] border-[5px] border-white/80 bg-black shadow-[0_25px_80px_rgba(0,0,0,0.65)]">
+                    <div className="flex min-h-0 items-center justify-center px-5 py-5">
+                        <div className="relative aspect-[9/16] w-[220px] max-w-full rounded-[2.1rem] border-[5px] border-white/80 bg-black shadow-[0_25px_80px_rgba(0,0,0,0.65)]">
                             <div className="absolute left-1/2 top-2 z-20 h-5 w-24 -translate-x-1/2 rounded-b-2xl bg-black" />
                             <div className="absolute left-1/2 top-4 z-30 h-1 w-10 -translate-x-1/2 rounded-full bg-white/25" />
 
@@ -116,8 +115,6 @@ export default function BannerSocial({
         <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
             <div className="absolute inset-0 bg-gradient-to-br from-[#0d9cff] via-[#064bb8] to-[#020617]" />
             <div className="absolute -left-32 top-[-80px] h-[420px] w-[420px] rounded-full bg-cyan-300/25 blur-3xl" />
-            <div className="absolute bottom-[-160px] right-[-80px] h-[520px] w-[520px] rounded-full bg-blue-950/80 blur-3xl" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_85%,rgba(125,226,255,0.18)_0,transparent_28%),radial-gradient(circle_at_70%_40%,rgba(255,255,255,0.10)_0,transparent_32%)]" />
 
             <div className="relative z-10 grid h-full grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)] gap-8 px-[clamp(1.5rem,5vw,6rem)] py-[clamp(1.25rem,5vh,4rem)]">
                 <div className="flex min-w-0 flex-col justify-center">
@@ -162,8 +159,8 @@ export default function BannerSocial({
                     </div>
                 </div>
 
-                <div className="flex min-h-0 items-center justify-center">
-                    <div className="relative aspect-[9/16] h-[min(86vh,780px)] max-h-full rounded-[3.2rem] border-[7px] border-white/85 bg-black shadow-[0_35px_120px_rgba(0,0,0,0.65)]">
+                <div className="flex min-h-0 items-center justify-center px-[clamp(1.5rem,3vw,3rem)] py-[clamp(1.5rem,4vh,3rem)]">
+                    <div className="relative aspect-[9/16] w-[min(25vw,360px)] max-w-full rounded-[3rem] border-[7px] border-white/85 bg-black shadow-[0_35px_120px_rgba(0,0,0,0.65)]">
                         <div className="absolute left-1/2 top-3 z-20 h-7 w-32 -translate-x-1/2 rounded-b-3xl bg-black" />
                         <div className="absolute left-1/2 top-5 z-30 h-1.5 w-14 -translate-x-1/2 rounded-full bg-white/25" />
 

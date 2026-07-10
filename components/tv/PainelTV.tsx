@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import Chamada from "@/components/Chamada"
+import AvisoUrgenteOverlay from "./AvisoUrgenteOverlay"
 import BannerRotativo from "@/components/tv/banner/BannerRotativo"
 import RodapeNoticias from "@/components/tv/rodape/RodapeNoticias"
 import Image from "next/image"
@@ -13,6 +14,7 @@ import {
 } from "firebase/firestore"
 
 import { db } from "@/lib/firebase"
+import { useAvisoUrgente } from "@/hooks/tv/useAvisoUrgente"
 import { useOnlineStatus } from "@/hooks/useOnlineStatus"
 
 
@@ -53,6 +55,7 @@ export default function PainelTV({
   const online = useOnlineStatus()
 
   const [midiaAtualTv, setMidiaAtualTv] = useState<Midia | null>(null)
+  const avisoUrgente = useAvisoUrgente()
 
   const tocarSomChamada = useCallback(() => {
     try {
@@ -241,6 +244,8 @@ export default function PainelTV({
         previewMidias={previewMidias}
         previewConfiguracoes={previewConfiguracoes}
       />
+
+      <AvisoUrgenteOverlay aviso={avisoUrgente} />
 
       <div className="absolute top-0 left-0 w-full h-36 bg-gradient-to-b from-black/75 via-black/35 to-transparent z-10" />
 
