@@ -12,6 +12,8 @@ export type ModoExibicaoMidia = "cover" | "contain"
 
 export type TipoExibicaoProgramada = "midia" | "youtube"
 
+export type ModoProgramacaoMidia = "periodo" | "uma_vez" | "intervalo"
+
 export type ModeloTarja =
     | "telejornal"
     | "compacta"
@@ -37,6 +39,9 @@ export type Midia = {
     cta?: string
     exibicaoProgramada?: boolean
     tipoExibicaoProgramada?: TipoExibicaoProgramada
+    modoProgramacao?: ModoProgramacaoMidia
+    intervaloExibicaoMinutos?: number
+    prioridadeProgramacao?: number
     inicioExibicao?: string
     fimExibicao?: string
     linkYoutubeExibicao?: string

@@ -194,7 +194,7 @@ export default function BannerRotativo({
 
             <div
                 key={chaveMidiaAtual}
-                className="absolute inset-0 animate-[entradaMidia_650ms_ease-out]"
+                className="absolute inset-0 animate-[entradaMidia_280ms_ease-out]"
             >
                 {renderizarTemplate()}
             </div>

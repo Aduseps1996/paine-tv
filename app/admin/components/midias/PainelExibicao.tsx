@@ -10,6 +10,12 @@ type Props = {
     setFimExibicao: (valor: string) => void
     linkYoutubeExibicao: string
     setLinkYoutubeExibicao: (valor: string) => void
+    modoProgramacao: Midia["modoProgramacao"]
+    setModoProgramacao: (valor: NonNullable<Midia["modoProgramacao"]>) => void
+    intervaloExibicaoMinutos: number
+    setIntervaloExibicaoMinutos: (valor: number) => void
+    prioridadeProgramacao: number
+    setPrioridadeProgramacao: (valor: number) => void
     onSalvar: () => void
     onCancelar: () => void
 }
@@ -24,6 +30,12 @@ export default function PainelExibicao({
     setFimExibicao,
     linkYoutubeExibicao,
     setLinkYoutubeExibicao,
+    modoProgramacao,
+    setModoProgramacao,
+    intervaloExibicaoMinutos,
+    setIntervaloExibicaoMinutos,
+    prioridadeProgramacao,
+    setPrioridadeProgramacao,
     onSalvar,
     onCancelar
 }: Props) {
@@ -111,6 +123,63 @@ export default function PainelExibicao({
                                 onChange={(e) => setFimExibicao(e.target.value)}
                             />
                         </div>
+                    </div>
+                )}
+
+                {(exibicaoProgramada || ehYoutube) && (
+                    <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
+                        <label className="mb-2 block text-sm font-bold text-zinc-300">
+                            Modo de programação
+                        </label>
+
+                        <select
+                            value={modoProgramacao || "periodo"}
+                            onChange={(e) =>
+                                setModoProgramacao(
+                                    e.target.value as NonNullable<Midia["modoProgramacao"]>
+                                )
+                            }
+                        >
+                            <option value="periodo">Período normal</option>
+                            <option value="intervalo">A cada X minutos</option>
+                            <option value="uma_vez">Uma vez dentro do período</option>
+                        </select>
+
+                        {modoProgramacao === "intervalo" && (
+                            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-sm font-bold text-zinc-300">
+                                        Intervalo em minutos
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        min={5}
+                                        value={intervaloExibicaoMinutos}
+                                        onChange={(e) =>
+                                            setIntervaloExibicaoMinutos(Number(e.target.value))
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-bold text-zinc-300">
+                                        Prioridade
+                                    </label>
+
+                                    <select
+                                        value={prioridadeProgramacao}
+                                        onChange={(e) =>
+                                            setPrioridadeProgramacao(Number(e.target.value))
+                                        }
+                                    >
+                                        <option value={1}>Máxima</option>
+                                        <option value={2}>Alta</option>
+                                        <option value={3}>Normal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

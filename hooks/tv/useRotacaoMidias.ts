@@ -22,6 +22,8 @@ export function useRotacaoMidias({
     const [indiceAtual, setIndiceAtual] = useState(0)
     const [agoraPainel, setAgoraPainel] = useState<Date | null>(null)
     const [midiasComErro, setMidiasComErro] = useState<string[]>([])
+    const [controleProgramacao, setControleProgramacao] =
+        useState<Record<string, number>>({})
     const timeoutAvancoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const timeoutRecarregarVideoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -49,24 +51,54 @@ export function useRotacaoMidias({
         }
     }, [])
 
-    const midiaEstaDentroDoHorario = useCallback((midia: Midia) => {
-        if (!midia.exibicaoProgramada) return true
-
+    const obterInicioFimMidia = useCallback((midia: Midia) => {
         if (!midia.inicioExibicao || !midia.fimExibicao) {
-            return false
+            return null
         }
 
         const inicio = new Date(midia.inicioExibicao)
         const fim = new Date(midia.fimExibicao)
 
         if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
-            return false
+            return null
         }
 
+        return { inicio, fim }
+    }, [])
+
+    const midiaEstaNoPeriodo = useCallback((midia: Midia) => {
         if (!agoraPainel) return true
 
-        return agoraPainel >= inicio && agoraPainel <= fim
-    }, [agoraPainel])
+        const periodo = obterInicioFimMidia(midia)
+
+        if (!periodo) return false
+
+        return agoraPainel >= periodo.inicio && agoraPainel <= periodo.fim
+    }, [agoraPainel, obterInicioFimMidia])
+
+    const midiaProgramadaEstaVencida = useCallback((midia: Midia) => {
+        if (!agoraPainel) return false
+
+        const modo = midia.modoProgramacao || "periodo"
+
+        if (modo === "periodo") return true
+
+        const ultimaExibicao = controleProgramacao[midia.id] || 0
+
+        if (modo === "uma_vez") {
+            return ultimaExibicao === 0
+        }
+
+        if (modo === "intervalo") {
+            const intervalo = Math.max(
+                5,
+                Number(midia.intervaloExibicaoMinutos || 20)
+            )
+            return agoraPainel.getTime() - ultimaExibicao >= intervalo * 60 * 1000
+        }
+
+        return true
+    }, [agoraPainel, controleProgramacao])
 
     const midiaPodeSerExibida = useCallback((midia: Midia) => {
         if (!midia.ativo) return false
@@ -84,7 +116,7 @@ export function useRotacaoMidias({
                 return false
             }
 
-            return midiaEstaDentroDoHorario(midia)
+            return midiaEstaNoPeriodo(midia)
         }
 
         if (!midia.arquivo || midia.arquivo.trim() === "") {
@@ -92,11 +124,11 @@ export function useRotacaoMidias({
         }
 
         if (midia.exibicaoProgramada) {
-            return midiaEstaDentroDoHorario(midia)
+            return midiaEstaNoPeriodo(midia)
         }
 
         return true
-    }, [midiaEstaDentroDoHorario])
+    }, [midiaEstaNoPeriodo])
 
     const midiasValidas = useMemo(() => {
         const listaValida = midias.filter((midia) => {
@@ -125,10 +157,39 @@ export function useRotacaoMidias({
             return [youtubeAtivo]
         }
 
+        const programadasVencidas = listaParaUso
+            .filter((midia) => midia.tipo !== "youtube")
+            .filter((midia) => midia.exibicaoProgramada)
+            .filter((midia) => midiaProgramadaEstaVencida(midia))
+            .sort((a, b) => {
+                const prioridadeA = Number(a.prioridadeProgramacao || 3)
+                const prioridadeB = Number(b.prioridadeProgramacao || 3)
+
+                return prioridadeA - prioridadeB
+            })
+
+        if (programadasVencidas.length > 0) {
+            const escolhida = programadasVencidas[0]
+
+            return [
+                escolhida,
+                ...montarListaInteligente(
+                    listaParaUso
+                        .filter((midia) => midia.tipo !== "youtube")
+                        .filter((midia) => midia.id !== escolhida.id)
+                )
+            ]
+        }
+
         return montarListaInteligente(
             listaParaUso.filter((midia) => midia.tipo !== "youtube")
         )
-    }, [midias, midiasComErro, midiaPodeSerExibida])
+    }, [
+        midias,
+        midiasComErro,
+        midiaPodeSerExibida,
+        midiaProgramadaEstaVencida
+    ])
 
     const assinaturaMidias = midiasValidas
         .map(obterAssinaturaMidia)
@@ -159,6 +220,28 @@ export function useRotacaoMidias({
             : indiceAtual
 
     const midiaAtual = midiasValidas[indiceSeguro]
+
+    useEffect(() => {
+        if (!midiaAtual || !agoraPainel) return
+        if (!midiaAtual.exibicaoProgramada) return
+
+        const modo = midiaAtual.modoProgramacao || "periodo"
+
+        if (modo === "periodo") return
+
+        const timeout = window.setTimeout(() => {
+            setControleProgramacao((atual) => {
+                if (atual[midiaAtual.id]) return atual
+
+                return {
+                    ...atual,
+                    [midiaAtual.id]: agoraPainel.getTime()
+                }
+            })
+        }, 0)
+
+        return () => window.clearTimeout(timeout)
+    }, [midiaAtual, agoraPainel])
 
     const indiceProximaMidia =
     midiasValidas.length > 1

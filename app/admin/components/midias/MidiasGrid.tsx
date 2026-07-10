@@ -27,6 +27,10 @@ export default function MidiasGrid({
     const [inicioExibicao, setInicioExibicao] = useState("")
     const [fimExibicao, setFimExibicao] = useState("")
     const [linkYoutubeExibicao, setLinkYoutubeExibicao] = useState("")
+    const [modoProgramacao, setModoProgramacao] =
+        useState<NonNullable<Midia["modoProgramacao"]>>("periodo")
+    const [intervaloExibicaoMinutos, setIntervaloExibicaoMinutos] = useState(20)
+    const [prioridadeProgramacao, setPrioridadeProgramacao] = useState(3)
 
     const [midiaTarjaEditando, setMidiaTarjaEditando] = useState<string | null>(null)
     const [mostrarTarjaMidia, setMostrarTarjaMidia] = useState(false)
@@ -111,6 +115,9 @@ export default function MidiasGrid({
         setInicioExibicao(midia.inicioExibicao || "")
         setFimExibicao(midia.fimExibicao || "")
         setLinkYoutubeExibicao(midia.linkYoutubeExibicao || midia.arquivo || "")
+        setModoProgramacao(midia.modoProgramacao || "periodo")
+        setIntervaloExibicaoMinutos(Number(midia.intervaloExibicaoMinutos || 20))
+        setPrioridadeProgramacao(Number(midia.prioridadeProgramacao || 3))
         setCardExibicaoAberto(midia.id)
     }
 
@@ -147,7 +154,10 @@ export default function MidiasGrid({
             tipoExibicaoProgramada: ehYoutube ? "youtube" : "midia",
             inicioExibicao,
             fimExibicao,
-            linkYoutubeExibicao: ehYoutube ? linkYoutubeExibicao : ""
+            linkYoutubeExibicao: ehYoutube ? linkYoutubeExibicao : "",
+            modoProgramacao,
+            intervaloExibicaoMinutos,
+            prioridadeProgramacao
         })
 
         setCardExibicaoAberto(null)
@@ -240,6 +250,12 @@ export default function MidiasGrid({
                             setFimExibicao={setFimExibicao}
                             linkYoutubeExibicao={linkYoutubeExibicao}
                             setLinkYoutubeExibicao={setLinkYoutubeExibicao}
+                            modoProgramacao={modoProgramacao}
+                            setModoProgramacao={setModoProgramacao}
+                            intervaloExibicaoMinutos={intervaloExibicaoMinutos}
+                            setIntervaloExibicaoMinutos={setIntervaloExibicaoMinutos}
+                            prioridadeProgramacao={prioridadeProgramacao}
+                            setPrioridadeProgramacao={setPrioridadeProgramacao}
                             onSalvar={() => salvarExibicao(midia)}
                             onCancelar={() => {
                                 setCardExibicaoAberto(null)
