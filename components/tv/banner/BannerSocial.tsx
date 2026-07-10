@@ -40,13 +40,13 @@ export default function BannerSocial({
                             </p>
                         </div>
 
-                        <h1 className="mt-5 max-w-[560px] text-[clamp(2.1rem,5vw,3.2rem)] font-black uppercase leading-[1.03] tracking-tight text-white">
+                        <h1 className="mt-4 max-w-[520px] text-[clamp(1.55rem,3.55vw,2.28rem)] font-black uppercase leading-[1.1] tracking-tight text-white line-clamp-5">
                             {titulo}
                         </h1>
 
                         <div className="mt-4 h-1.5 w-44 rounded-full bg-gradient-to-r from-cyan-300 to-transparent" />
 
-                        <p className="mt-4 line-clamp-2 max-w-[460px] text-base font-bold leading-snug text-white/88">
+                        <p className="mt-3 line-clamp-2 max-w-[440px] text-sm font-bold leading-snug text-white/84">
                             {subtitulo}
                         </p>
 
@@ -116,7 +116,7 @@ export default function BannerSocial({
             <div className="absolute inset-0 bg-gradient-to-br from-[#0d9cff] via-[#064bb8] to-[#020617]" />
             <div className="absolute -left-32 top-[-80px] h-[420px] w-[420px] rounded-full bg-cyan-300/25 blur-3xl" />
 
-            <div className="relative z-10 grid h-full grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)] gap-8 px-[clamp(1.5rem,5vw,6rem)] py-[clamp(1.25rem,5vh,4rem)]">
+            <div className="relative z-10 grid h-full grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)] gap-6 px-[clamp(1.5rem,4vw,5rem)] py-[clamp(1.25rem,5vh,4rem)]">
                 <div className="flex min-w-0 flex-col justify-center">
                     <div className="w-fit rounded-full bg-gradient-to-r from-cyan-300 to-cyan-500 px-7 py-3 shadow-[0_18px_50px_rgba(34,211,238,0.28)]">
                         <p className="text-[clamp(1rem,1.8vw,2rem)] font-black uppercase tracking-[0.35em] text-white">
@@ -124,13 +124,13 @@ export default function BannerSocial({
                         </p>
                     </div>
 
-                    <h1 className="mt-8 max-w-[780px] text-[clamp(2.8rem,5vw,5.6rem)] font-black uppercase leading-[1.05] tracking-tight text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                    <h1 className="mt-7 max-w-[760px] text-[clamp(2.35rem,4.15vw,4.45rem)] font-black uppercase leading-[1.07] tracking-tight text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)] line-clamp-5">
                         {titulo}
                     </h1>
 
                     <div className="mt-6 h-2 w-[min(360px,55%)] rounded-full bg-gradient-to-r from-cyan-300 to-transparent" />
 
-                    <p className="mt-7 max-w-[640px] text-[clamp(1.25rem,2.4vw,2.5rem)] font-medium leading-tight text-white/90">
+                    <p className="mt-5 line-clamp-3 max-w-[620px] text-[clamp(1rem,1.55vw,1.55rem)] font-bold leading-snug text-white/86">
                         {subtitulo}
                     </p>
 
