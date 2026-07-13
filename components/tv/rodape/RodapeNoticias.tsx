@@ -83,6 +83,9 @@ export default function RodapeNoticias({
                 setTempoSaidaTarja(Number(dados.tempoSaidaTarja || 1))
                 setTempoOcultaTarja(Number(dados.tempoOcultaTarja || 10))
                 setTempoInicialTarja(Number(dados.tempoInicialTarja || 1))
+            },
+            () => {
+                setMostrarRodapeNoticias(false)
             }
         )
 

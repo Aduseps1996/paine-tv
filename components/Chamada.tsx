@@ -1,3 +1,7 @@
+"use client"
+
+import { useEffect, useRef } from "react"
+
 type Props = {
   mostrar: boolean
   nome: string
@@ -11,6 +15,100 @@ export default function Chamada({
   matricula,
   guiche
 }: Props) {
+  const ultimaChamadaFaladaRef = useRef("")
+  const timeoutFalaRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (!mostrar) {
+      ultimaChamadaFaladaRef.current = ""
+
+      if (timeoutFalaRef.current) {
+        clearTimeout(timeoutFalaRef.current)
+        timeoutFalaRef.current = null
+      }
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel()
+      }
+
+      return
+    }
+
+    if (!("speechSynthesis" in window)) {
+      console.warn("Síntese de voz não suportada neste dispositivo.")
+      return
+    }
+
+    const assinaturaChamada = `${matricula}-${nome}-${guiche}`
+
+    if (ultimaChamadaFaladaRef.current === assinaturaChamada) {
+      return
+    }
+
+    ultimaChamadaFaladaRef.current = assinaturaChamada
+
+    const matriculaFalavel = matricula
+      .trim()
+      .split("")
+      .filter((caractere) => caractere !== " ")
+      .join(" ")
+
+    timeoutFalaRef.current = setTimeout(() => {
+      window.speechSynthesis.cancel()
+
+      const texto = [
+        "Atenção.",
+        `Matrícula ${matriculaFalavel}.`,
+        nome ? `${nome}.` : "",
+        guiche ? `Dirija-se ao ${guiche}.` : ""
+      ]
+        .filter(Boolean)
+        .join(" ")
+
+      const fala = new SpeechSynthesisUtterance(texto)
+
+      fala.lang = "pt-BR"
+      fala.rate = 0.88
+      fala.pitch = 1
+      fala.volume = 1
+
+      const vozes = window.speechSynthesis.getVoices()
+
+      const vozPortugues =
+        vozes.find((voz) => voz.lang.toLowerCase() === "pt-br") ||
+        vozes.find((voz) => voz.lang.toLowerCase().startsWith("pt"))
+
+      if (vozPortugues) {
+        fala.voice = vozPortugues
+      }
+
+      fala.onerror = (evento) => {
+        console.error("Erro ao reproduzir a chamada por voz:", evento)
+      }
+
+      window.speechSynthesis.speak(fala)
+    }, 900)
+
+    return () => {
+      if (timeoutFalaRef.current) {
+        clearTimeout(timeoutFalaRef.current)
+        timeoutFalaRef.current = null
+      }
+    }
+  }, [mostrar, nome, matricula, guiche])
+
+  useEffect(() => {
+    return () => {
+      if (timeoutFalaRef.current) {
+        clearTimeout(timeoutFalaRef.current)
+      }
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
+
   if (!mostrar) return null
 
   return (

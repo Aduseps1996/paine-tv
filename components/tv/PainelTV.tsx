@@ -117,6 +117,10 @@ export default function PainelTV({
 
         }
 
+      },
+      () => {
+        setLogo("")
+        setSlogan("")
       }
     )
 
@@ -148,7 +152,7 @@ export default function PainelTV({
         if (criadoEmMs < painelIniciadoEm) {
           updateDoc(doc(db, "painel_chamadas", "atual"), {
             ativo: false
-          })
+          }).catch(() => { })
 
           return
         }
@@ -196,10 +200,13 @@ export default function PainelTV({
             {
               ativo: false
             }
-          )
+          ).catch(() => { })
           /* Controle de tempo de chamada */
         }, 15000)
 
+      },
+      () => {
+        setMostrarChamada(false)
       }
     )
 

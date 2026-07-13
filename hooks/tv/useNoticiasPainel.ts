@@ -59,16 +59,22 @@ export function useNoticiasPainel({
             orderBy("ordem", "asc")
         )
 
-        const unsubscribe = onSnapshot(consulta, (resultado) => {
-            const lista = resultado.docs.map((documento) => ({
-                id: documento.id,
-                ...documento.data()
-            })) as Noticia[]
+        const unsubscribe = onSnapshot(
+            consulta,
+            (resultado) => {
+                const lista = resultado.docs.map((documento) => ({
+                    id: documento.id,
+                    ...documento.data()
+                })) as Noticia[]
 
-            const listaAtiva = lista.filter((noticia) => noticia.ativo === true)
+                const listaAtiva = lista.filter((noticia) => noticia.ativo === true)
 
-            setNoticias(listaAtiva)
-        })
+                setNoticias(listaAtiva)
+            },
+            () => {
+                setNoticias([])
+            }
+        )
 
         return () => unsubscribe()
     }, [modoPreview])

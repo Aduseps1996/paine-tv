@@ -39,14 +39,20 @@ export function usePainelData({
             orderBy("ordem", "asc")
         )
 
-        const unsubscribe = onSnapshot(consulta, (resultado) => {
-            const lista = resultado.docs.map((documento) => ({
-                id: documento.id,
-                ...documento.data()
-            })) as Midia[]
+        const unsubscribe = onSnapshot(
+            consulta,
+            (resultado) => {
+                const lista = resultado.docs.map((documento) => ({
+                    id: documento.id,
+                    ...documento.data()
+                })) as Midia[]
 
-            setMidiasPublicadas(lista)
-        })
+                setMidiasPublicadas(lista)
+            },
+            () => {
+                setMidiasPublicadas([])
+            }
+        )
 
         return () => unsubscribe()
     }, [modoPreview])
@@ -59,14 +65,20 @@ export function usePainelData({
             orderBy("ordem", "asc")
         )
 
-        const unsubscribe = onSnapshot(consulta, (resultado) => {
-            const lista = resultado.docs.map((documento) => ({
-                id: documento.id,
-                ...documento.data()
-            })) as Noticia[]
+        const unsubscribe = onSnapshot(
+            consulta,
+            (resultado) => {
+                const lista = resultado.docs.map((documento) => ({
+                    id: documento.id,
+                    ...documento.data()
+                })) as Noticia[]
 
-            setNoticiasPublicadas(lista)
-        })
+                setNoticiasPublicadas(lista)
+            },
+            () => {
+                setNoticiasPublicadas([])
+            }
+        )
 
         return () => unsubscribe()
     }, [modoPreview])
@@ -80,6 +92,9 @@ export function usePainelData({
                 if (!documento.exists()) return
 
                 setConfiguracoesPublicadas(documento.data() as ConfiguracoesPainel)
+            },
+            () => {
+                setConfiguracoesPublicadas({})
             }
         )
 
