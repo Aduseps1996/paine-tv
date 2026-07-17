@@ -31,6 +31,7 @@ export default function Chamada({
 }: Props) {
   const ultimaChamadaFaladaRef = useRef("")
   const timeoutFalaRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const falaAtualRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   useEffect(() => {
     if (!mostrar) {
@@ -42,7 +43,18 @@ export default function Chamada({
       }
 
       if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel()
+        if (falaAtualRef.current) {
+          falaAtualRef.current.onerror = null
+          falaAtualRef.current.onend = null
+          falaAtualRef.current = null
+        }
+
+        if (
+          window.speechSynthesis.speaking ||
+          window.speechSynthesis.pending
+        ) {
+          window.speechSynthesis.cancel()
+        }
       }
 
       return
@@ -62,8 +74,6 @@ export default function Chamada({
       return
     }
 
-    ultimaChamadaFaladaRef.current = assinaturaChamada
-
     const matriculaFalavel = matricula
       .trim()
       .split("")
@@ -71,6 +81,8 @@ export default function Chamada({
       .join(" ")
 
     timeoutFalaRef.current = setTimeout(() => {
+      ultimaChamadaFaladaRef.current = assinaturaChamada
+
       const texto = [
         "Atenção.",
         `Matrícula ${matriculaFalavel}.`,
@@ -89,7 +101,18 @@ export default function Chamada({
 
       // Chrome e outros navegadores
       if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel()
+        if (falaAtualRef.current) {
+          falaAtualRef.current.onerror = null
+          falaAtualRef.current.onend = null
+          falaAtualRef.current = null
+        }
+
+        if (
+          window.speechSynthesis.speaking ||
+          window.speechSynthesis.pending
+        ) {
+          window.speechSynthesis.cancel()
+        }
 
         const fala = new SpeechSynthesisUtterance(texto)
 
@@ -108,8 +131,28 @@ export default function Chamada({
           fala.voice = vozPortugues
         }
 
+        falaAtualRef.current = fala
+
+        fala.onend = () => {
+          if (falaAtualRef.current === fala) {
+            falaAtualRef.current = null
+          }
+        }
+
         fala.onerror = (evento) => {
-          console.error("Erro ao reproduzir a chamada:", evento)
+          if (falaAtualRef.current === fala) {
+            falaAtualRef.current = null
+          }
+
+          // cancel() gera esses eventos durante trocas de chamada e desmontagem.
+          if (evento.error === "canceled" || evento.error === "interrupted") {
+            return
+          }
+
+          // A voz é opcional; uma falha nela não deve abrir o overlay de erro do Next.
+          console.warn(
+            `Não foi possível reproduzir a chamada por voz: ${evento.error}`
+          )
         }
 
         window.speechSynthesis.speak(fala)
@@ -131,7 +174,18 @@ export default function Chamada({
       }
 
       if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel()
+        if (falaAtualRef.current) {
+          falaAtualRef.current.onerror = null
+          falaAtualRef.current.onend = null
+          falaAtualRef.current = null
+        }
+
+        if (
+          window.speechSynthesis.speaking ||
+          window.speechSynthesis.pending
+        ) {
+          window.speechSynthesis.cancel()
+        }
       }
     }
   }, [])
