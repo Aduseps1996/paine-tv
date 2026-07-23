@@ -11,6 +11,7 @@ import EscalaJuridicaPainel from "./EscalaJuridicaPainel"
 import BannerInstitucional from "./BannerInstitucional"
 import BannerSocial from "./BannerSocial"
 import BannerPainel from "./BannerPainel"
+import BannerPlantaoJuridico from "./BannerPlantaoJuridico"
 import BannerYoutube from "./BannerYoutube"
 import {
     midiaEhYoutube,
@@ -155,6 +156,14 @@ export default function BannerRotativo({
 
     function renderizarTemplate() {
         switch (templateAtual) {
+            case "plantao-juridico":
+                return (
+                    <BannerPlantaoJuridico
+                        midiaAtual={midiaAtual}
+                        agoraPainel={agoraPainel}
+                    />
+                )
+
             case "escala-juridica":
                 return (
                     <EscalaJuridicaPainel

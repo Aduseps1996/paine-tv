@@ -1,4 +1,4 @@
-export type TipoMidia = "imagem" | "video" | "youtube"
+export type TipoMidia = "imagem" | "video" | "youtube" | "dinamica"
 
 export type TemplateMidia =
     | "cheio"
@@ -6,6 +6,7 @@ export type TemplateMidia =
     | "painel"
     | "escala-juridica"
     | "social"
+    | "plantao-juridico"
 
 
 export type ModoExibicaoMidia = "cover" | "contain"
@@ -20,6 +21,20 @@ export type ModeloTarja =
     | "live"
     | "infobar"
     | "digital"
+
+export type DadosPlantao = {
+    titulo: string
+    chamadaPadrao: string
+    descricaoPadrao: string
+    whatsapp: string
+    rodape: string
+    avisoEspecialAtivo?: boolean
+    ocasiaoEspecial?: string
+    chamadaEspecial?: string
+    descricaoEspecial?: string
+    inicioAvisoEspecial?: string
+    fimAvisoEspecial?: string
+}
 
 export type Midia = {
     id: string
@@ -61,6 +76,7 @@ export type Midia = {
     larguraVideo?: number
     alturaVideo?: number
     orientacaoVideo?: "vertical" | "horizontal" | "quadrado"
+    plantao?: DadosPlantao
 
     // Controle do arquivo
     versao?: number

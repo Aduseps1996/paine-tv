@@ -21,7 +21,7 @@ export default function AbaMidias() {
     const midias = draft.midias
 
     const midiasFiltradas = midias.filter((midia) => {
-        const texto = `${midia.titulo || ""} ${midia.categoria || ""} ${midia.arquivo || ""}`.toLowerCase()
+        const texto = `${midia.titulo || ""} ${midia.categoria || ""} ${midia.arquivo || ""} ${midia.plantao?.chamadaPadrao || ""} ${midia.plantao?.ocasiaoEspecial || ""}`.toLowerCase()
         const correspondeBusca = texto.includes(busca.toLowerCase())
         const correspondeTemplate = filtroTemplate === "todos" || midia.template === filtroTemplate
         const correspondeTipo = filtroTipo === "todos" || midia.tipo === filtroTipo

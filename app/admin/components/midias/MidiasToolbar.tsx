@@ -69,6 +69,7 @@ export default function MidiasToolbar({
                     <option value="cheio">Banner Cheio</option>
                     <option value="institucional">Institucional</option>
                     <option value="painel">Painel Informativo</option>
+                    <option value="plantao-juridico">Plantão Judicial</option>
                 </select>
 
                 <select
@@ -81,6 +82,7 @@ export default function MidiasToolbar({
                     <option value="imagem">Imagem</option>
                     <option value="video">Vídeo</option>
                     <option value="youtube">YouTube / Live</option>
+                    <option value="dinamica">Conteúdo dinâmico</option>
                 </select>
 
                 <select

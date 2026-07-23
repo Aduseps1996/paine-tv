@@ -236,7 +236,9 @@ export default function PainelTV({
         ? "bg-black/25 border border-white/15 p-2 shadow-md backdrop-blur-sm"
         : "bg-white/95 p-2 shadow-md"
 
-  const midiaAtualEhPainelInformativo = midiaAtualTv?.template === "painel"
+  const midiaAtualUsaRodapeProprio =
+    midiaAtualTv?.template === "painel" ||
+    midiaAtualTv?.template === "plantao-juridico"
 
   return (
     <main
@@ -321,7 +323,7 @@ export default function PainelTV({
         </div>
       )}
 
-      {!midiaAtualEhPainelInformativo && (
+      {!midiaAtualUsaRodapeProprio && (
         <RodapeNoticias
           logo={logoFinal}
           slogan={sloganFinal}

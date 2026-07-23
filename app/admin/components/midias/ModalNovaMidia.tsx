@@ -68,7 +68,27 @@ export default function ModalNovaMidia({
     const [tempoOcultaTarja, setTempoOcultaTarja] = useState(10)
     const [tempoInicialTarja, setTempoInicialTarja] = useState(0)
 
+    const [tituloPlantao, setTituloPlantao] = useState("Plantão Judicial")
+    const [chamadaPadraoPlantao, setChamadaPadraoPlantao] =
+        useState("Urgências não esperam até segunda-feira.")
+    const [descricaoPadraoPlantao, setDescricaoPadraoPlantao] = useState(
+        "Atuação em situações urgentes relacionadas ao direito à saúde durante finais de semana e feriados."
+    )
+    const [whatsappPlantao, setWhatsappPlantao] = useState("(81) 99838-2275")
+    const [rodapePlantao, setRodapePlantao] = useState(
+        "Nosso compromisso é com a justiça social e a defesa da dignidade humana."
+    )
+    const [avisoEspecialAtivo, setAvisoEspecialAtivo] = useState(false)
+    const [ocasiaoEspecial, setOcasiaoEspecial] = useState("")
+    const [chamadaEspecial, setChamadaEspecial] = useState("")
+    const [descricaoEspecial, setDescricaoEspecial] = useState("")
+    const [inicioAvisoEspecial, setInicioAvisoEspecial] = useState("")
+    const [fimAvisoEspecial, setFimAvisoEspecial] = useState("")
+
     const ehYoutube = tipo === "youtube"
+    const ehPlantao =
+        tipo === "dinamica" &&
+        template === "plantao-juridico"
 
     const usaEtiqueta =
         modeloTarja === "telejornal" ||
@@ -92,7 +112,7 @@ export default function ModalNovaMidia({
     async function selecionarArquivoLocal(file: File | null) {
         if (!file) return
 
-        if (tipo === "youtube") {
+        if (tipo === "youtube" || tipo === "dinamica") {
             alert("Upload local não é usado para YouTube/Live.")
             return
         }
@@ -153,9 +173,50 @@ export default function ModalNovaMidia({
     }
 
     function salvarNoRascunho() {
-        if (!arquivo.trim()) {
+        if (
+            ehPlantao &&
+            midias.some((midia) => midia.template === "plantao-juridico")
+        ) {
+            alert(
+                "O Plantão Judicial já está cadastrado. Use o botão Editar conteúdo no card existente."
+            )
+            return
+        }
+
+        if (!ehPlantao && !arquivo.trim()) {
             alert("Informe o arquivo/link da mídia.")
             return
+        }
+
+        if (
+            ehPlantao &&
+            (
+                !tituloPlantao.trim() ||
+                !chamadaPadraoPlantao.trim() ||
+                !descricaoPadraoPlantao.trim() ||
+                !whatsappPlantao.trim()
+            )
+        ) {
+            alert("Preencha os campos principais do Plantão Judicial.")
+            return
+        }
+
+        if (ehPlantao && avisoEspecialAtivo) {
+            if (
+                !ocasiaoEspecial.trim() ||
+                !chamadaEspecial.trim() ||
+                !descricaoEspecial.trim() ||
+                !inicioAvisoEspecial ||
+                !fimAvisoEspecial
+            ) {
+                alert("Preencha todo o aviso especial e o período de exibição.")
+                return
+            }
+
+            if (new Date(fimAvisoEspecial) <= new Date(inicioAvisoEspecial)) {
+                alert("O fim do aviso especial precisa ser maior que o início.")
+                return
+            }
         }
 
         if (ehYoutube && (!inicioExibicao || !fimExibicao)) {
@@ -166,7 +227,7 @@ export default function ModalNovaMidia({
         const novaMidia: Midia = {
             id: `draft-${Date.now()}`,
             tipo,
-            arquivo: arquivo.trim(),
+            arquivo: ehPlantao ? "" : arquivo.trim(),
             storagePath: storagePath || "",
             mimeType: mimeType || "",
             tamanhoBytes: tamanhoBytes || undefined,
@@ -178,7 +239,7 @@ export default function ModalNovaMidia({
             pesoExibicao: 1,
             template: ehYoutube ? "cheio" : template,
             modoExibicao,
-            titulo: titulo.trim(),
+            titulo: ehPlantao ? tituloPlantao.trim() : titulo.trim(),
             subtitulo: subtitulo.trim(),
             rodape: rodape.trim(),
             categoria: categoria.trim(),
@@ -210,7 +271,22 @@ export default function ModalNovaMidia({
             duracaoVideo,
             larguraVideo,
             alturaVideo,
-            orientacaoVideo
+            orientacaoVideo,
+            plantao: ehPlantao
+                ? {
+                    titulo: tituloPlantao.trim(),
+                    chamadaPadrao: chamadaPadraoPlantao.trim(),
+                    descricaoPadrao: descricaoPadraoPlantao.trim(),
+                    whatsapp: whatsappPlantao.trim(),
+                    rodape: rodapePlantao.trim(),
+                    avisoEspecialAtivo,
+                    ocasiaoEspecial: ocasiaoEspecial.trim(),
+                    chamadaEspecial: chamadaEspecial.trim(),
+                    descricaoEspecial: descricaoEspecial.trim(),
+                    inicioAvisoEspecial,
+                    fimAvisoEspecial
+                }
+                : undefined
         }
 
         atualizarMidiasDraft([...midias, novaMidia])
@@ -254,7 +330,7 @@ export default function ModalNovaMidia({
                             </p>
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                                {!ehYoutube && (
+                                {!ehYoutube && !ehPlantao && (
                                     <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
                                         <p className="text-sm font-black text-white">
                                             Arquivo local
@@ -385,13 +461,15 @@ export default function ModalNovaMidia({
                                     </div>
                                 )}
 
-                                <input
-                                    type="text"
-                                    placeholder={ehYoutube ? "Link do YouTube / Live" : "URL externa ou arquivo enviado automaticamente"}
-                                    value={arquivo}
-                                    onChange={(e) => setArquivo(e.target.value)}
-                                    className="sm:col-span-2"
-                                />
+                                {!ehPlantao && (
+                                    <input
+                                        type="text"
+                                        placeholder={ehYoutube ? "Link do YouTube / Live" : "URL externa ou arquivo enviado automaticamente"}
+                                        value={arquivo}
+                                        onChange={(e) => setArquivo(e.target.value)}
+                                        className="sm:col-span-2"
+                                    />
+                                )}
 
                                 <select
                                     value={tipo}
@@ -403,14 +481,28 @@ export default function ModalNovaMidia({
                                             setTemplate("cheio")
                                             setProgramarExibicao(true)
                                         }
+
+                                        if (novoTipo === "dinamica") {
+                                            setTemplate("plantao-juridico")
+                                            setArquivo("")
+                                            setMostrarTarja(false)
+                                        }
+
+                                        if (
+                                            novoTipo !== "dinamica" &&
+                                            template === "plantao-juridico"
+                                        ) {
+                                            setTemplate("cheio")
+                                        }
                                     }}
                                 >
                                     <option value="imagem">Imagem</option>
                                     <option value="video">Vídeo</option>
                                     <option value="youtube">YouTube / Live</option>
+                                    <option value="dinamica">Conteúdo dinâmico</option>
                                 </select>
 
-                                {!ehYoutube && (
+                                {!ehYoutube && tipo !== "dinamica" && (
                                     <select
                                         value={template}
                                         onChange={(e) => setTemplate(e.target.value as TemplateMidia)}
@@ -419,6 +511,15 @@ export default function ModalNovaMidia({
                                         <option value="institucional">Institucional</option>
                                         <option value="painel">Painel Informativo</option>
                                         <option value="social">Redes Sociais</option>
+                                    </select>
+                                )}
+
+                                {tipo === "dinamica" && (
+                                    <select
+                                        value={template}
+                                        onChange={(e) => setTemplate(e.target.value as TemplateMidia)}
+                                    >
+                                        <option value="plantao-juridico">Plantão Judicial</option>
                                     </select>
                                 )}
                             </div>
@@ -538,6 +639,116 @@ export default function ModalNovaMidia({
                             </section>
                         )}
 
+                        {ehPlantao && (
+                            <section className="rounded-[26px] border border-cyan-400/20 bg-cyan-500/[0.06] p-5">
+                                <h3 className="text-xl font-black">
+                                    Plantão Judicial
+                                </h3>
+
+                                <p className="mt-2 text-sm text-zinc-400">
+                                    Este conteúdo fica salvo e pode ser ativado ou desativado na biblioteca sem enviar uma nova imagem.
+                                </p>
+
+                                <div className="mt-5 grid gap-4">
+                                    <input
+                                        value={tituloPlantao}
+                                        onChange={(e) => setTituloPlantao(e.target.value)}
+                                        placeholder="Título. Ex: Plantão Judicial"
+                                    />
+
+                                    <input
+                                        value={chamadaPadraoPlantao}
+                                        onChange={(e) => setChamadaPadraoPlantao(e.target.value)}
+                                        placeholder="Chamada padrão"
+                                    />
+
+                                    <textarea
+                                        value={descricaoPadraoPlantao}
+                                        onChange={(e) => setDescricaoPadraoPlantao(e.target.value)}
+                                        className="min-h-28 resize-none"
+                                        placeholder="Descrição padrão"
+                                    />
+
+                                    <input
+                                        value={whatsappPlantao}
+                                        onChange={(e) => setWhatsappPlantao(e.target.value)}
+                                        placeholder="WhatsApp do plantão"
+                                    />
+
+                                    <textarea
+                                        value={rodapePlantao}
+                                        onChange={(e) => setRodapePlantao(e.target.value)}
+                                        className="min-h-20 resize-none"
+                                        placeholder="Mensagem inferior"
+                                    />
+                                </div>
+
+                                <div className="mt-6 border-t border-white/10 pt-5">
+                                    <label className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4">
+                                        <span>
+                                            <span className="block font-bold">
+                                                Usar aviso especial temporário
+                                            </span>
+                                            <span className="mt-1 block text-xs text-zinc-500">
+                                                No fim do período, o banner volta sozinho à mensagem padrão.
+                                            </span>
+                                        </span>
+
+                                        <input
+                                            type="checkbox"
+                                            checked={avisoEspecialAtivo}
+                                            onChange={(e) => setAvisoEspecialAtivo(e.target.checked)}
+                                        />
+                                    </label>
+
+                                    {avisoEspecialAtivo && (
+                                        <div className="mt-4 grid gap-4">
+                                            <input
+                                                value={ocasiaoEspecial}
+                                                onChange={(e) => setOcasiaoEspecial(e.target.value)}
+                                                placeholder="Ocasião. Ex: Feriado de 7 de Setembro"
+                                            />
+
+                                            <input
+                                                value={chamadaEspecial}
+                                                onChange={(e) => setChamadaEspecial(e.target.value)}
+                                                placeholder="Chamada especial"
+                                            />
+
+                                            <textarea
+                                                value={descricaoEspecial}
+                                                onChange={(e) => setDescricaoEspecial(e.target.value)}
+                                                className="min-h-24 resize-none"
+                                                placeholder="Descrição especial"
+                                            />
+
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                <label className="text-sm font-bold text-zinc-300">
+                                                    Início do aviso
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={inicioAvisoEspecial}
+                                                        onChange={(e) => setInicioAvisoEspecial(e.target.value)}
+                                                        className="mt-2"
+                                                    />
+                                                </label>
+
+                                                <label className="text-sm font-bold text-zinc-300">
+                                                    Fim do aviso
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={fimAvisoEspecial}
+                                                        onChange={(e) => setFimAvisoEspecial(e.target.value)}
+                                                        className="mt-2"
+                                                    />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+                        )}
+
                         <section className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
                             <h3 className="text-xl font-black">Exibição</h3>
 
@@ -563,7 +774,7 @@ export default function ModalNovaMidia({
                             </div>
                         </section>
 
-                        {!ehYoutube && (
+                        {!ehYoutube && !ehPlantao && (
                             <section className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
                                 <h3 className="text-xl font-black">Tarja</h3>
 
@@ -630,7 +841,13 @@ export default function ModalNovaMidia({
 
                             <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
                                 <p className="text-zinc-500">Template</p>
-                                <p className="mt-1 font-black">{ehYoutube ? "YouTube / Live" : template}</p>
+                                <p className="mt-1 font-black">
+                                    {ehYoutube
+                                        ? "YouTube / Live"
+                                        : ehPlantao
+                                            ? "Plantão Judicial"
+                                            : template}
+                                </p>
                             </div>
 
                             <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
@@ -640,7 +857,13 @@ export default function ModalNovaMidia({
 
                             <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
                                 <p className="text-zinc-500">Tarja</p>
-                                <p className="mt-1 font-black">{mostrarTarja ? modeloTarja : "Sem tarja"}</p>
+                                <p className="mt-1 font-black">
+                                    {ehPlantao
+                                        ? "Não se aplica"
+                                        : mostrarTarja
+                                            ? modeloTarja
+                                            : "Sem tarja"}
+                                </p>
                             </div>
                         </div>
 

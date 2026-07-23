@@ -1,10 +1,11 @@
 import { useState } from "react"
 
-import type { Midia } from "@/types/painel"
+import type { DadosPlantao, Midia } from "@/types/painel"
 
 import MidiaCard from "./MidiaCard"
 import PainelExibicao from "./PainelExibicao"
 import PainelTarja from "./PainelTarja"
+import PainelPlantao from "./PainelPlantao"
 import { excluirMidiaStorage } from "@/utils/excluirMidiaStorage"
 
 
@@ -21,6 +22,7 @@ export default function MidiasGrid({
 }: Props) {
     const [cardExibicaoAberto, setCardExibicaoAberto] = useState<string | null>(null)
     const [cardTarjaAberto, setCardTarjaAberto] = useState<string | null>(null)
+    const [cardPlantaoAberto, setCardPlantaoAberto] = useState<string | null>(null)
 
     const [midiaExibicaoEditando, setMidiaExibicaoEditando] = useState<string | null>(null)
     const [exibicaoProgramada, setExibicaoProgramada] = useState(false)
@@ -109,6 +111,7 @@ export default function MidiasGrid({
 
         setCardTarjaAberto(null)
         setMidiaTarjaEditando(null)
+        setCardPlantaoAberto(null)
 
         setMidiaExibicaoEditando(midia.id)
         setExibicaoProgramada(midia.exibicaoProgramada ?? false)
@@ -175,6 +178,7 @@ export default function MidiasGrid({
 
         setCardExibicaoAberto(null)
         setMidiaExibicaoEditando(null)
+        setCardPlantaoAberto(null)
 
         setMidiaTarjaEditando(midia.id)
         setMostrarTarjaMidia(midia.mostrarTarja ?? false)
@@ -210,6 +214,24 @@ export default function MidiasGrid({
         setMidiaTarjaEditando(null)
     }
 
+    function abrirPlantao(midia: Midia) {
+        const jaAberto = cardPlantaoAberto === midia.id
+
+        setCardExibicaoAberto(null)
+        setMidiaExibicaoEditando(null)
+        setCardTarjaAberto(null)
+        setMidiaTarjaEditando(null)
+        setCardPlantaoAberto(jaAberto ? null : midia.id)
+    }
+
+    function salvarPlantao(midia: Midia, plantao: DadosPlantao) {
+        atualizarMidiaRascunho(midia.id, {
+            titulo: plantao.titulo,
+            plantao
+        })
+        setCardPlantaoAberto(null)
+    }
+
     if (midias.length === 0) {
         return (
             <section className="rounded-[28px] border border-white/10 bg-zinc-900/85 p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.24)]">
@@ -236,8 +258,10 @@ export default function MidiasGrid({
                     onAtualizar={atualizarMidiaRascunho}
                     exibirExibicao={cardExibicaoAberto === midia.id}
                     exibirTarja={cardTarjaAberto === midia.id}
+                    exibirPlantao={cardPlantaoAberto === midia.id}
                     onToggleExibicao={abrirExibicao}
                     onToggleTarja={abrirTarja}
+                    onTogglePlantao={abrirPlantao}
                 >
                     {cardExibicaoAberto === midia.id && midiaExibicaoEditando === midia.id && (
                         <PainelExibicao
@@ -293,6 +317,15 @@ export default function MidiasGrid({
                                 setCardTarjaAberto(null)
                                 setMidiaTarjaEditando(null)
                             }}
+                        />
+                    )}
+
+                    {cardPlantaoAberto === midia.id && (
+                        <PainelPlantao
+                            key={`plantao-${midia.id}`}
+                            midia={midia}
+                            onSalvar={(plantao) => salvarPlantao(midia, plantao)}
+                            onCancelar={() => setCardPlantaoAberto(null)}
                         />
                     )}
                 </MidiaCard>

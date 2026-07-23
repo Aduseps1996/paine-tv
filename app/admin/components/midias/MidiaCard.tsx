@@ -1,3 +1,5 @@
+import { Clock3, Gavel, MessageCircleMore } from "lucide-react"
+
 import type { Midia } from "@/types/painel"
 
 import {
@@ -17,8 +19,10 @@ type Props = {
     onAtualizar: (id: string, dados: Partial<Midia>) => void
     exibirExibicao: boolean
     exibirTarja: boolean
+    exibirPlantao: boolean
     onToggleExibicao: (midia: Midia) => void
     onToggleTarja: (midia: Midia) => void
+    onTogglePlantao: (midia: Midia) => void
     children?: React.ReactNode
 }
 
@@ -30,8 +34,10 @@ export default function MidiaCard({
     onAtualizar,
     exibirExibicao,
     exibirTarja,
+    exibirPlantao,
     onToggleExibicao,
     onToggleTarja,
+    onTogglePlantao,
     children
 }: Props) {
     const titulo = obterTituloMidia(midia)
@@ -100,6 +106,35 @@ export default function MidiaCard({
                     </div>
                 )}
 
+                {midia.template === "plantao-juridico" && (
+                    <div className="absolute inset-0 grid grid-cols-[34%_42%_24%] overflow-hidden bg-[radial-gradient(circle_at_88%_12%,#78eaff_0%,transparent_28%),linear-gradient(120deg,#06146d_0%,#073da9_50%,#00a8e0_100%)]">
+                        <div className="flex flex-col justify-center border-r border-cyan-300/70 px-5">
+                            <Clock3 className="h-9 w-9 text-white" strokeWidth={1.8} />
+                            <p className="mt-2 text-xl font-black leading-none text-white">
+                                Plantão
+                            </p>
+                            <p className="text-lg font-black uppercase text-cyan-300">
+                                Judicial
+                            </p>
+                            <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-white">
+                                <MessageCircleMore className="h-5 w-5 text-green-400" />
+                                {midia.plantao?.whatsapp || "(81) 99838-2275"}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center px-5">
+                            <p className="line-clamp-3 text-lg font-black leading-tight text-white">
+                                {midia.plantao?.chamadaPadrao ||
+                                    "Urgências não esperam até segunda-feira."}
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-center">
+                            <Gavel className="h-20 w-20 rotate-[28deg] text-amber-950 drop-shadow-xl" strokeWidth={1.5} />
+                        </div>
+                    </div>
+                )}
+
                 <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                     <span className={`rounded-full border px-3 py-1 text-xs font-black ${obterCorStatus(midia.ativo)}`}>
                         {obterTextoStatus(midia.ativo)}
@@ -118,9 +153,11 @@ export default function MidiaCard({
                             {titulo}
                         </h3>
 
-                        <p className="mt-2 max-w-xl break-all text-sm text-zinc-500">
-                            {midia.arquivo}
-                        </p>
+                        {midia.template !== "plantao-juridico" && (
+                            <p className="mt-2 max-w-xl break-all text-sm text-zinc-500">
+                                {midia.arquivo}
+                            </p>
+                        )}
 
                         {midia.tipo === "video" && (
                             <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-zinc-300">
@@ -177,7 +214,7 @@ export default function MidiaCard({
                             Duração
                         </p>
 
-                        {midia.tipo === "imagem" ? (
+                        {midia.tipo === "imagem" || midia.tipo === "dinamica" ? (
                             <input
                                 type="number"
                                 min="1"
@@ -236,16 +273,29 @@ export default function MidiaCard({
                         Configurar exibição
                     </button>
 
-                    <button
-                        type="button"
-                        onClick={() => onToggleTarja(midia)}
-                        className={`rounded-2xl px-4 py-3 text-sm font-black ${exibirTarja
-                            ? "border border-sky-300/30 bg-sky-500 text-white"
-                            : "border border-white/10 bg-white/[0.04] text-zinc-200"
-                            }`}
-                    >
-                        Tarja
-                    </button>
+                    {midia.template === "plantao-juridico" ? (
+                        <button
+                            type="button"
+                            onClick={() => onTogglePlantao(midia)}
+                            className={`rounded-2xl px-4 py-3 text-sm font-black ${exibirPlantao
+                                ? "border border-cyan-300/30 bg-cyan-500 text-white"
+                                : "border border-white/10 bg-white/[0.04] text-zinc-200"
+                                }`}
+                        >
+                            Editar conteúdo
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => onToggleTarja(midia)}
+                            className={`rounded-2xl px-4 py-3 text-sm font-black ${exibirTarja
+                                ? "border border-sky-300/30 bg-sky-500 text-white"
+                                : "border border-white/10 bg-white/[0.04] text-zinc-200"
+                                }`}
+                        >
+                            Tarja
+                        </button>
+                    )}
 
                     <button
                         type="button"

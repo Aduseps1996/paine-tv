@@ -103,6 +103,17 @@ export function useRotacaoMidias({
     const midiaPodeSerExibida = useCallback((midia: Midia) => {
         if (!midia.ativo) return false
 
+        if (
+            midia.tipo === "dinamica" &&
+            midia.template === "plantao-juridico"
+        ) {
+            if (midia.exibicaoProgramada) {
+                return midiaEstaNoPeriodo(midia)
+            }
+
+            return true
+        }
+
         if (midiaEhYoutube(midia)) {
             const linkYoutube =
                 midia.linkYoutubeExibicao ||
@@ -273,7 +284,10 @@ export function useRotacaoMidias({
     useEffect(() => {
         if (!midiaAtual) return
         if (midiasValidas.length <= 1) return
-        if (midiaAtual.tipo !== "imagem") return
+        if (
+            midiaAtual.tipo !== "imagem" &&
+            midiaAtual.tipo !== "dinamica"
+        ) return
 
         const duracaoSegura = Math.max(1, Number(midiaAtual.duracao || 8))
 
