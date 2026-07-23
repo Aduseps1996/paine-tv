@@ -230,7 +230,7 @@ export default function ModalNovaMidia({
             arquivo: ehPlantao ? "" : arquivo.trim(),
             storagePath: storagePath || "",
             mimeType: mimeType || "",
-            tamanhoBytes: tamanhoBytes || undefined,
+            ...(tamanhoBytes !== null ? { tamanhoBytes } : {}),
             versao: 1,
             atualizadoEm: new Date().toISOString(),
             ativo: true,

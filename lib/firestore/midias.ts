@@ -15,6 +15,29 @@ import type { Midia, NovaMidia } from "@/types/painel"
 
 const colecaoMidias = "midias"
 
+function removerCamposUndefined<T>(valor: T): T {
+    if (Array.isArray(valor)) {
+        return valor.map(removerCamposUndefined) as T
+    }
+
+    if (
+        valor !== null &&
+        typeof valor === "object" &&
+        Object.getPrototypeOf(valor) === Object.prototype
+    ) {
+        return Object.fromEntries(
+            Object.entries(valor)
+                .filter(([, conteudo]) => conteudo !== undefined)
+                .map(([chave, conteudo]) => [
+                    chave,
+                    removerCamposUndefined(conteudo)
+                ])
+        ) as T
+    }
+
+    return valor
+}
+
 export async function listarMidias() {
     const consulta = query(
         collection(db, colecaoMidias),
@@ -31,7 +54,7 @@ export async function listarMidias() {
 
 export async function criarMidia(midia: NovaMidia) {
     await addDoc(collection(db, colecaoMidias), {
-        ...midia,
+        ...removerCamposUndefined(midia),
         criadoEm: serverTimestamp()
     })
 }
@@ -41,5 +64,8 @@ export async function removerMidiaPorId(id: string) {
 }
 
 export async function atualizarMidia(id: string, dados: Partial<Midia>) {
-    await updateDoc(doc(db, colecaoMidias, id), dados)
+    await updateDoc(
+        doc(db, colecaoMidias, id),
+        removerCamposUndefined(dados)
+    )
 }
