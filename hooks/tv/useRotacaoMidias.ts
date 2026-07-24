@@ -103,10 +103,7 @@ export function useRotacaoMidias({
     const midiaPodeSerExibida = useCallback((midia: Midia) => {
         if (!midia.ativo) return false
 
-        if (
-            midia.tipo === "dinamica" &&
-            midia.template === "plantao-juridico"
-        ) {
+        if (midia.tipo === "dinamica") {
             if (midia.exibicaoProgramada) {
                 return midiaEstaNoPeriodo(midia)
             }

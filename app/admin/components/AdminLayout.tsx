@@ -7,6 +7,7 @@ type AbaAdmin =
   | "inicio"
   | "midias"
   | "noticias"
+  | "contatos"
   | "configuracao-painel"
   | "configuracao-tipografia"
 
@@ -22,6 +23,7 @@ const abas = [
   { id: "inicio", label: "Início" },
   { id: "midias", label: "Mídias" },
   { id: "noticias", label: "Notícias" },
+  { id: "contatos", label: "Contatos" },
   { id: "configuracao-painel", label: "Config. Painel" },
   { id: "configuracao-tipografia", label: "Tipografia" }
 ] as const

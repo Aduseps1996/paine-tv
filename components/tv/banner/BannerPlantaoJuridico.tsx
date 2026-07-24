@@ -5,11 +5,20 @@ import {
     ShieldCheck
 } from "lucide-react"
 
-import type { DadosPlantao, Midia } from "@/types/painel"
+import type {
+    ConfiguracoesPainel,
+    DadosPlantao,
+    Midia
+} from "@/types/painel"
+import {
+    CONTATO_PLANTAO_ID,
+    obterValorContato
+} from "@/utils/contatosPainel"
 
 type Props = {
     midiaAtual: Midia
     agoraPainel: Date | null
+    configuracoes: ConfiguracoesPainel
 }
 
 const CONTEUDO_PADRAO: DadosPlantao = {
@@ -17,6 +26,7 @@ const CONTEUDO_PADRAO: DadosPlantao = {
     chamadaPadrao: "Urgências não esperam até segunda-feira.",
     descricaoPadrao:
         "Atuação em situações urgentes relacionadas ao direito à saúde durante finais de semana e feriados.",
+    contatoId: CONTATO_PLANTAO_ID,
     whatsapp: "(81) 99838-2275",
     rodape:
         "Nosso compromisso é com a justiça social e a defesa da dignidade humana."
@@ -41,7 +51,8 @@ function avisoEspecialEstaAtivo(
 
 export default function BannerPlantaoJuridico({
     midiaAtual,
-    agoraPainel
+    agoraPainel,
+    configuracoes
 }: Props) {
     const plantao = {
         ...CONTEUDO_PADRAO,
@@ -62,6 +73,12 @@ export default function BannerPlantaoJuridico({
         usarAvisoEspecial && plantao.descricaoEspecial
             ? plantao.descricaoEspecial
             : plantao.descricaoPadrao
+
+    const whatsapp = obterValorContato(
+        configuracoes,
+        plantao.contatoId || CONTATO_PLANTAO_ID,
+        plantao.whatsapp || "(81) 99838-2275"
+    )
 
     return (
         <section className="absolute inset-0 isolate overflow-hidden bg-[#061c4f] text-white">
@@ -156,7 +173,7 @@ export default function BannerPlantaoJuridico({
                                     WhatsApp do plantão
                                 </p>
                                 <p className="mt-[0.5vh] whitespace-nowrap text-[clamp(1.15rem,1.8vw,2.5rem)] font-black tracking-[-0.03em] text-[#082e66]">
-                                    {plantao.whatsapp}
+                                    {whatsapp}
                                 </p>
                             </div>
                         </div>

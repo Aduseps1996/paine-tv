@@ -1,4 +1,10 @@
-import { Clock3, Gavel, MessageCircleMore } from "lucide-react"
+import {
+    Clock3,
+    ContactRound,
+    Gavel,
+    MessageCircleMore,
+    Phone
+} from "lucide-react"
 
 import type { Midia } from "@/types/painel"
 
@@ -135,6 +141,39 @@ export default function MidiaCard({
                     </div>
                 )}
 
+                {midia.template === "contatos-oficiais" && (
+                    <div className="absolute inset-0 overflow-hidden bg-[linear-gradient(120deg,#06143c_0%,#064696_60%,#05a4ca_100%)] p-6">
+                        <div className="flex items-center gap-2 text-cyan-200">
+                            <ContactRound className="h-5 w-5" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">
+                                Canais oficiais ADUSEPS
+                            </p>
+                        </div>
+                        <h3 className="mt-4 text-2xl font-black leading-none text-white">
+                            {midia.contatosOficiais?.titulo || "Fale com a ADUSEPS"}
+                        </h3>
+                        <div className="mt-5 grid grid-cols-4 gap-2">
+                            {["Recepção", "Plantão", "Social", "Jurídico"].map(
+                                (titulo, indice) => (
+                                    <div
+                                        key={titulo}
+                                        className="rounded-xl bg-white/95 p-3 text-[#082e68]"
+                                    >
+                                        {indice === 0 ? (
+                                            <Phone className="h-4 w-4 text-sky-600" />
+                                        ) : (
+                                            <MessageCircleMore className="h-4 w-4 text-emerald-600" />
+                                        )}
+                                        <p className="mt-2 text-[9px] font-black">
+                                            {titulo}
+                                        </p>
+                                    </div>
+                                )
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                     <span className={`rounded-full border px-3 py-1 text-xs font-black ${obterCorStatus(midia.ativo)}`}>
                         {obterTextoStatus(midia.ativo)}
@@ -153,7 +192,8 @@ export default function MidiaCard({
                             {titulo}
                         </h3>
 
-                        {midia.template !== "plantao-juridico" && (
+                        {midia.template !== "plantao-juridico" &&
+                            midia.template !== "contatos-oficiais" && (
                             <p className="mt-2 max-w-xl break-all text-sm text-zinc-500">
                                 {midia.arquivo}
                             </p>
@@ -273,7 +313,8 @@ export default function MidiaCard({
                         Configurar exibição
                     </button>
 
-                    {midia.template === "plantao-juridico" ? (
+                    {midia.template === "plantao-juridico" ||
+                    midia.template === "contatos-oficiais" ? (
                         <button
                             type="button"
                             onClick={() => onTogglePlantao(midia)}

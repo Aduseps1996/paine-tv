@@ -1,11 +1,16 @@
 import { useState } from "react"
 
-import type { DadosPlantao, Midia } from "@/types/painel"
+import type {
+    DadosContatosOficiais,
+    DadosPlantao,
+    Midia
+} from "@/types/painel"
 
 import MidiaCard from "./MidiaCard"
 import PainelExibicao from "./PainelExibicao"
 import PainelTarja from "./PainelTarja"
 import PainelPlantao from "./PainelPlantao"
+import PainelContatosOficiais from "./PainelContatosOficiais"
 import { excluirMidiaStorage } from "@/utils/excluirMidiaStorage"
 
 
@@ -232,6 +237,17 @@ export default function MidiasGrid({
         setCardPlantaoAberto(null)
     }
 
+    function salvarContatosOficiais(
+        midia: Midia,
+        contatosOficiais: DadosContatosOficiais
+    ) {
+        atualizarMidiaRascunho(midia.id, {
+            titulo: contatosOficiais.titulo,
+            contatosOficiais
+        })
+        setCardPlantaoAberto(null)
+    }
+
     if (midias.length === 0) {
         return (
             <section className="rounded-[28px] border border-white/10 bg-zinc-900/85 p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.24)]">
@@ -320,11 +336,24 @@ export default function MidiasGrid({
                         />
                     )}
 
-                    {cardPlantaoAberto === midia.id && (
+                    {cardPlantaoAberto === midia.id &&
+                        midia.template === "plantao-juridico" && (
                         <PainelPlantao
                             key={`plantao-${midia.id}`}
                             midia={midia}
                             onSalvar={(plantao) => salvarPlantao(midia, plantao)}
+                            onCancelar={() => setCardPlantaoAberto(null)}
+                        />
+                    )}
+
+                    {cardPlantaoAberto === midia.id &&
+                        midia.template === "contatos-oficiais" && (
+                        <PainelContatosOficiais
+                            key={`contatos-${midia.id}`}
+                            midia={midia}
+                            onSalvar={(dados) =>
+                                salvarContatosOficiais(midia, dados)
+                            }
                             onCancelar={() => setCardPlantaoAberto(null)}
                         />
                     )}

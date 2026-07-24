@@ -7,6 +7,7 @@ export type TemplateMidia =
     | "escala-juridica"
     | "social"
     | "plantao-juridico"
+    | "contatos-oficiais"
 
 
 export type ModoExibicaoMidia = "cover" | "contain"
@@ -26,7 +27,8 @@ export type DadosPlantao = {
     titulo: string
     chamadaPadrao: string
     descricaoPadrao: string
-    whatsapp: string
+    contatoId?: string
+    whatsapp?: string
     rodape: string
     avisoEspecialAtivo?: boolean
     ocasiaoEspecial?: string
@@ -34,6 +36,25 @@ export type DadosPlantao = {
     descricaoEspecial?: string
     inicioAvisoEspecial?: string
     fimAvisoEspecial?: string
+}
+
+export type TipoContatoPainel = "telefone" | "whatsapp" | "site"
+
+export type ContatoPainel = {
+    id: string
+    titulo: string
+    tipo: TipoContatoPainel
+    valores: string[]
+    observacao?: string
+    ativo: boolean
+    mostrarNoBanner: boolean
+    ordem: number
+}
+
+export type DadosContatosOficiais = {
+    titulo: string
+    subtitulo: string
+    rodape: string
 }
 
 export type Midia = {
@@ -77,6 +98,7 @@ export type Midia = {
     alturaVideo?: number
     orientacaoVideo?: "vertical" | "horizontal" | "quadrado"
     plantao?: DadosPlantao
+    contatosOficiais?: DadosContatosOficiais
 
     // Controle do arquivo
     versao?: number
@@ -126,6 +148,7 @@ export type AbaAdmin =
     | "inicio"
     | "midias"
     | "noticias"
+    | "contatos"
     | "configuracao-painel"
     | "configuracao-tipografia"
 
@@ -169,4 +192,5 @@ export type ConfiguracoesPainel = {
     alturaBarraNoticias?: number
     tamanhoLogoRodape?: number
     duracaoAnimacaoNoticias?: number
+    contatos?: ContatoPainel[]
 }

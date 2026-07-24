@@ -238,7 +238,8 @@ export default function PainelTV({
 
   const midiaAtualUsaRodapeProprio =
     midiaAtualTv?.template === "painel" ||
-    midiaAtualTv?.template === "plantao-juridico"
+    midiaAtualTv?.template === "plantao-juridico" ||
+    midiaAtualTv?.template === "contatos-oficiais"
 
   return (
     <main

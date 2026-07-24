@@ -12,6 +12,7 @@ import BannerInstitucional from "./BannerInstitucional"
 import BannerSocial from "./BannerSocial"
 import BannerPainel from "./BannerPainel"
 import BannerPlantaoJuridico from "./BannerPlantaoJuridico"
+import BannerContatosOficiais from "./BannerContatosOficiais"
 import BannerYoutube from "./BannerYoutube"
 import {
     midiaEhYoutube,
@@ -161,6 +162,15 @@ export default function BannerRotativo({
                     <BannerPlantaoJuridico
                         midiaAtual={midiaAtual}
                         agoraPainel={agoraPainel}
+                        configuracoes={configuracoesBanner}
+                    />
+                )
+
+            case "contatos-oficiais":
+                return (
+                    <BannerContatosOficiais
+                        midiaAtual={midiaAtual}
+                        configuracoes={configuracoesBanner}
                     />
                 )
 

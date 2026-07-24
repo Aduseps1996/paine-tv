@@ -7,6 +7,7 @@ import AdminLayout from "./components/AdminLayout"
 import AbaInicio from "./components/AbaInicio"
 import AbaMidias from "./components/AbaMidias"
 import AbaNoticias from "./components/AbaNoticias"
+import AbaContatos from "./components/AbaContatos"
 import AbaConfiguracaoPainel from "./components/AbaConfiguracaoPainel"
 import AbaConfiguracaoTipografia from "./components/AbaConfiguracaoTipografia"
 import {
@@ -71,6 +72,8 @@ function AdminPageContent() {
         latitudeClimaPainel,
         longitudeClimaPainel,
         timezoneClimaPainel,
+        contatos,
+        configuracoesCarregadas,
         setTamanhoFonteRodape,
         setTamanhoFonteSlogan,
         setTamanhoFonteHora,
@@ -109,6 +112,7 @@ function AdminPageContent() {
         latitudeClimaPainel,
         longitudeClimaPainel,
         timezoneClimaPainel,
+        contatos,
         tempoEntradaTarja,
         tempoVisivelTarja,
         tempoSaidaTarja,
@@ -136,6 +140,7 @@ function AdminPageContent() {
         latitudeClimaPainel,
         longitudeClimaPainel,
         timezoneClimaPainel,
+        contatos,
         tempoEntradaTarja,
         tempoVisivelTarja,
         tempoSaidaTarja,
@@ -151,6 +156,7 @@ function AdminPageContent() {
 
     useEffect(() => {
         if (carregouDraftRef.current) return
+        if (!configuracoesCarregadas) return
 
         const midiasCarregadas = midias.length > 0
         const noticiasCarregadas = noticias.length > 0
@@ -164,7 +170,13 @@ function AdminPageContent() {
         })
 
         carregouDraftRef.current = true
-    }, [configuracoes, midias, noticias, carregarPublicadoNoDraft])
+    }, [
+        configuracoes,
+        configuracoesCarregadas,
+        midias,
+        noticias,
+        carregarPublicadoNoDraft
+    ])
 
     if (!logado) {
         return (
@@ -261,6 +273,10 @@ function AdminPageContent() {
 
             {abaAtiva === "noticias" && (
                 <AbaNoticias />
+            )}
+
+            {abaAtiva === "contatos" && (
+                <AbaContatos />
             )}
         </AdminLayout>
     )

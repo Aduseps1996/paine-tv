@@ -6,10 +6,15 @@ import {
     buscarConfiguracoesPainel,
     salvarConfiguracoesPainel
 } from "@/lib/firestore/configuracoes"
-import type { ModoLogo, TamanhoLogoPainel } from "@/types/painel"
+import type {
+    ContatoPainel,
+    ModoLogo,
+    TamanhoLogoPainel
+} from "@/types/painel"
 import { limitarValor } from "@/utils/numero"
 
 export function useAdminConfiguracoesPainel() {
+    const [configuracoesCarregadas, setConfiguracoesCarregadas] = useState(false)
     const [nomePainel, setNomePainel] = useState("")
     const [subtitulo, setSubtitulo] = useState("")
     const [logo, setLogo] = useState("")
@@ -47,13 +52,15 @@ export function useAdminConfiguracoesPainel() {
     const [latitudeClimaPainel, setLatitudeClimaPainel] = useState(-8.05)
     const [longitudeClimaPainel, setLongitudeClimaPainel] = useState(-34.9)
     const [timezoneClimaPainel, setTimezoneClimaPainel] = useState("America/Recife")
+    const [contatos, setContatos] = useState<ContatoPainel[] | undefined>()
 
     const carregarConfiguracoes = useCallback(async () => {
-        const dados = await buscarConfiguracoesPainel()
+        try {
+            const dados = await buscarConfiguracoesPainel()
 
-        if (!dados) return
+            if (!dados) return
 
-        setNomePainel(dados.nomePainel || "")
+            setNomePainel(dados.nomePainel || "")
         setSubtitulo(dados.subtitulo || "")
         setLogo(dados.logo || "")
         setModoLogo(dados.modoLogo || "fundo")
@@ -79,6 +86,7 @@ export function useAdminConfiguracoesPainel() {
         setLatitudeClimaPainel(Number(dados.latitudeClimaPainel ?? -8.05))
         setLongitudeClimaPainel(Number(dados.longitudeClimaPainel ?? -34.9))
         setTimezoneClimaPainel(dados.timezoneClimaPainel || "America/Recife")
+        setContatos(dados.contatos)
 
         setTamanhoFonteRodape(
             limitarValor(Number(dados.tamanhoFonteRodape || 28), 12, 80, 28)
@@ -104,9 +112,12 @@ export function useAdminConfiguracoesPainel() {
         setTamanhoLogoRodape(
             limitarValor(Number(dados.tamanhoLogoRodape || 44), 20, 100, 44)
         )
-        setDuracaoAnimacaoNoticias(
-            limitarValor(Number(dados.duracaoAnimacaoNoticias || 150), 60, 300, 150)
-        )
+            setDuracaoAnimacaoNoticias(
+                limitarValor(Number(dados.duracaoAnimacaoNoticias || 150), 60, 300, 150)
+            )
+        } finally {
+            setConfiguracoesCarregadas(true)
+        }
     }, [])
 
     async function salvarConfiguracoes() {
@@ -129,6 +140,7 @@ export function useAdminConfiguracoesPainel() {
             latitudeClimaPainel,
             longitudeClimaPainel,
             timezoneClimaPainel,
+            contatos,
             tempoEntradaTarja,
             tempoVisivelTarja,
             tempoSaidaTarja,
@@ -191,6 +203,8 @@ export function useAdminConfiguracoesPainel() {
         latitudeClimaPainel,
         longitudeClimaPainel,
         timezoneClimaPainel,
+        contatos,
+        configuracoesCarregadas,
         setNomePainel,
         setSubtitulo,
         setLogo,
@@ -221,6 +235,7 @@ export function useAdminConfiguracoesPainel() {
         setLatitudeClimaPainel,
         setLongitudeClimaPainel,
         setTimezoneClimaPainel,
+        setContatos,
         carregarConfiguracoes,
         salvarConfiguracoes
     }

@@ -9,6 +9,7 @@ import type {
 } from "@/types/painel"
 import { gerarMetadadosVideo } from "@/utils/videoMidia"
 import { uploadMidiaParaStorage } from "@/utils/uploadMidia"
+import { CONTATO_PLANTAO_ID } from "@/utils/contatosPainel"
 
 type Props = {
     midias: Midia[]
@@ -74,7 +75,6 @@ export default function ModalNovaMidia({
     const [descricaoPadraoPlantao, setDescricaoPadraoPlantao] = useState(
         "Atuação em situações urgentes relacionadas ao direito à saúde durante finais de semana e feriados."
     )
-    const [whatsappPlantao, setWhatsappPlantao] = useState("(81) 99838-2275")
     const [rodapePlantao, setRodapePlantao] = useState(
         "Nosso compromisso é com a justiça social e a defesa da dignidade humana."
     )
@@ -85,10 +85,23 @@ export default function ModalNovaMidia({
     const [inicioAvisoEspecial, setInicioAvisoEspecial] = useState("")
     const [fimAvisoEspecial, setFimAvisoEspecial] = useState("")
 
+    const [tituloContatos, setTituloContatos] =
+        useState("Fale com a ADUSEPS")
+    const [subtituloContatos, setSubtituloContatos] = useState(
+        "Nossos canais oficiais estão à disposição dos associados."
+    )
+    const [rodapeContatos, setRodapeContatos] = useState(
+        "Salve os contatos oficiais e fale diretamente com o setor que você precisa."
+    )
+
     const ehYoutube = tipo === "youtube"
     const ehPlantao =
         tipo === "dinamica" &&
         template === "plantao-juridico"
+    const ehContatos =
+        tipo === "dinamica" &&
+        template === "contatos-oficiais"
+    const ehDinamica = ehPlantao || ehContatos
 
     const usaEtiqueta =
         modeloTarja === "telejornal" ||
@@ -183,7 +196,17 @@ export default function ModalNovaMidia({
             return
         }
 
-        if (!ehPlantao && !arquivo.trim()) {
+        if (
+            ehContatos &&
+            midias.some((midia) => midia.template === "contatos-oficiais")
+        ) {
+            alert(
+                "O banner de Contatos Oficiais já está cadastrado. Edite o card existente."
+            )
+            return
+        }
+
+        if (!ehDinamica && !arquivo.trim()) {
             alert("Informe o arquivo/link da mídia.")
             return
         }
@@ -193,11 +216,22 @@ export default function ModalNovaMidia({
             (
                 !tituloPlantao.trim() ||
                 !chamadaPadraoPlantao.trim() ||
-                !descricaoPadraoPlantao.trim() ||
-                !whatsappPlantao.trim()
+                !descricaoPadraoPlantao.trim()
             )
         ) {
             alert("Preencha os campos principais do Plantão Judicial.")
+            return
+        }
+
+        if (
+            ehContatos &&
+            (
+                !tituloContatos.trim() ||
+                !subtituloContatos.trim() ||
+                !rodapeContatos.trim()
+            )
+        ) {
+            alert("Preencha os textos do banner de Contatos Oficiais.")
             return
         }
 
@@ -227,7 +261,7 @@ export default function ModalNovaMidia({
         const novaMidia: Midia = {
             id: `draft-${Date.now()}`,
             tipo,
-            arquivo: ehPlantao ? "" : arquivo.trim(),
+            arquivo: ehDinamica ? "" : arquivo.trim(),
             storagePath: storagePath || "",
             mimeType: mimeType || "",
             ...(tamanhoBytes !== null ? { tamanhoBytes } : {}),
@@ -239,7 +273,11 @@ export default function ModalNovaMidia({
             pesoExibicao: 1,
             template: ehYoutube ? "cheio" : template,
             modoExibicao,
-            titulo: ehPlantao ? tituloPlantao.trim() : titulo.trim(),
+            titulo: ehPlantao
+                ? tituloPlantao.trim()
+                : ehContatos
+                    ? tituloContatos.trim()
+                    : titulo.trim(),
             subtitulo: subtitulo.trim(),
             rodape: rodape.trim(),
             categoria: categoria.trim(),
@@ -277,7 +315,7 @@ export default function ModalNovaMidia({
                     titulo: tituloPlantao.trim(),
                     chamadaPadrao: chamadaPadraoPlantao.trim(),
                     descricaoPadrao: descricaoPadraoPlantao.trim(),
-                    whatsapp: whatsappPlantao.trim(),
+                    contatoId: CONTATO_PLANTAO_ID,
                     rodape: rodapePlantao.trim(),
                     avisoEspecialAtivo,
                     ocasiaoEspecial: ocasiaoEspecial.trim(),
@@ -285,6 +323,13 @@ export default function ModalNovaMidia({
                     descricaoEspecial: descricaoEspecial.trim(),
                     inicioAvisoEspecial,
                     fimAvisoEspecial
+                }
+                : undefined,
+            contatosOficiais: ehContatos
+                ? {
+                    titulo: tituloContatos.trim(),
+                    subtitulo: subtituloContatos.trim(),
+                    rodape: rodapeContatos.trim()
                 }
                 : undefined
         }
@@ -330,7 +375,7 @@ export default function ModalNovaMidia({
                             </p>
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                                {!ehYoutube && !ehPlantao && (
+                                {!ehYoutube && !ehDinamica && (
                                     <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
                                         <p className="text-sm font-black text-white">
                                             Arquivo local
@@ -461,7 +506,7 @@ export default function ModalNovaMidia({
                                     </div>
                                 )}
 
-                                {!ehPlantao && (
+                                {!ehDinamica && (
                                     <input
                                         type="text"
                                         placeholder={ehYoutube ? "Link do YouTube / Live" : "URL externa ou arquivo enviado automaticamente"}
@@ -490,7 +535,10 @@ export default function ModalNovaMidia({
 
                                         if (
                                             novoTipo !== "dinamica" &&
-                                            template === "plantao-juridico"
+                                            (
+                                                template === "plantao-juridico" ||
+                                                template === "contatos-oficiais"
+                                            )
                                         ) {
                                             setTemplate("cheio")
                                         }
@@ -520,6 +568,7 @@ export default function ModalNovaMidia({
                                         onChange={(e) => setTemplate(e.target.value as TemplateMidia)}
                                     >
                                         <option value="plantao-juridico">Plantão Judicial</option>
+                                        <option value="contatos-oficiais">Contatos Oficiais</option>
                                     </select>
                                 )}
                             </div>
@@ -669,11 +718,9 @@ export default function ModalNovaMidia({
                                         placeholder="Descrição padrão"
                                     />
 
-                                    <input
-                                        value={whatsappPlantao}
-                                        onChange={(e) => setWhatsappPlantao(e.target.value)}
-                                        placeholder="WhatsApp do plantão"
-                                    />
+                                    <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/[0.06] p-4 text-sm text-emerald-200">
+                                        O WhatsApp vem do cadastro central em <strong>Contatos → Plantão Judicial</strong>.
+                                    </div>
 
                                     <textarea
                                         value={rodapePlantao}
@@ -749,6 +796,38 @@ export default function ModalNovaMidia({
                             </section>
                         )}
 
+                        {ehContatos && (
+                            <section className="rounded-[26px] border border-sky-400/20 bg-sky-500/[0.06] p-5">
+                                <h3 className="text-xl font-black">
+                                    Contatos Oficiais
+                                </h3>
+
+                                <p className="mt-2 text-sm text-zinc-400">
+                                    O banner usa automaticamente os setores marcados como “No banner” na aba Contatos.
+                                </p>
+
+                                <div className="mt-5 grid gap-4">
+                                    <input
+                                        value={tituloContatos}
+                                        onChange={(e) => setTituloContatos(e.target.value)}
+                                        placeholder="Título principal"
+                                    />
+                                    <textarea
+                                        value={subtituloContatos}
+                                        onChange={(e) => setSubtituloContatos(e.target.value)}
+                                        className="min-h-20 resize-none"
+                                        placeholder="Texto de apoio"
+                                    />
+                                    <textarea
+                                        value={rodapeContatos}
+                                        onChange={(e) => setRodapeContatos(e.target.value)}
+                                        className="min-h-20 resize-none"
+                                        placeholder="Mensagem inferior"
+                                    />
+                                </div>
+                            </section>
+                        )}
+
                         <section className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
                             <h3 className="text-xl font-black">Exibição</h3>
 
@@ -774,7 +853,7 @@ export default function ModalNovaMidia({
                             </div>
                         </section>
 
-                        {!ehYoutube && !ehPlantao && (
+                        {!ehYoutube && !ehDinamica && (
                             <section className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
                                 <h3 className="text-xl font-black">Tarja</h3>
 
@@ -846,6 +925,8 @@ export default function ModalNovaMidia({
                                         ? "YouTube / Live"
                                         : ehPlantao
                                             ? "Plantão Judicial"
+                                            : ehContatos
+                                                ? "Contatos Oficiais"
                                             : template}
                                 </p>
                             </div>
@@ -858,7 +939,7 @@ export default function ModalNovaMidia({
                             <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
                                 <p className="text-zinc-500">Tarja</p>
                                 <p className="mt-1 font-black">
-                                    {ehPlantao
+                                    {ehDinamica
                                         ? "Não se aplica"
                                         : mostrarTarja
                                             ? modeloTarja

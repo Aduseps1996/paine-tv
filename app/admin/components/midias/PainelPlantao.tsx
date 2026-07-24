@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import type { DadosPlantao, Midia } from "@/types/painel"
+import { CONTATO_PLANTAO_ID } from "@/utils/contatosPainel"
 
 type Props = {
     midia: Midia
@@ -13,7 +14,7 @@ const PADRAO: DadosPlantao = {
     chamadaPadrao: "Urgências não esperam até segunda-feira.",
     descricaoPadrao:
         "Atuação em situações urgentes relacionadas ao direito à saúde durante finais de semana e feriados.",
-    whatsapp: "(81) 99838-2275",
+    contatoId: CONTATO_PLANTAO_ID,
     rodape:
         "Nosso compromisso é com a justiça social e a defesa da dignidade humana.",
     avisoEspecialAtivo: false,
@@ -39,7 +40,6 @@ export default function PainelPlantao({
         useState(dadosIniciais.chamadaPadrao)
     const [descricaoPadrao, setDescricaoPadrao] =
         useState(dadosIniciais.descricaoPadrao)
-    const [whatsapp, setWhatsapp] = useState(dadosIniciais.whatsapp)
     const [rodape, setRodape] = useState(dadosIniciais.rodape)
     const [avisoEspecialAtivo, setAvisoEspecialAtivo] =
         useState(Boolean(dadosIniciais.avisoEspecialAtivo))
@@ -58,8 +58,7 @@ export default function PainelPlantao({
         if (
             !titulo.trim() ||
             !chamadaPadrao.trim() ||
-            !descricaoPadrao.trim() ||
-            !whatsapp.trim()
+            !descricaoPadrao.trim()
         ) {
             alert("Preencha os campos principais do Plantão Judicial.")
             return
@@ -87,7 +86,7 @@ export default function PainelPlantao({
             titulo: titulo.trim(),
             chamadaPadrao: chamadaPadrao.trim(),
             descricaoPadrao: descricaoPadrao.trim(),
-            whatsapp: whatsapp.trim(),
+            contatoId: dadosIniciais.contatoId || CONTATO_PLANTAO_ID,
             rodape: rodape.trim(),
             avisoEspecialAtivo,
             ocasiaoEspecial: ocasiaoEspecial.trim(),
@@ -126,11 +125,9 @@ export default function PainelPlantao({
                     className="min-h-24 resize-none"
                     placeholder="Descrição padrão"
                 />
-                <input
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder="WhatsApp"
-                />
+                <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/[0.06] p-4 text-sm leading-relaxed text-emerald-200">
+                    O WhatsApp deste banner é o contato <strong>Plantão Judicial</strong> da aba Contatos. Alterando lá, o número muda em todos os banners.
+                </div>
                 <textarea
                     value={rodape}
                     onChange={(e) => setRodape(e.target.value)}

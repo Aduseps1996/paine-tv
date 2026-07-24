@@ -70,6 +70,7 @@ export default function MidiasToolbar({
                     <option value="institucional">Institucional</option>
                     <option value="painel">Painel Informativo</option>
                     <option value="plantao-juridico">Plantão Judicial</option>
+                    <option value="contatos-oficiais">Contatos Oficiais</option>
                 </select>
 
                 <select
