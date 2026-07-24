@@ -3,6 +3,7 @@ import type { Midia, NovaMidia } from "@/types/painel"
 import {
     listarMidias,
     criarMidia,
+    criarMidiaComId,
     atualizarMidia,
     removerMidiaPorId
 } from "./midias"
@@ -13,12 +14,22 @@ function ehMidiaDraft(id: string) {
 
 export async function sincronizarMidias(midiasDraft: Midia[]) {
     const midiasPublicadas = await listarMidias()
+    const idsPublicados = new Set(
+        midiasPublicadas.map((midia) => midia.id)
+    )
 
     for (const midia of midiasDraft) {
         if (ehMidiaDraft(midia.id)) {
             const { id, ...novaMidia } = midia
 
             await criarMidia(novaMidia as NovaMidia)
+            continue
+        }
+
+        if (!idsPublicados.has(midia.id)) {
+            const { id, ...midiaAusente } = midia
+
+            await criarMidiaComId(id, midiaAusente as NovaMidia)
             continue
         }
 

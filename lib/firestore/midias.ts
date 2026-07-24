@@ -7,6 +7,7 @@ import {
     orderBy,
     query,
     serverTimestamp,
+    setDoc,
     updateDoc
 } from "firebase/firestore"
 
@@ -54,6 +55,13 @@ export async function listarMidias() {
 
 export async function criarMidia(midia: NovaMidia) {
     await addDoc(collection(db, colecaoMidias), {
+        ...removerCamposUndefined(midia),
+        criadoEm: serverTimestamp()
+    })
+}
+
+export async function criarMidiaComId(id: string, midia: NovaMidia) {
+    await setDoc(doc(db, colecaoMidias, id), {
         ...removerCamposUndefined(midia),
         criadoEm: serverTimestamp()
     })
