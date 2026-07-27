@@ -1,4 +1,8 @@
-import type { ConfiguracoesPainel, Midia } from "@/types/painel"
+import type {
+    ConfiguracoesPainel,
+    Midia,
+    PersonalizacaoVisualBanner
+} from "@/types/painel"
 
 export type PrevisaoDia = {
     data: string
@@ -67,6 +71,16 @@ export function normalizarConfiguracoesBanner(
     }
 }
 
+export function obterPersonalizacaoVisual(
+    midia: Midia,
+    configuracoes: ConfiguracoesPainel
+): PersonalizacaoVisualBanner {
+    return {
+        ...(configuracoes.personalizacaoBanners || {}),
+        ...(midia.personalizacaoVisual || {})
+    }
+}
+
 export function formatarNumeroClima(valor: unknown) {
     const numero = Number(valor)
 
@@ -97,6 +111,9 @@ export function obterAssinaturaMidia(midia: Midia) {
             : "",
         midia.comunicado
             ? JSON.stringify(midia.comunicado)
+            : "",
+        midia.personalizacaoVisual
+            ? JSON.stringify(midia.personalizacaoVisual)
             : ""
     ].join(":")
 }

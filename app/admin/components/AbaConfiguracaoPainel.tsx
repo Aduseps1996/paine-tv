@@ -1,18 +1,27 @@
 "use client"
 
+import { useState } from "react"
 import {
     CalendarDays,
     CloudSun,
     ImageIcon,
     LayoutPanelTop,
     Megaphone,
+    Palette,
     Scale,
-    Settings2
+    Settings2,
+    Trash2,
+    UploadCloud
 } from "lucide-react"
 
 import { usePainelDraftContext } from "../context/PainelDraftContext"
 import CidadeAutocomplete from "./clima/CidadeAutocomplete"
-import type { ConfiguracoesPainel } from "@/types/painel"
+import type {
+    ConfiguracoesPainel,
+    PersonalizacaoVisualBanner,
+    PosicaoLogoPainel
+} from "@/types/painel"
+import { uploadMidiaParaStorage } from "@/utils/uploadMidia"
 
 type ModoLogo = "transparente" | "fundo" | "card"
 type TamanhoLogo = "pequeno" | "medio" | "grande"
@@ -92,11 +101,14 @@ function Toggle({
 export default function AbaConfiguracaoPainel() {
     const { draft, atualizarConfiguracoesDraft } = usePainelDraftContext()
     const config = draft.configuracoes
+    const [enviandoFundo, setEnviandoFundo] = useState(false)
+    const [progressoFundo, setProgressoFundo] = useState(0)
 
     const modoLogo = (config.modoLogo || "fundo") as ModoLogo
     const tamanhoLogo = (config.tamanhoLogoPainel || "medio") as TamanhoLogo
     const logoConfigurada = Boolean((config.logo || "").trim())
     const cidade = config.cidadeClimaPainel || "Recife"
+    const personalizacao = config.personalizacaoBanners || {}
 
     const alturaLogo =
         tamanhoLogo === "pequeno"
@@ -109,6 +121,54 @@ export default function AbaConfiguracaoPainel() {
         return active
             ? "border-blue-500 bg-blue-50 text-[#0755b5] ring-2 ring-blue-500/10"
             : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-slate-50"
+    }
+
+    function atualizarPersonalizacao(
+        alteracoes: Partial<PersonalizacaoVisualBanner>
+    ) {
+        atualizarConfiguracoesDraft({
+            personalizacaoBanners: {
+                ...personalizacao,
+                ...alteracoes
+            }
+        })
+    }
+
+    async function selecionarFundoGlobal(file: File | null) {
+        if (!file) return
+
+        try {
+            setEnviandoFundo(true)
+            setProgressoFundo(0)
+
+            const resultado = await uploadMidiaParaStorage(
+                file,
+                "imagem",
+                setProgressoFundo
+            )
+
+            atualizarPersonalizacao({
+                fundoImagem: resultado.url,
+                fundoStoragePath: resultado.storagePath
+            })
+        } catch (erro) {
+            console.error(erro)
+            alert(
+                erro instanceof Error
+                    ? erro.message
+                    : "Não foi possível enviar o fundo."
+            )
+        } finally {
+            setEnviandoFundo(false)
+        }
+    }
+
+    function limparCor(chave: keyof PersonalizacaoVisualBanner) {
+        const atualizada = { ...personalizacao }
+        delete atualizada[chave]
+        atualizarConfiguracoesDraft({
+            personalizacaoBanners: atualizada
+        })
     }
 
     return (
@@ -228,6 +288,143 @@ export default function AbaConfiguracaoPainel() {
                                         </button>
                                     ))}
                                 </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="aparencia-banners" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                        <SectionTitle
+                            icon={Palette}
+                            title="Aparência dos banners"
+                            description="Padrão global dos banners dinâmicos. Plantão e Contatos podem substituir estas escolhas individualmente."
+                        />
+
+                        <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-extrabold text-slate-800">
+                                        Imagem de fundo global
+                                    </p>
+                                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                                        Sem imagem, o sistema mantém o visual azul original.
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-500 bg-white px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">
+                                        <UploadCloud size={17} />
+                                        {enviandoFundo ? `${progressoFundo}%` : "Selecionar imagem"}
+                                        <input
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            className="hidden"
+                                            disabled={enviandoFundo}
+                                            onChange={(event) =>
+                                                selecionarFundoGlobal(
+                                                    event.target.files?.[0] || null
+                                                )
+                                            }
+                                        />
+                                    </label>
+
+                                    {personalizacao.fundoImagem && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                atualizarPersonalizacao({
+                                                    fundoImagem: "",
+                                                    fundoStoragePath: ""
+                                                })
+                                            }
+                                            className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50"
+                                        >
+                                            <Trash2 size={16} />
+                                            Remover
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {personalizacao.fundoImagem && (
+                                <img
+                                    src={personalizacao.fundoImagem}
+                                    alt="Prévia do fundo global"
+                                    className="mt-4 aspect-video w-full rounded-xl border border-slate-200 object-cover"
+                                />
+                            )}
+                        </div>
+
+                        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                            {([
+                                ["corFundo", "Cor ou proteção do fundo", "#061c4f"],
+                                ["corTitulo", "Cor dos títulos", "#ffffff"],
+                                ["corTexto", "Cor dos textos", "#eaf4ff"],
+                                ["corDestaque", "Cor de destaque", "#67e8f9"]
+                            ] as const).map(([chave, rotulo, fallbackCor]) => (
+                                <div key={chave} className="rounded-xl border border-slate-200 p-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <label className="text-sm font-bold text-slate-700">
+                                            {rotulo}
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={() => limparCor(chave)}
+                                            className="text-xs font-bold text-blue-600 hover:underline"
+                                        >
+                                            Usar padrão
+                                        </button>
+                                    </div>
+                                    <div className="mt-3 flex items-center gap-3">
+                                        <input
+                                            type="color"
+                                            value={personalizacao[chave] || fallbackCor}
+                                            onChange={(event) =>
+                                                atualizarPersonalizacao({
+                                                    [chave]: event.target.value
+                                                })
+                                            }
+                                            className="h-11 w-16 cursor-pointer rounded-lg border border-slate-200 bg-white p-1"
+                                        />
+                                        <input
+                                            value={personalizacao[chave] || ""}
+                                            onChange={(event) =>
+                                                atualizarPersonalizacao({
+                                                    [chave]: event.target.value
+                                                })
+                                            }
+                                            placeholder={fallbackCor}
+                                            className="mt-0"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-5">
+                            <p className="mb-2 text-sm font-bold text-slate-700">
+                                Posição global da logo
+                            </p>
+                            <div className="grid grid-cols-3 gap-2">
+                                {([
+                                    ["esquerda", "Esquerda"],
+                                    ["centro", "Centro"],
+                                    ["direita", "Direita"]
+                                ] as const).map(([valor, rotulo]) => (
+                                    <button
+                                        key={valor}
+                                        type="button"
+                                        onClick={() =>
+                                            atualizarPersonalizacao({
+                                                posicaoLogo: valor as PosicaoLogoPainel
+                                            })
+                                        }
+                                        className={`rounded-xl border px-3 py-3 text-xs font-bold transition ${optionClass(
+                                            (personalizacao.posicaoLogo || "esquerda") === valor
+                                        )}`}
+                                    >
+                                        {rotulo}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </section>
@@ -414,6 +611,7 @@ export default function AbaConfiguracaoPainel() {
                         <nav className="grid grid-cols-2 gap-2 p-4 text-xs font-bold">
                             {[
                                 ["Identidade", "#identidade"],
+                                ["Banners", "#aparencia-banners"],
                                 ["Rodapé", "#rodape"],
                                 ["Clima", "#clima"],
                                 ["Escala", "#escala"],

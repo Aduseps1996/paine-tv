@@ -21,7 +21,8 @@ import type {
   AvisoUrgente,
   ConfiguracoesPainel,
   Midia,
-  Noticia
+  Noticia,
+  PosicaoLogoPainel
 } from "@/types/painel"
 
 type Props = {
@@ -56,6 +57,8 @@ export default function PainelTV({
 
   const [tamanhoLogoPainel, setTamanhoLogoPainel] =
     useState<"pequeno" | "medio" | "grande">("medio")
+  const [posicaoLogoPainel, setPosicaoLogoPainel] =
+    useState<PosicaoLogoPainel>("esquerda")
 
   const [slogan, setSlogan] = useState("Informação, acolhimento e compromisso com o associado.")
   const [fallback, setFallback] = useState("/fallbacks/offline.jpg")
@@ -115,6 +118,9 @@ export default function PainelTV({
           setLogo(dados.logo || "")
           setModoLogo(dados.modoLogo || "fundo")
           setTamanhoLogoPainel(dados.tamanhoLogoPainel || "medio")
+          setPosicaoLogoPainel(
+            dados.personalizacaoBanners?.posicaoLogo || "esquerda"
+          )
 
           setFallback(
             dados.fallback || "/fallbacks/offline.jpg"
@@ -225,6 +231,11 @@ export default function PainelTV({
   const subtituloFinal = modoPreview ? previewConfiguracoes?.subtitulo || "" : subtitulo
   const modoLogoFinal = modoPreview ? previewConfiguracoes?.modoLogo || "fundo" : modoLogo
   const tamanhoLogoPainelFinal = modoPreview ? previewConfiguracoes?.tamanhoLogoPainel || "medio" : tamanhoLogoPainel
+  const posicaoLogoGlobal = modoPreview
+    ? previewConfiguracoes?.personalizacaoBanners?.posicaoLogo || "esquerda"
+    : posicaoLogoPainel
+  const posicaoLogoFinal =
+    midiaAtualTv?.personalizacaoVisual?.posicaoLogo || posicaoLogoGlobal
   const sloganFinal = modoPreview ? previewConfiguracoes?.slogan || "" : slogan
   const fallbackFinal = modoPreview ? previewConfiguracoes?.fallback || fallback : fallback
 
@@ -241,6 +252,13 @@ export default function PainelTV({
       : modoLogoFinal === "card"
         ? "bg-black/25 border border-white/15 p-2 shadow-md backdrop-blur-sm"
         : "bg-white/95 p-2 shadow-md"
+
+  const posicaoLogoClasse =
+    posicaoLogoFinal === "centro"
+      ? "left-1/2 -translate-x-1/2 justify-center text-center"
+      : posicaoLogoFinal === "direita"
+        ? "right-[clamp(0.75rem,2vw,2rem)] flex-row-reverse text-right"
+        : "left-[clamp(0.75rem,2vw,2rem)]"
 
   const midiaAtualUsaRodapeProprio =
     midiaAtualTv?.template === "painel" ||
@@ -278,7 +296,9 @@ export default function PainelTV({
         subtituloFinal.trim() !== ""
       ) && (
 
-          <div className="absolute top-[clamp(0.75rem,2vh,1.5rem)] left-[clamp(0.75rem,2vw,2rem)] z-10 flex items-center gap-[clamp(0.5rem,1.5vw,1rem)]">
+          <div
+            className={`absolute top-[clamp(0.75rem,2vh,1.5rem)] z-10 flex items-center gap-[clamp(0.5rem,1.5vw,1rem)] ${posicaoLogoClasse}`}
+          >
 
             {logoFinal.trim() !== "" && (
               <div

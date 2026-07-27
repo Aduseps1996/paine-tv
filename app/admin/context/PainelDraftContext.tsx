@@ -15,7 +15,10 @@ import type {
     Midia,
     Noticia
 } from "@/types/painel"
-import { excluirArquivosMidiaStorage } from "@/utils/excluirMidiaStorage"
+import {
+    excluirArquivosMidiaStorage,
+    excluirMidiaStorage
+} from "@/utils/excluirMidiaStorage"
 
 type PainelDraft = {
     configuracoes: ConfiguracoesPainel
@@ -72,7 +75,15 @@ async function limparMidiasRemovidasDoStorage(
                 midiaAtual.thumbnailStoragePath !==
                     midiaPublicada.thumbnailStoragePath
                     ? midiaPublicada.thumbnailStoragePath
-                    : undefined
+                    : undefined,
+            personalizacaoVisual: {
+                fundoStoragePath:
+                    !midiaAtual ||
+                    midiaAtual.personalizacaoVisual?.fundoStoragePath !==
+                        midiaPublicada.personalizacaoVisual?.fundoStoragePath
+                        ? midiaPublicada.personalizacaoVisual?.fundoStoragePath
+                        : undefined
+            }
         }
     })
 
@@ -135,10 +146,38 @@ export function PainelDraftProvider({
     )
 
     const descartarAlteracoes = useCallback(async () => {
-        const idsPublicados = new Set(publicado.midias.map((midia) => midia.id))
-        const midiasNovasDescartadas = draft.midias.filter(
-            (midia) => !idsPublicados.has(midia.id)
+        const caminhosPublicados = new Set(
+            publicado.midias.flatMap((midia) =>
+                [
+                    midia.storagePath,
+                    midia.thumbnailStoragePath,
+                    midia.personalizacaoVisual?.fundoStoragePath
+                ].filter((caminho): caminho is string => Boolean(caminho))
+            )
         )
+        const caminhosDescartados = draft.midias
+            .flatMap((midia) => [
+                midia.storagePath,
+                midia.thumbnailStoragePath,
+                midia.personalizacaoVisual?.fundoStoragePath
+            ])
+            .filter(
+                (caminho): caminho is string =>
+                    typeof caminho === "string" &&
+                    caminho.length > 0 &&
+                    !caminhosPublicados.has(caminho)
+            )
+        const fundoGlobalDescartado =
+            draft.configuracoes.personalizacaoBanners?.fundoStoragePath
+        const fundoGlobalPublicado =
+            publicado.configuracoes.personalizacaoBanners?.fundoStoragePath
+
+        if (
+            fundoGlobalDescartado &&
+            fundoGlobalDescartado !== fundoGlobalPublicado
+        ) {
+            caminhosDescartados.push(fundoGlobalDescartado)
+        }
 
         setDraft({
             configuracoes: { ...publicado.configuracoes },
@@ -150,13 +189,17 @@ export function PainelDraftProvider({
         })
 
         const resultados = await Promise.allSettled(
-            midiasNovasDescartadas.map(excluirArquivosMidiaStorage)
+            [...new Set(caminhosDescartados)].map(excluirMidiaStorage)
         )
 
         if (resultados.some((resultado) => resultado.status === "rejected")) {
             console.warn("Alguns uploads descartados não puderam ser removidos.")
         }
-    }, [draft.midias, publicado])
+    }, [
+        draft.midias,
+        draft.configuracoes.personalizacaoBanners?.fundoStoragePath,
+        publicado
+    ])
 
     const temAlteracoesPendentes = useMemo(() => {
         return JSON.stringify(draft) !== JSON.stringify(publicado)
@@ -172,10 +215,21 @@ export function PainelDraftProvider({
             // Só remove os arquivos antigos depois que o novo estado já está
             // completamente publicado no Firestore.
             const resultadosLimpeza = await Promise.allSettled([
-                limparMidiasRemovidasDoStorage(publicado.midias, draft.midias)
+                limparMidiasRemovidasDoStorage(publicado.midias, draft.midias),
+                publicado.configuracoes.personalizacaoBanners?.fundoStoragePath !==
+                    draft.configuracoes.personalizacaoBanners?.fundoStoragePath
+                    ? excluirMidiaStorage(
+                        publicado.configuracoes.personalizacaoBanners
+                            ?.fundoStoragePath
+                    )
+                    : Promise.resolve()
             ])
 
-            if (resultadosLimpeza[0]?.status === "rejected") {
+            if (
+                resultadosLimpeza.some(
+                    (resultado) => resultado.status === "rejected"
+                )
+            ) {
                 console.warn(
                     "O painel foi publicado, mas alguns arquivos antigos não puderam ser removidos."
                 )

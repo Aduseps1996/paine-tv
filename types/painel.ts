@@ -58,6 +58,18 @@ export type DadosContatosOficiais = {
     rodape: string
 }
 
+export type PosicaoLogoPainel = "esquerda" | "centro" | "direita"
+
+export type PersonalizacaoVisualBanner = {
+    fundoImagem?: string
+    fundoStoragePath?: string
+    corFundo?: string
+    corTitulo?: string
+    corTexto?: string
+    corDestaque?: string
+    posicaoLogo?: PosicaoLogoPainel
+}
+
 export type Midia = {
     id: string
     tipo: TipoMidia
@@ -101,6 +113,7 @@ export type Midia = {
     plantao?: DadosPlantao
     contatosOficiais?: DadosContatosOficiais
     comunicado?: AvisoUrgente
+    personalizacaoVisual?: PersonalizacaoVisualBanner
 
     // Controle do arquivo
     versao?: number
@@ -207,4 +220,5 @@ export type ConfiguracoesPainel = {
     tamanhoLogoRodape?: number
     duracaoAnimacaoNoticias?: number
     contatos?: ContatoPainel[]
+    personalizacaoBanners?: PersonalizacaoVisualBanner
 }

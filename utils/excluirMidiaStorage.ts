@@ -22,11 +22,15 @@ export async function excluirMidiaStorage(storagePath?: string) {
 }
 
 export async function excluirArquivosMidiaStorage(
-    midia: Pick<Midia, "storagePath" | "thumbnailStoragePath">
+    midia: Pick<
+        Midia,
+        "storagePath" | "thumbnailStoragePath" | "personalizacaoVisual"
+    >
 ) {
     const caminhos = [
         midia.storagePath,
-        midia.thumbnailStoragePath
+        midia.thumbnailStoragePath,
+        midia.personalizacaoVisual?.fundoStoragePath
     ].filter((caminho): caminho is string => Boolean(caminho))
 
     await Promise.all(caminhos.map(excluirMidiaStorage))

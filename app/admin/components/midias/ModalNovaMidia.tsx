@@ -11,6 +11,8 @@ import type {
     Midia,
     ModeloTarja,
     ModoExibicaoMidia,
+    PersonalizacaoVisualBanner,
+    PosicaoLogoPainel,
     TemplateMidia,
     TipoMidia
 } from "@/types/painel"
@@ -116,6 +118,12 @@ export default function ModalNovaMidia({
         midiaEditando?.contatosOficiais?.rodape ||
         "Salve os contatos oficiais e fale diretamente com o setor que você precisa."
     )
+    const [personalizacaoVisual, setPersonalizacaoVisual] =
+        useState<PersonalizacaoVisualBanner>(
+            midiaEditando?.personalizacaoVisual || {}
+        )
+    const [enviandoFundoBanner, setEnviandoFundoBanner] = useState(false)
+    const [progressoFundoBanner, setProgressoFundoBanner] = useState(0)
 
     const ehYoutube = tipo === "youtube"
     const ehPlantao =
@@ -206,6 +214,46 @@ export default function ModalNovaMidia({
         } finally {
             setEnviandoUpload(false)
         }
+    }
+
+    async function selecionarFundoBanner(file: File | null) {
+        if (!file) return
+
+        try {
+            setEnviandoFundoBanner(true)
+            setProgressoFundoBanner(0)
+
+            const resultado = await uploadMidiaParaStorage(
+                file,
+                "imagem",
+                setProgressoFundoBanner
+            )
+
+            setPersonalizacaoVisual((atual) => ({
+                ...atual,
+                fundoImagem: resultado.url,
+                fundoStoragePath: resultado.storagePath
+            }))
+        } catch (erro) {
+            console.error(erro)
+            alert(
+                erro instanceof Error
+                    ? erro.message
+                    : "Não foi possível enviar o fundo."
+            )
+        } finally {
+            setEnviandoFundoBanner(false)
+        }
+    }
+
+    function limparPersonalizacao(
+        chave: keyof PersonalizacaoVisualBanner
+    ) {
+        setPersonalizacaoVisual((atual) => {
+            const proxima = { ...atual }
+            delete proxima[chave]
+            return proxima
+        })
     }
 
     function salvarNoRascunho() {
@@ -364,6 +412,9 @@ export default function ModalNovaMidia({
                     subtitulo: subtituloContatos.trim(),
                     rodape: rodapeContatos.trim()
                 }
+                : undefined,
+            personalizacaoVisual: ehDinamica
+                ? personalizacaoVisual
                 : undefined
         }
 
@@ -911,6 +962,156 @@ export default function ModalNovaMidia({
                                         placeholder="Mensagem inferior"
                                     />
                                 </div>
+                            </section>
+                        )}
+
+                        {ehDinamica && (
+                            <section className="rounded-xl border border-violet-200 bg-violet-50/60 p-5 shadow-[0_6px_20px_rgba(15,23,42,0.04)]">
+                                <h3 className="text-xl font-black">
+                                    Aparência deste banner
+                                </h3>
+                                <p className="mt-2 text-sm text-slate-500">
+                                    Deixe vazio para usar o padrão global definido em Configurações.
+                                </p>
+
+                                <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4">
+                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                            <p className="text-sm font-black text-slate-800">
+                                                Imagem de fundo própria
+                                            </p>
+                                            <p className="mt-1 text-xs text-slate-500">
+                                                Ao remover, o banner volta ao fundo global ou original.
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            <label className="cursor-pointer rounded-lg border border-violet-500 bg-white px-4 py-2.5 text-sm font-bold text-violet-700 hover:bg-violet-50">
+                                                {enviandoFundoBanner
+                                                    ? `${progressoFundoBanner}%`
+                                                    : "Selecionar imagem"}
+                                                <input
+                                                    type="file"
+                                                    accept="image/jpeg,image/png,image/webp"
+                                                    className="hidden"
+                                                    disabled={enviandoFundoBanner}
+                                                    onChange={(event) =>
+                                                        selecionarFundoBanner(
+                                                            event.target.files?.[0] || null
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                            {personalizacaoVisual.fundoImagem && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setPersonalizacaoVisual(
+                                                            (atual) => ({
+                                                                ...atual,
+                                                                fundoImagem: "",
+                                                                fundoStoragePath: ""
+                                                            })
+                                                        )
+                                                    }
+                                                    className="rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50"
+                                                >
+                                                    Remover
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {personalizacaoVisual.fundoImagem && (
+                                        <img
+                                            src={personalizacaoVisual.fundoImagem}
+                                            alt="Prévia do fundo deste banner"
+                                            className="mt-4 aspect-video w-full rounded-lg border border-slate-200 object-cover"
+                                        />
+                                    )}
+                                </div>
+
+                                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                                    {([
+                                        ["corFundo", "Fundo / proteção", "#061c4f"],
+                                        ["corTitulo", "Título", "#ffffff"],
+                                        ["corTexto", "Textos", "#eaf4ff"],
+                                        ["corDestaque", "Destaque", "#67e8f9"]
+                                    ] as const).map(([chave, rotulo, fallbackCor]) => (
+                                        <div key={chave} className="rounded-xl border border-slate-200 bg-white p-4">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className="text-sm font-bold text-slate-700">
+                                                    {rotulo}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        limparPersonalizacao(chave)
+                                                    }
+                                                    className="text-xs font-bold text-violet-700 hover:underline"
+                                                >
+                                                    Usar global
+                                                </button>
+                                            </div>
+                                            <div className="mt-3 flex items-center gap-3">
+                                                <input
+                                                    type="color"
+                                                    value={
+                                                        personalizacaoVisual[chave] ||
+                                                        fallbackCor
+                                                    }
+                                                    onChange={(event) =>
+                                                        setPersonalizacaoVisual(
+                                                            (atual) => ({
+                                                                ...atual,
+                                                                [chave]: event.target.value
+                                                            })
+                                                        )
+                                                    }
+                                                    className="h-11 w-16 cursor-pointer p-1"
+                                                />
+                                                <input
+                                                    value={personalizacaoVisual[chave] || ""}
+                                                    onChange={(event) =>
+                                                        setPersonalizacaoVisual(
+                                                            (atual) => ({
+                                                                ...atual,
+                                                                [chave]: event.target.value
+                                                            })
+                                                        )
+                                                    }
+                                                    placeholder="Usar global"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <label className="mt-4 block text-sm font-bold text-slate-700">
+                                    Posição da logo neste banner
+                                    <select
+                                        className="mt-2"
+                                        value={personalizacaoVisual.posicaoLogo || ""}
+                                        onChange={(event) => {
+                                            const valor = event.target.value
+
+                                            if (!valor) {
+                                                limparPersonalizacao("posicaoLogo")
+                                                return
+                                            }
+
+                                            setPersonalizacaoVisual((atual) => ({
+                                                ...atual,
+                                                posicaoLogo:
+                                                    valor as PosicaoLogoPainel
+                                            }))
+                                        }}
+                                    >
+                                        <option value="">Usar posição global</option>
+                                        <option value="esquerda">Esquerda</option>
+                                        <option value="centro">Centro</option>
+                                        <option value="direita">Direita</option>
+                                    </select>
+                                </label>
                             </section>
                         )}
 

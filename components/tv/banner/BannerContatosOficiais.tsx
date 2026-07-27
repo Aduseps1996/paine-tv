@@ -6,12 +6,18 @@ import {
     PhoneCall
 } from "lucide-react"
 
-import type { ConfiguracoesPainel, Midia } from "@/types/painel"
+import type {
+    ConfiguracoesPainel,
+    Midia,
+    PersonalizacaoVisualBanner
+} from "@/types/painel"
 import { normalizarContatos } from "@/utils/contatosPainel"
+import FundoBannerPersonalizado from "./FundoBannerPersonalizado"
 
 type Props = {
     midiaAtual: Midia
     configuracoes: ConfiguracoesPainel
+    personalizacao: PersonalizacaoVisualBanner
 }
 
 const CONTEUDO_PADRAO = {
@@ -53,7 +59,8 @@ function rotuloTipo(tipo: "telefone" | "whatsapp" | "site") {
 
 export default function BannerContatosOficiais({
     midiaAtual,
-    configuracoes
+    configuracoes,
+    personalizacao
 }: Props) {
     const conteudo = {
         ...CONTEUDO_PADRAO,
@@ -82,8 +89,14 @@ export default function BannerContatosOficiais({
     const gradeCompacta = quantidade === 3 || quantidade > 4
 
     return (
-        <section className="absolute inset-0 isolate overflow-hidden bg-[#03143d] text-white">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,#0b3977_0%,#061f4f_45%,#020f32_100%)]" />
+        <section
+            className="absolute inset-0 isolate overflow-hidden bg-[#03143d] text-white"
+            style={{ color: personalizacao.corTexto }}
+        >
+            {!personalizacao.fundoImagem && !personalizacao.corFundo && (
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,#0b3977_0%,#061f4f_45%,#020f32_100%)]" />
+            )}
+            <FundoBannerPersonalizado personalizacao={personalizacao} />
             <div className="absolute inset-y-0 left-0 w-[18vw] bg-[radial-gradient(circle_at_0%_45%,rgba(10,118,222,0.28),transparent_68%)]" />
             <div className="absolute inset-y-0 right-0 w-[18vw] bg-[radial-gradient(circle_at_100%_55%,rgba(10,118,222,0.25),transparent_68%)]" />
             <div className="absolute left-0 top-[9vh] h-[17vh] w-[14vw] opacity-25 [background-image:radial-gradient(circle,rgba(53,190,255,0.8)_1.2px,transparent_1.2px)] [background-size:1.25vw_1.25vw]" />
@@ -99,12 +112,22 @@ export default function BannerContatosOficiais({
                     <span className="h-px w-[3vw] bg-cyan-300/85" />
                 </div>
 
-                <h1 className="mt-[1.8vh] text-[clamp(2.5rem,4.2vw,5.7rem)] font-black leading-[0.98] tracking-[-0.045em]">
+                <h1
+                    className="mt-[1.8vh] text-[clamp(2.5rem,4.2vw,5.7rem)] font-black leading-[0.98] tracking-[-0.045em]"
+                    style={{ color: personalizacao.corTitulo }}
+                >
                     {conteudo.titulo}
                 </h1>
 
-                <p className="mt-[1.6vh] flex items-center gap-[0.65vw] text-[clamp(0.9rem,1.25vw,1.65rem)] font-medium leading-[1.3] text-blue-50/90">
-                    <ShieldCheck className="h-[2.7vh] w-[2.7vh] text-cyan-300" strokeWidth={2.4} />
+                <p
+                    className="mt-[1.6vh] flex items-center gap-[0.65vw] text-[clamp(0.9rem,1.25vw,1.65rem)] font-medium leading-[1.3] text-blue-50/90"
+                    style={{ color: personalizacao.corTexto }}
+                >
+                    <ShieldCheck
+                        className="h-[2.7vh] w-[2.7vh] text-cyan-300"
+                        strokeWidth={2.4}
+                        style={{ color: personalizacao.corDestaque }}
+                    />
                     {conteudo.subtitulo}
                 </p>
             </header>
@@ -224,7 +247,10 @@ export default function BannerContatosOficiais({
             <footer className="absolute bottom-[3.2vh] left-1/2 z-10 flex -translate-x-1/2 items-center gap-[1.5vw] whitespace-nowrap">
                 <span className="h-px w-[7vw] bg-cyan-300/80" />
                 <ShieldCheck className="h-[3.8vh] w-[3.8vh] text-cyan-300" strokeWidth={2.3} />
-                <p className="text-[clamp(0.82rem,1.1vw,1.5rem)] font-medium text-white/90">
+                <p
+                    className="text-[clamp(0.82rem,1.1vw,1.5rem)] font-medium text-white/90"
+                    style={{ color: personalizacao.corTexto }}
+                >
                     {conteudo.rodape}
                 </p>
                 <span className="h-px w-[7vw] bg-cyan-300/80" />

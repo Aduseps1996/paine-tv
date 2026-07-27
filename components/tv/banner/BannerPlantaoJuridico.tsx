@@ -8,17 +8,20 @@ import {
 import type {
     ConfiguracoesPainel,
     DadosPlantao,
-    Midia
+    Midia,
+    PersonalizacaoVisualBanner
 } from "@/types/painel"
 import {
     CONTATO_PLANTAO_ID,
     obterValorContato
 } from "@/utils/contatosPainel"
+import FundoBannerPersonalizado from "./FundoBannerPersonalizado"
 
 type Props = {
     midiaAtual: Midia
     agoraPainel: Date | null
     configuracoes: ConfiguracoesPainel
+    personalizacao: PersonalizacaoVisualBanner
 }
 
 const CONTEUDO_PADRAO: DadosPlantao = {
@@ -52,7 +55,8 @@ function avisoEspecialEstaAtivo(
 export default function BannerPlantaoJuridico({
     midiaAtual,
     agoraPainel,
-    configuracoes
+    configuracoes,
+    personalizacao
 }: Props) {
     const plantao = {
         ...CONTEUDO_PADRAO,
@@ -81,8 +85,14 @@ export default function BannerPlantaoJuridico({
     )
 
     return (
-        <section className="absolute inset-0 isolate overflow-hidden bg-[#061c4f] text-white">
-            <div className="absolute inset-0 bg-[linear-gradient(118deg,#061944_0%,#073c85_54%,#0a88bf_100%)]" />
+        <section
+            className="absolute inset-0 isolate overflow-hidden bg-[#061c4f] text-white"
+            style={{ color: personalizacao.corTexto }}
+        >
+            {!personalizacao.fundoImagem && !personalizacao.corFundo && (
+                <div className="absolute inset-0 bg-[linear-gradient(118deg,#061944_0%,#073c85_54%,#0a88bf_100%)]" />
+            )}
+            <FundoBannerPersonalizado personalizacao={personalizacao} />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(117,225,255,0.34),transparent_30%),radial-gradient(circle_at_38%_100%,rgba(28,148,255,0.28),transparent_42%)]" />
             <div className="absolute -right-[12vw] -top-[24vw] h-[61vw] w-[61vw] rounded-full border-[5vw] border-white/[0.045]" />
             <div className="absolute -bottom-[37vw] left-[19vw] h-[70vw] w-[70vw] rounded-full border-[7vw] border-cyan-200/[0.045]" />
@@ -90,7 +100,10 @@ export default function BannerPlantaoJuridico({
 
             <header className="absolute left-[5vw] right-[5vw] top-[5.5vh] z-10 flex items-center justify-between border-b border-white/20 pb-[2.2vh]">
                 <div className="flex items-center gap-[1vw]">
-                    <span className="flex h-[4.8vh] w-[4.8vh] items-center justify-center rounded-[1.2vh] bg-cyan-300 text-[#06356f]">
+                    <span
+                        className="flex h-[4.8vh] w-[4.8vh] items-center justify-center rounded-[1.2vh] bg-cyan-300 text-[#06356f]"
+                        style={{ backgroundColor: personalizacao.corDestaque }}
+                    >
                         <ShieldCheck
                             aria-hidden="true"
                             strokeWidth={2.6}
@@ -125,11 +138,17 @@ export default function BannerPlantaoJuridico({
                         </p>
                     </div>
 
-                    <h1 className="max-w-[56vw] text-[clamp(2.6rem,4.7vw,6.4rem)] font-black leading-[0.98] tracking-[-0.05em] text-white">
+                    <h1
+                        className="max-w-[56vw] text-[clamp(2.6rem,4.7vw,6.4rem)] font-black leading-[0.98] tracking-[-0.05em] text-white"
+                        style={{ color: personalizacao.corTitulo }}
+                    >
                         {chamada}
                     </h1>
 
-                    <p className="mt-[3vh] max-w-[53vw] text-[clamp(1.05rem,1.65vw,2.35rem)] font-medium leading-[1.32] text-blue-50/95">
+                    <p
+                        className="mt-[3vh] max-w-[53vw] text-[clamp(1.05rem,1.65vw,2.35rem)] font-medium leading-[1.32] text-blue-50/95"
+                        style={{ color: personalizacao.corTexto }}
+                    >
                         {descricao}
                     </p>
                 </main>
@@ -182,8 +201,14 @@ export default function BannerPlantaoJuridico({
             </div>
 
             <footer className="absolute bottom-0 left-0 right-0 z-10 flex min-h-[12vh] items-center border-t border-white/15 bg-[#04163d]/88 px-[5vw] backdrop-blur-md">
-                <span className="mr-[1.4vw] h-[5.6vh] w-[0.35vw] rounded-full bg-cyan-300" />
-                <p className="max-w-[88vw] text-[clamp(0.95rem,1.35vw,1.9rem)] font-semibold leading-snug tracking-[0.01em] text-white/95">
+                <span
+                    className="mr-[1.4vw] h-[5.6vh] w-[0.35vw] rounded-full bg-cyan-300"
+                    style={{ backgroundColor: personalizacao.corDestaque }}
+                />
+                <p
+                    className="max-w-[88vw] text-[clamp(0.95rem,1.35vw,1.9rem)] font-semibold leading-snug tracking-[0.01em] text-white/95"
+                    style={{ color: personalizacao.corTexto }}
+                >
                     {plantao.rodape}
                 </p>
             </footer>

@@ -25,6 +25,7 @@ import {
     midiaEhYoutube,
     normalizarConfiguracoesBanner,
     obterAssinaturaMidia,
+    obterPersonalizacaoVisual,
     type BannerTemplateProps
 } from "./utils"
 
@@ -166,13 +167,19 @@ export default function BannerRotativo({
 
     const templateAtual = midiaAtual.template || "cheio"
 
+    const proximaImagemPreload =
+        proximaMidia?.personalizacaoVisual?.fundoImagem ||
+        (proximaMidia?.tipo === "dinamica"
+            ? configuracoesBanner.personalizacaoBanners?.fundoImagem
+            : "") ||
+        (proximaMidia?.tipo === "imagem" ? proximaMidia.arquivo : "")
+
     const preloadProximaMidia =
         proximaMidia &&
-            proximaMidia.tipo === "imagem" &&
-            proximaMidia.arquivo &&
+            proximaImagemPreload &&
             !midiaEhYoutube(proximaMidia) ? (
             <img
-                src={proximaMidia.arquivo}
+                src={proximaImagemPreload}
                 alt=""
                 aria-hidden="true"
                 className="pointer-events-none absolute h-0 w-0 opacity-0"
@@ -205,6 +212,11 @@ export default function BannerRotativo({
     }
 
     function renderizarTemplate() {
+        const personalizacao = obterPersonalizacaoVisual(
+            midiaAtual,
+            configuracoesBanner
+        )
+
         switch (templateAtual) {
             case "plantao-juridico":
                 return (
@@ -212,6 +224,7 @@ export default function BannerRotativo({
                         midiaAtual={midiaAtual}
                         agoraPainel={agoraPainel}
                         configuracoes={configuracoesBanner}
+                        personalizacao={personalizacao}
                     />
                 )
 
@@ -220,6 +233,7 @@ export default function BannerRotativo({
                     <BannerContatosOficiais
                         midiaAtual={midiaAtual}
                         configuracoes={configuracoesBanner}
+                        personalizacao={personalizacao}
                     />
                 )
 
