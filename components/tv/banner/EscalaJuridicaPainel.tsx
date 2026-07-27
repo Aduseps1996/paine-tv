@@ -1,14 +1,18 @@
 "use client"
 
+import type { CSSProperties } from "react"
 import { CalendarDays, Scale } from "lucide-react"
 
 import { useEscalaJuridicaPainel } from "@/hooks/tv/useEscalaJuridicaPainel"
 import { useModoTelaPainel } from "@/hooks/tv/useModoTelaPainel"
+import type { PersonalizacaoVisualBanner } from "@/types/painel"
+import FundoBannerPersonalizado from "./FundoBannerPersonalizado"
 import type { ClimaPainel, ConfiguracoesBanner } from "./utils"
 
 type Props = {
     configuracoes: ConfiguracoesBanner
     clima: ClimaPainel
+    personalizacao: PersonalizacaoVisualBanner
 }
 
 function ListaNomes({ nomes }: { nomes: string[] }) {
@@ -73,7 +77,8 @@ function CardTurno({
 
 export default function EscalaJuridicaPainel({
     configuracoes,
-    clima
+    clima,
+    personalizacao
 }: Props) {
     const escala = useEscalaJuridicaPainel()
     const { modoCompacto } = useModoTelaPainel()
@@ -103,10 +108,26 @@ export default function EscalaJuridicaPainel({
         return indiceDia > indiceAtual
     }).slice(0, 3)
 
+    const estiloCores = {
+        color: personalizacao.corTexto,
+        "--cor-titulo-banner": personalizacao.corTitulo || "inherit",
+        "--cor-texto-banner": personalizacao.corTexto || "inherit",
+        "--cor-destaque-banner": personalizacao.corDestaque || "inherit"
+    } as CSSProperties
+
+    const classeCores =
+        "[&_h1]:text-[var(--cor-titulo-banner)] [&_h2]:text-[var(--cor-titulo-banner)] [&_h3]:text-[var(--cor-titulo-banner)] [&_p]:text-[var(--cor-texto-banner)] [&_svg]:text-[var(--cor-destaque-banner)]"
+
     if (modoCompacto) {
         return (
-            <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
+            <section
+                className={`absolute inset-0 overflow-hidden bg-[#06183d] text-white ${classeCores}`}
+                style={estiloCores}
+            >
+                {!personalizacao.fundoImagem && !personalizacao.corFundo && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
+                )}
+                <FundoBannerPersonalizado personalizacao={personalizacao} />
 
                 <div className="relative z-10 flex h-full flex-col p-3">
                     <header className="flex items-center justify-between gap-3">
@@ -304,8 +325,14 @@ export default function EscalaJuridicaPainel({
     }
 
     return (
-        <section className="absolute inset-0 overflow-hidden bg-[#06183d] text-white">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
+        <section
+            className={`absolute inset-0 overflow-hidden bg-[#06183d] text-white ${classeCores}`}
+            style={estiloCores}
+        >
+            {!personalizacao.fundoImagem && !personalizacao.corFundo && (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
+            )}
+            <FundoBannerPersonalizado personalizacao={personalizacao} />
             <div className="absolute -left-32 top-10 h-80 w-80 rounded-full bg-sky-300/25 blur-3xl" />
             <div className="absolute right-[-120px] top-[-80px] h-96 w-96 rounded-full bg-white/15 blur-3xl" />
             <div className="absolute bottom-[-140px] left-1/3 h-96 w-96 rounded-full bg-blue-950/70 blur-3xl" />

@@ -171,7 +171,7 @@ export default function BannerContatosOficiais({
                                         gradeCompacta
                                             ? "text-[clamp(0.9rem,1.2vw,1.55rem)]"
                                             : "text-[clamp(1.2rem,1.75vw,2.35rem)]"
-                                    }`}>
+                                    }`} style={{ color: personalizacao.corTitulo }}>
                                         {contato.titulo}
                                     </h2>
 
@@ -218,6 +218,7 @@ export default function BannerContatosOficiais({
                                                             ? "text-[clamp(1rem,1.45vw,1.9rem)]"
                                                             : "text-[clamp(1.2rem,1.7vw,2.25rem)]"
                                                 }`}
+                                                style={{ color: personalizacao.corTexto }}
                                             >
                                                 {valor}
                                             </p>
@@ -226,11 +227,14 @@ export default function BannerContatosOficiais({
                                 </div>
 
                                 {contato.observacao && (
-                                    <p className={`mt-[1.2vh] truncate font-medium text-blue-50/75 ${
+                                    <p
+                                        className={`mt-[1.2vh] truncate font-medium text-blue-50/75 ${
                                         gradeCompacta
                                             ? "text-[clamp(0.52rem,0.58vw,0.75rem)]"
                                             : "text-[clamp(0.62rem,0.72vw,0.95rem)]"
-                                    }`}>
+                                        }`}
+                                        style={{ color: personalizacao.corTexto }}
+                                    >
                                         {contato.observacao}
                                     </p>
                                 )}

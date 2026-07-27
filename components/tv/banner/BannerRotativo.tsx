@@ -239,7 +239,10 @@ export default function BannerRotativo({
 
             case "comunicado":
                 return midiaAtual.comunicado ? (
-                    <BannerComunicado comunicado={midiaAtual.comunicado} />
+                    <BannerComunicado
+                        comunicado={midiaAtual.comunicado}
+                        personalizacao={personalizacao}
+                    />
                 ) : null
 
             case "escala-juridica":
@@ -247,6 +250,7 @@ export default function BannerRotativo({
                     <EscalaJuridicaPainel
                         configuracoes={configuracoesBanner}
                         clima={clima}
+                        personalizacao={personalizacao}
                     />
                 )
 

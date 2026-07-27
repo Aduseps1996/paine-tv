@@ -75,9 +75,21 @@ export function obterPersonalizacaoVisual(
     midia: Midia,
     configuracoes: ConfiguracoesPainel
 ): PersonalizacaoVisualBanner {
+    const removerValoresVazios = (
+        personalizacao?: PersonalizacaoVisualBanner
+    ): PersonalizacaoVisualBanner => {
+        if (!personalizacao) return {}
+
+        return Object.fromEntries(
+            Object.entries(personalizacao).filter(([, valor]) => {
+                return typeof valor !== "string" || valor.trim() !== ""
+            })
+        ) as PersonalizacaoVisualBanner
+    }
+
     return {
-        ...(configuracoes.personalizacaoBanners || {}),
-        ...(midia.personalizacaoVisual || {})
+        ...removerValoresVazios(configuracoes.personalizacaoBanners),
+        ...removerValoresVazios(midia.personalizacaoVisual)
     }
 }
 

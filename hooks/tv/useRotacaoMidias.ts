@@ -272,6 +272,11 @@ export function useRotacaoMidias({
             : indiceAtual
 
     const midiaAtual = midiasValidas[indiceSeguro]
+    const assinaturaMidiaAtual = midiaAtual
+        ? obterAssinaturaMidia(midiaAtual)
+        : ""
+    const tipoMidiaAtual = midiaAtual?.tipo
+    const duracaoMidiaAtual = midiaAtual?.duracao
 
     useEffect(() => {
         if (!midiaAtual || !agoraPainel) return
@@ -317,21 +322,28 @@ export function useRotacaoMidias({
     }, [midiasValidas.length])
 
     useEffect(() => {
-        if (!midiaAtual) return
+        if (!assinaturaMidiaAtual) return
         if (midiasValidas.length <= 1) return
         if (
-            midiaAtual.tipo !== "imagem" &&
-            midiaAtual.tipo !== "dinamica"
+            tipoMidiaAtual !== "imagem" &&
+            tipoMidiaAtual !== "dinamica"
         ) return
 
-        const duracaoSegura = Math.max(1, Number(midiaAtual.duracao || 8))
+        const duracaoSegura = Math.max(1, Number(duracaoMidiaAtual || 8))
 
-        const intervaloBanner = setInterval(() => {
+        const timeoutBanner = window.setTimeout(() => {
             avancarMidia()
         }, duracaoSegura * 1000)
 
-        return () => clearInterval(intervaloBanner)
-    }, [midiaAtual, midiasValidas.length, assinaturaMidias, avancarMidia])
+        return () => window.clearTimeout(timeoutBanner)
+    }, [
+        assinaturaMidiaAtual,
+        tipoMidiaAtual,
+        duracaoMidiaAtual,
+        midiasValidas.length,
+        assinaturaMidias,
+        avancarMidia
+    ])
 
     const marcarMidiaComErro = useCallback((midia: Midia | undefined) => {
         if (!midia) return
