@@ -23,6 +23,14 @@ declare global {
   }
 }
 
+function pararVozFully() {
+  try {
+    window.fully?.stopTextToSpeech?.()
+  } catch {
+    // O fechamento visual da chamada não pode depender da ponte nativa.
+  }
+}
+
 export default function Chamada({
   mostrar,
   nome,
@@ -41,6 +49,8 @@ export default function Chamada({
         clearTimeout(timeoutFalaRef.current)
         timeoutFalaRef.current = null
       }
+
+      pararVozFully()
 
       if ("speechSynthesis" in window) {
         if (falaAtualRef.current) {
@@ -76,8 +86,8 @@ export default function Chamada({
 
     const matriculaFalavel = matricula
       .trim()
+      .replace(/\s+/g, "")
       .split("")
-      .filter((caractere) => caractere !== " ")
       .join(" ")
 
     timeoutFalaRef.current = setTimeout(() => {
@@ -85,18 +95,25 @@ export default function Chamada({
 
       const texto = [
         "Atenção.",
-        `Matrícula ${matriculaFalavel}.`,
+        matriculaFalavel ? `Matrícula ${matriculaFalavel}.` : "",
         nome ? `${nome}.` : "",
         guiche ? `Dirija-se ao ${guiche}.` : ""
       ]
         .filter(Boolean)
         .join(" ")
 
-      // Fully Kiosk no stick
+      // Fully Kiosk no Stick
       if (window.fully?.textToSpeech) {
-        window.fully.stopTextToSpeech?.()
-        window.fully.textToSpeech(texto, "pt_BR")
-        return
+        try {
+          window.fully.stopTextToSpeech?.()
+          window.fully.textToSpeech(texto, "pt_BR")
+          return
+        } catch (erro) {
+          console.warn(
+            "A voz nativa do Fully Kiosk falhou; tentando a voz do navegador.",
+            erro
+          )
+        }
       }
 
       // Chrome e outros navegadores
@@ -172,6 +189,8 @@ export default function Chamada({
       if (timeoutFalaRef.current) {
         clearTimeout(timeoutFalaRef.current)
       }
+
+      pararVozFully()
 
       if ("speechSynthesis" in window) {
         if (falaAtualRef.current) {

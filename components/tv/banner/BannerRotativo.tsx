@@ -5,7 +5,13 @@ import { useEffect, useMemo, useRef } from "react"
 import { useClimaPainel } from "@/hooks/tv/useClimaPainel"
 import { usePainelData } from "@/hooks/tv/usePainelData"
 import { useRotacaoMidias } from "@/hooks/tv/useRotacaoMidias"
-import type { ConfiguracoesPainel, Midia, Noticia } from "@/types/painel"
+import { useComunicadosAtivos } from "@/hooks/tv/useComunicadosAtivos"
+import type {
+    AvisoUrgente,
+    ConfiguracoesPainel,
+    Midia,
+    Noticia
+} from "@/types/painel"
 import BannerCheio from "./BannerCheio"
 import EscalaJuridicaPainel from "./EscalaJuridicaPainel"
 import BannerInstitucional from "./BannerInstitucional"
@@ -13,6 +19,7 @@ import BannerSocial from "./BannerSocial"
 import BannerPainel from "./BannerPainel"
 import BannerPlantaoJuridico from "./BannerPlantaoJuridico"
 import BannerContatosOficiais from "./BannerContatosOficiais"
+import BannerComunicado from "./BannerComunicado"
 import BannerYoutube from "./BannerYoutube"
 import {
     midiaEhYoutube,
@@ -28,6 +35,7 @@ type Props = {
     previewConfiguracoes?: ConfiguracoesPainel
     previewMidias?: Midia[]
     previewNoticias?: Noticia[]
+    previewComunicados?: AvisoUrgente[]
 }
 
 export default function BannerRotativo({
@@ -36,7 +44,8 @@ export default function BannerRotativo({
     modoPreview = false,
     previewConfiguracoes,
     previewMidias,
-    previewNoticias
+    previewNoticias,
+    previewComunicados
 }: Props) {
     const ultimaMidiaNotificadaRef = useRef<string | null>(null)
 
@@ -48,6 +57,10 @@ export default function BannerRotativo({
     })
 
     const configuracoesBanner = normalizarConfiguracoesBanner(configuracoes)
+    const comunicadosAtivos = useComunicadosAtivos(
+        modoPreview,
+        previewComunicados
+    )
 
     const mostrarEscalaJuridicaTv =
         configuracoesBanner.mostrarEscalaJuridicaTv ?? false
@@ -55,14 +68,11 @@ export default function BannerRotativo({
     const duracaoEscalaJuridicaTv =
         Math.max(5, Number(configuracoesBanner.duracaoEscalaJuridicaTv || 15))
 
-    const midiasComEscalaJuridica: Midia[] = useMemo(() => {
-        if (!mostrarEscalaJuridicaTv) {
-            return midias
-        }
+    const midiasComConteudoDinamico: Midia[] = useMemo(() => {
+        const lista: Midia[] = [...midias]
 
-        return [
-            ...midias,
-            {
+        if (mostrarEscalaJuridicaTv) {
+            lista.push({
                 id: "escala-juridica-tv",
                 tipo: "imagem",
                 arquivo: "__escala_juridica__",
@@ -71,9 +81,35 @@ export default function BannerRotativo({
                 duracao: duracaoEscalaJuridicaTv,
                 pesoExibicao: 1,
                 template: "escala-juridica"
-            }
-        ]
-    }, [duracaoEscalaJuridicaTv, midias, mostrarEscalaJuridicaTv])
+            })
+        }
+
+        comunicadosAtivos
+            .filter((comunicado) => comunicado.exibirRotacao)
+            .forEach((comunicado, indice) => {
+                lista.push({
+                    id: `comunicado-${comunicado.id}`,
+                    tipo: "dinamica",
+                    arquivo: "__comunicado__",
+                    ativo: true,
+                    ordem: 1000 + indice,
+                    duracao: Math.max(
+                        5,
+                        Number(comunicado.duracaoTela || 12)
+                    ),
+                    pesoExibicao: 1,
+                    template: "comunicado",
+                    comunicado
+                })
+            })
+
+        return lista
+    }, [
+        comunicadosAtivos,
+        duracaoEscalaJuridicaTv,
+        midias,
+        mostrarEscalaJuridicaTv
+    ])
 
     const {
         midias: midiasRotacao,
@@ -85,7 +121,7 @@ export default function BannerRotativo({
         lidarComErroVideo,
         reiniciarOuAvancarVideo,
         lidarComErroImagem
-    } = useRotacaoMidias({ midias: midiasComEscalaJuridica, fallback })
+    } = useRotacaoMidias({ midias: midiasComConteudoDinamico, fallback })
 
     const clima = useClimaPainel(configuracoesBanner)
 
@@ -142,6 +178,19 @@ export default function BannerRotativo({
                 className="pointer-events-none absolute h-0 w-0 opacity-0"
                 key={`preload-${obterAssinaturaMidia(proximaMidia)}`}
             />
+        ) : proximaMidia &&
+            proximaMidia.tipo === "video" &&
+            proximaMidia.arquivo &&
+            !midiaEhYoutube(proximaMidia) ? (
+            <video
+                src={proximaMidia.arquivo}
+                aria-hidden="true"
+                muted
+                playsInline
+                preload="auto"
+                className="pointer-events-none absolute h-px w-px opacity-0"
+                key={`preload-${obterAssinaturaMidia(proximaMidia)}`}
+            />
         ) : null
 
     const templateProps: BannerTemplateProps = {
@@ -173,6 +222,11 @@ export default function BannerRotativo({
                         configuracoes={configuracoesBanner}
                     />
                 )
+
+            case "comunicado":
+                return midiaAtual.comunicado ? (
+                    <BannerComunicado comunicado={midiaAtual.comunicado} />
+                ) : null
 
             case "escala-juridica":
                 return (

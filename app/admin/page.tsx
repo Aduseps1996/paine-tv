@@ -1,13 +1,15 @@
 ﻿"use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import AdminLayout from "./components/AdminLayout"
 
 import AbaInicio from "./components/AbaInicio"
+import AbaPreviaTV from "./components/AbaPreviaTV"
 import AbaMidias from "./components/AbaMidias"
 import AbaNoticias from "./components/AbaNoticias"
 import AbaContatos from "./components/AbaContatos"
+import AbaComunicados from "./components/AbaComunicados"
 import AbaConfiguracaoPainel from "./components/AbaConfiguracaoPainel"
 import AbaConfiguracaoTipografia from "./components/AbaConfiguracaoTipografia"
 import {
@@ -15,7 +17,7 @@ import {
     usePainelDraftContext
 } from "./context/PainelDraftContext"
 
-import type { AbaAdmin, ConfiguracoesPainel } from "@/types/painel"
+import type { AbaAdmin } from "@/types/painel"
 import { useAdminAuth } from "@/hooks/admin/useAdminAuth"
 import { useAdminCollections } from "@/hooks/admin/useAdminCollections"
 import { useAdminConfiguracoesPainel } from "@/hooks/admin/useAdminConfiguracoesPainel"
@@ -42,49 +44,17 @@ function AdminPageContent() {
     const {
         midias,
         noticias,
+        comunicados,
+        colecoesCarregadas,
     } = useAdminCollections()
 
     const {
-        nomePainel,
-        subtitulo,
-        logo,
-        modoLogo,
-        tamanhoLogoPainel,
-        slogan,
-        tamanhoFonteRodape,
-        tamanhoFonteSlogan,
-        tamanhoFonteHora,
-        alturaBarraNoticias,
-        tempoOcultaTarja,
-        mostrarLogoFaixaPainel,
-        mostrarRodapeNoticias,
-        tempoEntradaTarja,
-        tempoVisivelTarja,
-        tempoSaidaTarja,
-        duracaoAnimacaoNoticias,
-        mostrarTemperaturaPainel,
-        mostrarDescricaoClimaPainel,
-        mostrarCidadePainel,
-        mostrarDataPainel,
-        mostrarHoraPainel,
-        cidadeClimaPainel,
-
-        latitudeClimaPainel,
-        longitudeClimaPainel,
-        timezoneClimaPainel,
-        contatos,
+        configuracoesPublicadas,
         configuracoesCarregadas,
-        setTamanhoFonteRodape,
-        setTamanhoFonteSlogan,
-        setTamanhoFonteHora,
-        setAlturaBarraNoticias,
-        setDuracaoAnimacaoNoticias,
-        carregarConfiguracoes,
-        salvarConfiguracoes
+        carregarConfiguracoes
     } = useAdminConfiguracoesPainel()
 
     const {
-        draft,
         carregarPublicadoNoDraft,
     } = usePainelDraftContext()
 
@@ -94,87 +64,28 @@ function AdminPageContent() {
         void Promise.resolve().then(carregarConfiguracoes)
     }, [carregarConfiguracoes])
 
-    const configuracoes = useMemo<ConfiguracoesPainel>(() => ({
-        nomePainel,
-        subtitulo,
-        logo,
-        slogan,
-        modoLogo,
-        tamanhoLogoPainel,
-        mostrarLogoFaixaPainel,
-        mostrarRodapeNoticias,
-        mostrarTemperaturaPainel,
-        mostrarDescricaoClimaPainel,
-        mostrarCidadePainel,
-        mostrarDataPainel,
-        mostrarHoraPainel,
-        cidadeClimaPainel,
-        latitudeClimaPainel,
-        longitudeClimaPainel,
-        timezoneClimaPainel,
-        contatos,
-        tempoEntradaTarja,
-        tempoVisivelTarja,
-        tempoSaidaTarja,
-        tempoOcultaTarja,
-        tamanhoFonteRodape,
-        tamanhoFonteSlogan,
-        tamanhoFonteHora,
-        alturaBarraNoticias,
-        duracaoAnimacaoNoticias
-    }), [
-        nomePainel,
-        subtitulo,
-        logo,
-        slogan,
-        modoLogo,
-        tamanhoLogoPainel,
-        mostrarLogoFaixaPainel,
-        mostrarRodapeNoticias,
-        mostrarTemperaturaPainel,
-        mostrarDescricaoClimaPainel,
-        mostrarCidadePainel,
-        mostrarDataPainel,
-        mostrarHoraPainel,
-        cidadeClimaPainel,
-        latitudeClimaPainel,
-        longitudeClimaPainel,
-        timezoneClimaPainel,
-        contatos,
-        tempoEntradaTarja,
-        tempoVisivelTarja,
-        tempoSaidaTarja,
-        tempoOcultaTarja,
-        tamanhoFonteRodape,
-        tamanhoFonteSlogan,
-        tamanhoFonteHora,
-        alturaBarraNoticias,
-        duracaoAnimacaoNoticias
-    ])
-
     const carregouDraftRef = useRef(false)
 
     useEffect(() => {
         if (carregouDraftRef.current) return
         if (!configuracoesCarregadas) return
-
-        const midiasCarregadas = midias.length > 0
-        const noticiasCarregadas = noticias.length > 0
-
-        if (!midiasCarregadas && !noticiasCarregadas) return
+        if (!colecoesCarregadas) return
 
         carregarPublicadoNoDraft({
-            configuracoes,
+            configuracoes: configuracoesPublicadas,
             midias,
-            noticias
+            noticias,
+            comunicados
         })
 
         carregouDraftRef.current = true
     }, [
-        configuracoes,
+        configuracoesPublicadas,
         configuracoesCarregadas,
+        colecoesCarregadas,
         midias,
         noticias,
+        comunicados,
         carregarPublicadoNoDraft
     ])
 
@@ -246,29 +157,20 @@ function AdminPageContent() {
 
             {abaAtiva === "configuracao-tipografia" && (
                 <AbaConfiguracaoTipografia
-                    tamanhoFonteRodape={tamanhoFonteRodape}
-                    tamanhoFonteSlogan={tamanhoFonteSlogan}
-                    tamanhoFonteHora={tamanhoFonteHora}
-                    alturaBarraNoticias={alturaBarraNoticias}
-                    duracaoAnimacaoNoticias={duracaoAnimacaoNoticias}
-
-
-                    setTamanhoFonteSlogan={setTamanhoFonteSlogan}
-                    setTamanhoFonteRodape={setTamanhoFonteRodape}
-                    setTamanhoFonteHora={setTamanhoFonteHora}
-                    setAlturaBarraNoticias={setAlturaBarraNoticias}
-                    setDuracaoAnimacaoNoticias={setDuracaoAnimacaoNoticias}
-
-                    salvarConfiguracoes={salvarConfiguracoes}
+                    navegarPara={setAbaAtiva}
                 />
             )}
 
             {abaAtiva === "inicio" && (
-                <AbaInicio />
+                <AbaInicio navegarPara={setAbaAtiva} />
+            )}
+
+            {abaAtiva === "previa-tv" && (
+                <AbaPreviaTV />
             )}
 
             {abaAtiva === "midias" && (
-                <AbaMidias />
+                <AbaMidias navegarPara={setAbaAtiva} />
             )}
 
             {abaAtiva === "noticias" && (
@@ -277,6 +179,10 @@ function AdminPageContent() {
 
             {abaAtiva === "contatos" && (
                 <AbaContatos />
+            )}
+
+            {abaAtiva === "comunicados" && (
+                <AbaComunicados />
             )}
         </AdminLayout>
     )

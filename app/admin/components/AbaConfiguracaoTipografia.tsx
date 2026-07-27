@@ -1,30 +1,15 @@
+"use client"
+
+import { Eye, Gauge, Ruler, Type } from "lucide-react"
+
+import type { AbaAdmin, ConfiguracoesPainel } from "@/types/painel"
+import { usePainelDraftContext } from "../context/PainelDraftContext"
+
 type Props = {
-    tamanhoFonteRodape: number
-    tamanhoFonteSlogan: number
-    tamanhoFonteHora: number
-    alturaBarraNoticias: number
-    duracaoAnimacaoNoticias: number
-
-    setTamanhoFonteRodape: (valor: number) => void
-    setTamanhoFonteSlogan: (valor: number) => void
-    setTamanhoFonteHora: (valor: number) => void
-    setAlturaBarraNoticias: (valor: number) => void
-    setDuracaoAnimacaoNoticias: (valor: number) => void
-
-    salvarConfiguracoes: () => void
+    navegarPara: (aba: AbaAdmin) => void
 }
 
-type ControleNumeroProps = {
-    titulo: string
-    descricao: string
-    valor: number
-    minimo: number
-    maximo: number
-    sufixo: string
-    onChange: (valor: number) => void
-}
-
-function ControleNumero({
+function Controle({
     titulo,
     descricao,
     valor,
@@ -32,352 +17,211 @@ function ControleNumero({
     maximo,
     sufixo,
     onChange
-}: ControleNumeroProps) {
+}: {
+    titulo: string
+    descricao: string
+    valor: number
+    minimo: number
+    maximo: number
+    sufixo: string
+    onChange: (valor: number) => void
+}) {
     return (
-        <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="flex items-start justify-between gap-3">
                 <div>
-                    <h3 className="text-xl font-black">
-                        {titulo}
-                    </h3>
-
-                    <p className="mt-2 text-sm text-zinc-400">
-                        {descricao}
-                    </p>
+                    <h3 className="text-sm font-extrabold text-slate-900">{titulo}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">{descricao}</p>
                 </div>
-
-                <div className="rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-3 text-right">
-                    <p className="text-2xl font-black">
-                        {valor}
-                    </p>
-
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                        {sufixo}
-                    </p>
-                </div>
+                <span className="shrink-0 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-extrabold text-blue-700">
+                    {valor}{sufixo}
+                </span>
             </div>
-
-            <div className="mt-5">
-                <input
-                    type="range"
-                    min={minimo}
-                    max={maximo}
-                    value={valor}
-                    onChange={(e) => onChange(Number(e.target.value))}
-                    className="w-full"
-                />
-
-                <div className="mt-2 flex justify-between text-xs font-bold text-zinc-500">
-                    <span>{minimo}</span>
-                    <span>{maximo}</span>
-                </div>
-            </div>
-
             <input
-                type="number"
+                type="range"
                 min={minimo}
                 max={maximo}
                 value={valor}
-                onChange={(e) => onChange(Number(e.target.value))}
-                className="mt-4"
+                onChange={(event) => onChange(Number(event.target.value))}
+                className="mt-5 w-full accent-[#0d6efd]"
             />
+            <div className="mt-2 flex justify-between text-[11px] font-bold text-slate-400">
+                <span>{minimo}{sufixo}</span>
+                <span>{maximo}{sufixo}</span>
+            </div>
         </div>
     )
 }
 
-export default function AbaConfiguracaoTipografia({
-    tamanhoFonteRodape,
-    tamanhoFonteSlogan,
-    tamanhoFonteHora,
-    alturaBarraNoticias,
-    duracaoAnimacaoNoticias,
+export default function AbaConfiguracaoTipografia({ navegarPara }: Props) {
+    const { draft, atualizarConfiguracoesDraft } = usePainelDraftContext()
+    const configuracoes = draft.configuracoes
+    const tamanhoFonteRodape = Number(configuracoes.tamanhoFonteRodape || 28)
+    const tamanhoFonteSlogan = Number(configuracoes.tamanhoFonteSlogan || 18)
+    const tamanhoFonteHora = Number(configuracoes.tamanhoFonteHora || 24)
+    const alturaBarraNoticias = Number(configuracoes.alturaBarraNoticias || 44)
+    const duracaoAnimacaoNoticias = Number(
+        configuracoes.duracaoAnimacaoNoticias || 150
+    )
 
-    setTamanhoFonteRodape,
-    setTamanhoFonteSlogan,
-    setTamanhoFonteHora,
-    setAlturaBarraNoticias,
-    setDuracaoAnimacaoNoticias,
+    function atualizar(
+        campo: keyof ConfiguracoesPainel,
+        valor: number
+    ) {
+        atualizarConfiguracoesDraft({ [campo]: valor })
+    }
 
-    salvarConfiguracoes
-}: Props) {
-    const velocidadeTexto =
+    const velocidade =
         duracaoAnimacaoNoticias >= 170
             ? "Lenta"
             : duracaoAnimacaoNoticias <= 130
                 ? "Rápida"
                 : "Normal"
 
-    function classeOpcao(ativa: boolean) {
-        return ativa
-            ? "border-sky-400/40 bg-sky-500/15 text-white shadow-[0_14px_35px_rgba(14,165,233,0.16)]"
-            : "border-white/10 bg-zinc-950/60 text-zinc-300"
-    }
-
     return (
-        <div className="space-y-8">
-            <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.22)] sm:p-7">
+        <div className="space-y-6">
+            <header className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.32em] text-sky-300">
-                        Estilo visual
+                    <div className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#0d6efd]">
+                        <Type size={15} />
+                        Leitura na televisão
                     </div>
-
-                    <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
+                    <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
                         Tipografia e medidas
                     </h1>
-
-                    <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400 sm:text-base">
-                        Ajuste fontes, altura do rodapé e velocidade das notícias exibidas na TV.
+                    <p className="mt-2 text-sm text-slate-500">
+                        Ajuste fontes, altura do rodapé e velocidade das notícias com prévia em tempo real.
                     </p>
                 </div>
-            </section>
+                <button
+                    type="button"
+                    onClick={() => navegarPara("previa-tv")}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0d6efd] px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#075fd4]"
+                >
+                    <Eye size={18} />
+                    Revisar na Prévia
+                </button>
+            </header>
 
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
-                    {
-                        label: "Fonte notícias",
-                        value: `${tamanhoFonteRodape}px`,
-                        desc: "tamanho do letreiro"
-                    },
-                    {
-                        label: "Fonte slogan",
-                        value: `${tamanhoFonteSlogan}px`,
-                        desc: "texto institucional"
-                    },
-                    {
-                        label: "Fonte hora",
-                        value: `${tamanhoFonteHora}px`,
-                        desc: "relógio do painel"
-                    },
-                    {
-                        label: "Rodapé",
-                        value: `${alturaBarraNoticias}px`,
-                        desc: "altura da barra"
-                    }
-                ].map((card) => (
-                    <div
-                        key={card.label}
-                        className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
-                    >
-                        <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
-                            {card.label}
-                        </p>
-
-                        <div className="mt-4 text-4xl font-black">
-                            {card.value}
-                        </div>
-
-                        <p className="mt-3 text-sm text-zinc-400">
-                            {card.desc}
-                        </p>
+                    ["Notícias", `${tamanhoFonteRodape}px`, "texto do rodapé"],
+                    ["Slogan", `${tamanhoFonteSlogan}px`, "texto institucional"],
+                    ["Hora", `${tamanhoFonteHora}px`, "relógio da TV"],
+                    ["Barra", `${alturaBarraNoticias}px`, "altura do rodapé"]
+                ].map(([label, value, detail]) => (
+                    <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{label}</p>
+                        <p className="mt-2 text-2xl font-extrabold text-slate-950">{value}</p>
+                        <p className="mt-1 text-xs text-slate-500">{detail}</p>
                     </div>
                 ))}
             </section>
 
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Fontes
-                </h2>
-
-                <p className="mt-2 text-sm text-zinc-400">
-                    Controle o tamanho dos principais textos exibidos na TV.
-                </p>
-
-                <div className="mt-6 grid gap-5 xl:grid-cols-3">
-                    <ControleNumero
-                        titulo="Fonte das notícias"
-                        descricao="Tamanho do texto que corre no rodapé."
-                        valor={tamanhoFonteRodape}
-                        minimo={12}
-                        maximo={80}
-                        sufixo="px"
-                        onChange={setTamanhoFonteRodape}
-                    />
-
-                    <ControleNumero
-                        titulo="Fonte da tarja / slogan"
-                        descricao="Tamanho do texto institucional e chamadas."
-                        valor={tamanhoFonteSlogan}
-                        minimo={12}
-                        maximo={60}
-                        sufixo="px"
-                        onChange={setTamanhoFonteSlogan}
-                    />
-
-                    <ControleNumero
-                        titulo="Fonte da hora"
-                        descricao="Tamanho do relógio exibido no painel."
-                        valor={tamanhoFonteHora}
-                        minimo={12}
-                        maximo={70}
-                        sufixo="px"
-                        onChange={setTamanhoFonteHora}
-                    />
-                </div>
-            </section>
-
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Rodapé de notícias
-                </h2>
-
-                <p className="mt-2 text-sm text-zinc-400">
-                    Defina a altura da barra e a velocidade de passagem das mensagens.
-                </p>
-
-                <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
-                    <ControleNumero
-                        titulo="Altura da barra"
-                        descricao="Altura visual do rodapé de notícias."
-                        valor={alturaBarraNoticias}
-                        minimo={30}
-                        maximo={100}
-                        sufixo="px"
-                        onChange={setAlturaBarraNoticias}
-                    />
-
-                    <div className="rounded-[26px] border border-white/10 bg-white/[0.03] p-5">
-                        <h3 className="text-xl font-black">
-                            Velocidade das notícias
-                        </h3>
-
-                        <p className="mt-2 text-sm text-zinc-400">
-                            Quanto maior o número, mais devagar as notícias passam.
-                        </p>
-
-                        <div className="mt-5 grid gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setDuracaoAnimacaoNoticias(180)}
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${classeOpcao(duracaoAnimacaoNoticias === 180)}`}
-                            >
-                                Lenta
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setDuracaoAnimacaoNoticias(150)}
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${classeOpcao(duracaoAnimacaoNoticias === 150)}`}
-                            >
-                                Normal
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setDuracaoAnimacaoNoticias(120)}
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${classeOpcao(duracaoAnimacaoNoticias === 120)}`}
-                            >
-                                Rápida
-                            </button>
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_430px]">
+                <div className="space-y-6">
+                    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                        <div className="flex items-start gap-3">
+                            <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-[#0d6efd]">
+                                <Type size={20} />
+                            </span>
+                            <div>
+                                <h2 className="text-lg font-extrabold text-slate-950">Tamanho dos textos</h2>
+                                <p className="mt-1 text-sm text-slate-500">Use os controles e confira o resultado na prévia.</p>
+                            </div>
                         </div>
-
-                        <input
-                            type="number"
-                            min={60}
-                            max={300}
-                            value={duracaoAnimacaoNoticias}
-                            onChange={(e) =>
-                                setDuracaoAnimacaoNoticias(Number(e.target.value))
-                            }
-                            className="mt-4"
-                        />
-
-                        <div className="mt-4 rounded-2xl border border-white/10 bg-zinc-950/60 p-4">
-                            <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-500">
-                                Velocidade atual
-                            </p>
-
-                            <p className="mt-2 text-2xl font-black">
-                                {velocidadeTexto}
-                            </p>
-
-                            <p className="mt-1 text-sm text-zinc-400">
-                                {duracaoAnimacaoNoticias}s de animação
-                            </p>
+                        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                            <Controle titulo="Fonte das notícias" descricao="Texto que corre no rodapé." valor={tamanhoFonteRodape} minimo={12} maximo={80} sufixo="px" onChange={(valor) => atualizar("tamanhoFonteRodape", valor)} />
+                            <Controle titulo="Fonte do slogan" descricao="Texto institucional da faixa." valor={tamanhoFonteSlogan} minimo={12} maximo={60} sufixo="px" onChange={(valor) => atualizar("tamanhoFonteSlogan", valor)} />
+                            <Controle titulo="Fonte da hora" descricao="Relógio exibido no painel." valor={tamanhoFonteHora} minimo={12} maximo={70} sufixo="px" onChange={(valor) => atualizar("tamanhoFonteHora", valor)} />
+                            <Controle titulo="Altura da barra" descricao="Altura total do rodapé." valor={alturaBarraNoticias} minimo={30} maximo={100} sufixo="px" onChange={(valor) => atualizar("alturaBarraNoticias", valor)} />
                         </div>
-                    </div>
+                    </section>
+
+                    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                        <div className="flex items-start gap-3">
+                            <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-[#0d6efd]">
+                                <Gauge size={20} />
+                            </span>
+                            <div>
+                                <h2 className="text-lg font-extrabold text-slate-950">Velocidade das notícias</h2>
+                                <p className="mt-1 text-sm text-slate-500">Quanto maior a duração, mais devagar o texto passa.</p>
+                            </div>
+                        </div>
+                        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                            {[
+                                ["Lenta", 180],
+                                ["Normal", 150],
+                                ["Rápida", 120]
+                            ].map(([label, value]) => (
+                                <button
+                                    key={label}
+                                    type="button"
+                                    onClick={() => atualizar("duracaoAnimacaoNoticias", Number(value))}
+                                    className={`rounded-xl border px-4 py-3 text-sm font-extrabold transition ${
+                                        duracaoAnimacaoNoticias === value
+                                            ? "border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-500/10"
+                                            : "border-slate-200 bg-white text-slate-600 hover:border-blue-200"
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                        <Controle titulo={`Ajuste fino — ${velocidade}`} descricao="Duração completa da animação." valor={duracaoAnimacaoNoticias} minimo={60} maximo={300} sufixo="s" onChange={(valor) => atualizar("duracaoAnimacaoNoticias", valor)} />
+                    </section>
                 </div>
-            </section>
 
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <div className="mb-6">
-                    <h2 className="text-2xl font-black sm:text-3xl">
-                        Prévia visual
-                    </h2>
-
-                    <p className="mt-2 text-sm text-zinc-400">
-                        Simulação rápida do rodapé com os tamanhos configurados.
-                    </p>
-                </div>
-
-                <div className="overflow-hidden rounded-[26px] border border-white/10 bg-[#071633] p-5">
-                    <div className="mb-4 flex items-center justify-between gap-4">
-                        <div>
+                <aside className="xl:sticky xl:top-[100px] xl:self-start">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                            <div>
+                                <p className="text-sm font-extrabold text-slate-900">Prévia visual</p>
+                                <p className="text-xs text-slate-500">Simulação da TV</p>
+                            </div>
+                            <Ruler size={19} className="text-blue-600" />
+                        </div>
+                        <div className="aspect-video bg-[linear-gradient(145deg,#073f91_0%,#061c3f_100%)] p-5 text-white">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <p style={{ fontSize: `${tamanhoFonteSlogan}px` }} className="font-extrabold leading-none">ADUSEPS</p>
+                                    <p className="mt-1 text-xs text-blue-100">Painel Institucional</p>
+                                </div>
+                                <p style={{ fontSize: `${tamanhoFonteHora}px` }} className="font-extrabold leading-none">12:48</p>
+                            </div>
+                            <div className="mt-8 grid h-20 place-items-center rounded-lg bg-white/10 text-xs font-bold text-white/45">
+                                Área da mídia
+                            </div>
+                        </div>
+                        <div
+                            className="flex items-center overflow-hidden bg-[#0a57b7] px-4 text-white"
+                            style={{ height: `${alturaBarraNoticias}px` }}
+                        >
                             <p
-                                className="font-black text-white"
-                                style={{
-                                    fontSize: `${tamanhoFonteSlogan}px`
-                                }}
+                                className="whitespace-nowrap font-bold"
+                                style={{ fontSize: `${tamanhoFonteRodape}px` }}
                             >
-                                ADUSEPS
-                            </p>
-
-                            <p className="text-sm text-white/55">
-                                Painel Institucional
+                                ADUSEPS — Informação e compromisso com o associado
                             </p>
                         </div>
-
-                        <div
-                            className="font-black text-white"
-                            style={{
-                                fontSize: `${tamanhoFonteHora}px`
-                            }}
-                        >
-                            12:48
+                        <div className="flex items-center justify-between border-t border-slate-200 px-5 py-4 text-xs">
+                            <span className="font-bold text-slate-500">Velocidade atual</span>
+                            <strong className="text-slate-900">{velocidade} · {duracaoAnimacaoNoticias}s</strong>
                         </div>
                     </div>
+                </aside>
+            </div>
 
-                    <div
-                        className="overflow-hidden rounded-2xl bg-[#183b78] px-4"
-                        style={{
-                            height: `${alturaBarraNoticias}px`
-                        }}
-                    >
-                        <div
-                            className="flex h-full items-center whitespace-nowrap font-bold text-white"
-                            style={{
-                                fontSize: `${tamanhoFonteRodape}px`
-                            }}
-                        >
-                            <span className="mx-8">
-                                Prévia do rodapé de notícias da ADUSEPS
-                            </span>
-
-                            <span className="mx-6 text-[#f15434]">•</span>
-
-                            <span className="mx-8">
-                                Velocidade: {duracaoAnimacaoNoticias}s
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="rounded-[26px] border border-amber-400/20 bg-amber-500/10 p-5">
-                <p className="font-black text-amber-200">
-                    Alterações salvas no rascunho
-                </p>
-
-                <p className="mt-2 text-sm text-amber-100/80">
-                    Para enviar essas configurações para a TV, volte para a página Início e clique em Publicar na TV.
-                </p>
-            </section>
-
-            <button
-                onClick={salvarConfiguracoes}
-                className="rounded-2xl border border-sky-300/20 bg-sky-500 px-6 py-4 text-sm font-black text-white shadow-[0_14px_35px_rgba(14,165,233,0.22)]"
-            >
-                Salvar tipografia
-            </button>
+            <div className="flex justify-end">
+                <button
+                    type="button"
+                    onClick={() => navegarPara("previa-tv")}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0d6efd] px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#075fd4]"
+                >
+                    <Eye size={18} />
+                    Revisar na Prévia
+                </button>
+            </div>
         </div>
     )
 }

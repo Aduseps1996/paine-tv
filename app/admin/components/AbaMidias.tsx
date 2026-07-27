@@ -1,6 +1,11 @@
 import { useState } from "react"
 
-import type { TemplateMidia, TipoMidia } from "@/types/painel"
+import type {
+    AbaAdmin,
+    Midia,
+    TemplateMidia,
+    TipoMidia
+} from "@/types/painel"
 
 import { usePainelDraftContext } from "../context/PainelDraftContext"
 import MidiasGrid from "./midias/MidiasGrid"
@@ -9,10 +14,18 @@ import MidiasStats from "./midias/MidiasStats"
 import MidiasToolbar from "./midias/MidiasToolbar"
 import ModalNovaMidia from "./midias/ModalNovaMidia"
 
-export default function AbaMidias() {
-    const { draft, atualizarMidiasDraft } = usePainelDraftContext()
+export default function AbaMidias({
+    navegarPara
+}: {
+    navegarPara: (aba: AbaAdmin) => void
+}) {
+    const {
+        draft,
+        atualizarMidiasDraft
+    } = usePainelDraftContext()
 
     const [modalNovaMidiaAberto, setModalNovaMidiaAberto] = useState(false)
+    const [midiaEditando, setMidiaEditando] = useState<Midia | null>(null)
     const [busca, setBusca] = useState("")
     const [filtroTemplate, setFiltroTemplate] = useState<"todos" | TemplateMidia>("todos")
     const [filtroTipo, setFiltroTipo] = useState<"todos" | TipoMidia>("todos")
@@ -34,38 +47,50 @@ export default function AbaMidias() {
         return correspondeBusca && correspondeTemplate && correspondeTipo && correspondeStatus
     })
 
+    if (modalNovaMidiaAberto || midiaEditando) {
+        return (
+            <ModalNovaMidia
+                key={midiaEditando?.id || "nova-midia"}
+                midias={midias}
+                midiaEditando={midiaEditando}
+                atualizarMidiasDraft={atualizarMidiasDraft}
+                onFechar={() => {
+                    setModalNovaMidiaAberto(false)
+                    setMidiaEditando(null)
+                }}
+            />
+        )
+    }
+
     return (
-        <div className="space-y-8">
-            <MidiasHeader />
+        <div className="space-y-5">
+            <MidiasHeader
+                onNovaMidia={() => setModalNovaMidiaAberto(true)}
+                onRevisar={() => navegarPara("previa-tv")}
+            />
 
             <MidiasStats midias={midias} />
 
-            <MidiasToolbar
-                busca={busca}
-                setBusca={setBusca}
-                filtroTemplate={filtroTemplate}
-                setFiltroTemplate={setFiltroTemplate}
-                filtroTipo={filtroTipo}
-                setFiltroTipo={setFiltroTipo}
-                filtroStatus={filtroStatus}
-                setFiltroStatus={setFiltroStatus}
-                totalResultados={midiasFiltradas.length}
-                onNovaMidia={() => setModalNovaMidiaAberto(true)}
-            />
-
-            <MidiasGrid
-                midias={midiasFiltradas}
-                todasMidias={midias}
-                atualizarMidiasDraft={atualizarMidiasDraft}
-            />
-
-            {modalNovaMidiaAberto && (
-                <ModalNovaMidia
-                    midias={midias}
-                    atualizarMidiasDraft={atualizarMidiasDraft}
-                    onFechar={() => setModalNovaMidiaAberto(false)}
+            <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+                <MidiasToolbar
+                    busca={busca}
+                    setBusca={setBusca}
+                    filtroTemplate={filtroTemplate}
+                    setFiltroTemplate={setFiltroTemplate}
+                    filtroTipo={filtroTipo}
+                    setFiltroTipo={setFiltroTipo}
+                    filtroStatus={filtroStatus}
+                    setFiltroStatus={setFiltroStatus}
+                    totalResultados={midiasFiltradas.length}
                 />
-            )}
+
+                <MidiasGrid
+                    midias={midiasFiltradas}
+                    todasMidias={midias}
+                    atualizarMidiasDraft={atualizarMidiasDraft}
+                    onEditar={setMidiaEditando}
+                />
+            </section>
         </div>
     )
 }

@@ -20,7 +20,9 @@ export async function sincronizarMidias(midiasDraft: Midia[]) {
 
     for (const midia of midiasDraft) {
         if (ehMidiaDraft(midia.id)) {
-            const { id, ...novaMidia } = midia
+            const novaMidia = Object.fromEntries(
+                Object.entries(midia).filter(([chave]) => chave !== "id")
+            )
 
             await criarMidia(novaMidia as NovaMidia)
             continue

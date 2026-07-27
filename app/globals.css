@@ -63,28 +63,28 @@ body {
 .admin-shell select {
   appearance: none;
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.95rem;
-  background: rgba(9, 14, 25, 0.9);
-  color: #f4f4f5;
+  border: 1px solid rgb(203 213 225);
+  border-radius: 0.65rem;
+  background: #ffffff;
+  color: rgb(15 23 42);
   padding: 0.72rem 0.9rem;
   line-height: 1.4;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
 .admin-shell input::placeholder,
 .admin-shell textarea::placeholder {
-  color: rgb(161 161 170);
+  color: rgb(148 163 184);
 }
 
 .admin-shell input:focus,
 .admin-shell textarea:focus,
 .admin-shell select:focus {
   outline: none;
-  border-color: rgba(56, 189, 248, 0.7);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
-  background: rgba(12, 18, 31, 0.96);
+  border-color: rgb(59 130 246);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.13);
+  background: #ffffff;
 }
 
 .admin-shell button {
@@ -102,7 +102,46 @@ body {
 
 .admin-shell input[type="checkbox"],
 .admin-shell input[type="radio"] {
-  accent-color: #38bdf8;
+  accent-color: #0d6efd;
+}
+
+.admin-media-modal section,
+.admin-media-modal aside {
+  border-color: rgb(226 232 240) !important;
+  background: #ffffff !important;
+  border-radius: 0.85rem !important;
+  color: rgb(15 23 42);
+}
+
+.admin-media-modal [class*="bg-zinc-950"],
+.admin-media-modal [class*="bg-zinc-900"] {
+  border-color: rgb(226 232 240) !important;
+  background: rgb(248 250 252) !important;
+}
+
+.admin-media-modal [class*="text-zinc-2"],
+.admin-media-modal [class*="text-zinc-3"],
+.admin-media-modal [class*="text-zinc-4"] {
+  color: rgb(71 85 105) !important;
+}
+
+.admin-media-modal [class*="text-zinc-5"] {
+  color: rgb(100 116 139) !important;
+}
+
+.admin-media-modal [class*="text-white"] {
+  color: rgb(15 23 42);
+}
+
+.admin-media-modal .bg-sky-500,
+.admin-media-modal [class*="bg-sky-500"][class*="text-white"] {
+  color: #ffffff !important;
+}
+
+.admin-media-card > div:last-child [class*="bg-zinc"] {
+  border-color: rgb(226 232 240) !important;
+  background: rgb(248 250 252) !important;
+  color: rgb(51 65 85) !important;
 }
 
 @keyframes entradaMidia {

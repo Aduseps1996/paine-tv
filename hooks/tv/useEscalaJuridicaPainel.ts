@@ -81,8 +81,6 @@ export function useEscalaJuridicaPainel() {
 
                 const dadosFirebase = documento.data() as EscalaDocumento
 
-                console.log("ESCALA JURIDICA TV:", dadosFirebase)
-
                 setDados(dadosFirebase)
                 setCarregando(false)
             },

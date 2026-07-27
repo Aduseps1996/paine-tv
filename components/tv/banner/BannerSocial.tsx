@@ -89,7 +89,7 @@ export default function BannerSocial({
                                         muted
                                         loop={!possuiRotacao}
                                         playsInline
-                                        preload="metadata"
+                                        preload="auto"
                                         className="h-full w-full object-contain bg-black"
                                         onError={(e) => onErroVideo(e.currentTarget)}
                                         onEnded={(e) => onVideoEnded(e.currentTarget)}
@@ -173,7 +173,7 @@ export default function BannerSocial({
                                     muted
                                     loop={!possuiRotacao}
                                     playsInline
-                                    preload="metadata"
+                                    preload="auto"
                                     className="h-full w-full object-contain bg-black"
                                     onError={(e) => onErroVideo(e.currentTarget)}
                                     onEnded={(e) => onVideoEnded(e.currentTarget)}

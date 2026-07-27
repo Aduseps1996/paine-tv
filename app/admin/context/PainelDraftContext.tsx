@@ -10,16 +10,18 @@ import {
 
 import { publicarPainel } from "@/lib/firestore/publicacao"
 import type {
+    AvisoUrgente,
     ConfiguracoesPainel,
     Midia,
     Noticia
 } from "@/types/painel"
-import { excluirMidiaStorage } from "@/utils/excluirMidiaStorage"
+import { excluirArquivosMidiaStorage } from "@/utils/excluirMidiaStorage"
 
 type PainelDraft = {
     configuracoes: ConfiguracoesPainel
     midias: Midia[]
     noticias: Noticia[]
+    comunicados: AvisoUrgente[]
 }
 
 type EstadoInicial = PainelDraft
@@ -34,14 +36,16 @@ type PainelDraftContextValue = {
     atualizarConfiguracoesDraft: (configuracoes: Partial<ConfiguracoesPainel>) => void
     atualizarMidiasDraft: (midias: Midia[]) => void
     atualizarNoticiasDraft: (noticias: Noticia[]) => void
-    descartarAlteracoes: () => void
+    atualizarComunicadosDraft: (comunicados: AvisoUrgente[]) => void
+    descartarAlteracoes: () => Promise<void>
     publicar: () => Promise<void>
 }
 
 const estadoVazio: PainelDraft = {
     configuracoes: {},
     midias: [],
-    noticias: []
+    noticias: [],
+    comunicados: []
 }
 
 const PainelDraftContext = createContext<PainelDraftContextValue | null>(null)
@@ -50,15 +54,31 @@ async function limparMidiasRemovidasDoStorage(
     midiasPublicadas: Midia[],
     midiasDraft: Midia[]
 ) {
-    const idsDraft = new Set(midiasDraft.map((midia) => midia.id))
-
-    const midiasRemovidas = midiasPublicadas.filter(
-        (midia) => !idsDraft.has(midia.id)
+    const midiasAtuais = new Map(
+        midiasDraft.map((midia) => [midia.id, midia])
     )
 
+    const arquivosObsoletos = midiasPublicadas.map((midiaPublicada) => {
+        const midiaAtual = midiasAtuais.get(midiaPublicada.id)
+
+        return {
+            storagePath:
+                !midiaAtual ||
+                midiaAtual.storagePath !== midiaPublicada.storagePath
+                    ? midiaPublicada.storagePath
+                    : undefined,
+            thumbnailStoragePath:
+                !midiaAtual ||
+                midiaAtual.thumbnailStoragePath !==
+                    midiaPublicada.thumbnailStoragePath
+                    ? midiaPublicada.thumbnailStoragePath
+                    : undefined
+        }
+    })
+
     await Promise.all(
-        midiasRemovidas.map((midia) =>
-            excluirMidiaStorage(midia.storagePath)
+        arquivosObsoletos.map((midia) =>
+            excluirArquivosMidiaStorage(midia)
         )
     )
 }
@@ -104,13 +124,39 @@ export function PainelDraftProvider({
         }))
     }, [])
 
-    const descartarAlteracoes = useCallback(() => {
+    const atualizarComunicadosDraft = useCallback(
+        (comunicados: AvisoUrgente[]) => {
+            setDraft((atual) => ({
+                ...atual,
+                comunicados
+            }))
+        },
+        []
+    )
+
+    const descartarAlteracoes = useCallback(async () => {
+        const idsPublicados = new Set(publicado.midias.map((midia) => midia.id))
+        const midiasNovasDescartadas = draft.midias.filter(
+            (midia) => !idsPublicados.has(midia.id)
+        )
+
         setDraft({
             configuracoes: { ...publicado.configuracoes },
             midias: publicado.midias.map((midia) => ({ ...midia })),
-            noticias: publicado.noticias.map((noticia) => ({ ...noticia }))
+            noticias: publicado.noticias.map((noticia) => ({ ...noticia })),
+            comunicados: publicado.comunicados.map((comunicado) => ({
+                ...comunicado
+            }))
         })
-    }, [publicado])
+
+        const resultados = await Promise.allSettled(
+            midiasNovasDescartadas.map(excluirArquivosMidiaStorage)
+        )
+
+        if (resultados.some((resultado) => resultado.status === "rejected")) {
+            console.warn("Alguns uploads descartados não puderam ser removidos.")
+        }
+    }, [draft.midias, publicado])
 
     const temAlteracoesPendentes = useMemo(() => {
         return JSON.stringify(draft) !== JSON.stringify(publicado)
@@ -120,12 +166,29 @@ export function PainelDraftProvider({
         try {
             setPublicando(true)
 
-            await limparMidiasRemovidasDoStorage(publicado.midias, draft.midias)
-
             await publicarPainel(draft)
             setPublicado(draft)
 
+            // Só remove os arquivos antigos depois que o novo estado já está
+            // completamente publicado no Firestore.
+            const resultadosLimpeza = await Promise.allSettled([
+                limparMidiasRemovidasDoStorage(publicado.midias, draft.midias)
+            ])
+
+            if (resultadosLimpeza[0]?.status === "rejected") {
+                console.warn(
+                    "O painel foi publicado, mas alguns arquivos antigos não puderam ser removidos."
+                )
+            }
+
             alert("Painel publicado na TV!")
+        } catch (erro) {
+            console.error("Erro ao publicar o painel:", erro)
+            alert(
+                erro instanceof Error
+                    ? erro.message
+                    : "Não foi possível publicar o painel."
+            )
         } finally {
             setPublicando(false)
         }
@@ -141,6 +204,7 @@ export function PainelDraftProvider({
             atualizarConfiguracoesDraft,
             atualizarMidiasDraft,
             atualizarNoticiasDraft,
+            atualizarComunicadosDraft,
             descartarAlteracoes,
             publicar
         }),
@@ -153,6 +217,7 @@ export function PainelDraftProvider({
             atualizarConfiguracoesDraft,
             atualizarMidiasDraft,
             atualizarNoticiasDraft,
+            atualizarComunicadosDraft,
             descartarAlteracoes,
             publicar
         ]

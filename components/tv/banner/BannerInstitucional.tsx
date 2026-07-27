@@ -33,7 +33,7 @@ export default function BannerInstitucional({
                     autoPlay
                     muted
                     playsInline
-                    preload="metadata"
+                    preload="auto"
                     className={`${areaMidia} brightness-[0.92] contrast-[1.04]`}
                     onError={(e) => onErroVideo(e.currentTarget)}
                     onEnded={(e) => onVideoEnded(e.currentTarget)}

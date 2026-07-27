@@ -15,6 +15,53 @@ type UseRotacaoMidiasParams = {
     fallback: string
 }
 
+function intercalarComunicados(
+    midiasBase: Midia[],
+    comunicados: Midia[]
+) {
+    if (comunicados.length === 0) return midiasBase
+    if (midiasBase.length === 0) return comunicados
+
+    const maiorIntervalo = Math.max(
+        ...comunicados.map((midia) =>
+            Math.max(
+                1,
+                Number(midia.comunicado?.intervaloRotacaoMidias || 5)
+            )
+        )
+    )
+
+    const tamanhoCiclo = Math.max(midiasBase.length, maiorIntervalo)
+    const contadores = new Map<string, number>(
+        comunicados.map((midia) => [midia.id, 0])
+    )
+    const resultado: Midia[] = []
+
+    for (let indice = 0; indice < tamanhoCiclo; indice++) {
+        resultado.push(midiasBase[indice % midiasBase.length])
+
+        comunicados.forEach((comunicado) => {
+            const intervalo = Math.max(
+                1,
+                Number(
+                    comunicado.comunicado?.intervaloRotacaoMidias || 5
+                )
+            )
+            const contador = (contadores.get(comunicado.id) || 0) + 1
+
+            if (contador >= intervalo) {
+                resultado.push(comunicado)
+                contadores.set(comunicado.id, 0)
+                return
+            }
+
+            contadores.set(comunicado.id, contador)
+        })
+    }
+
+    return resultado
+}
+
 export function useRotacaoMidias({
     midias,
     fallback
@@ -24,7 +71,6 @@ export function useRotacaoMidias({
     const [midiasComErro, setMidiasComErro] = useState<string[]>([])
     const [controleProgramacao, setControleProgramacao] =
         useState<Record<string, number>>({})
-    const timeoutAvancoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const timeoutRecarregarVideoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
@@ -41,10 +87,6 @@ export function useRotacaoMidias({
 
     useEffect(() => {
         return () => {
-            if (timeoutAvancoRef.current) {
-                clearTimeout(timeoutAvancoRef.current)
-            }
-
             if (timeoutRecarregarVideoRef.current) {
                 clearTimeout(timeoutRecarregarVideoRef.current)
             }
@@ -189,9 +231,16 @@ export function useRotacaoMidias({
             ]
         }
 
-        return montarListaInteligente(
-            listaParaUso.filter((midia) => midia.tipo !== "youtube")
+        const comunicados = listaParaUso.filter(
+            (midia) => midia.template === "comunicado"
         )
+        const midiasBase = montarListaInteligente(
+            listaParaUso
+                .filter((midia) => midia.tipo !== "youtube")
+                .filter((midia) => midia.template !== "comunicado")
+        )
+
+        return intercalarComunicados(midiasBase, comunicados)
     }, [
         midias,
         midiasComErro,
@@ -208,11 +257,6 @@ export function useRotacaoMidias({
             setIndiceAtual(0)
             setMidiasComErro([])
         }, 0)
-
-        if (timeoutAvancoRef.current) {
-            clearTimeout(timeoutAvancoRef.current)
-            timeoutAvancoRef.current = null
-        }
 
         if (timeoutRecarregarVideoRef.current) {
             clearTimeout(timeoutRecarregarVideoRef.current)
@@ -266,16 +310,10 @@ export function useRotacaoMidias({
     const avancarMidia = useCallback(() => {
         if (midiasValidas.length <= 1) return
 
-        if (timeoutAvancoRef.current) {
-            clearTimeout(timeoutAvancoRef.current)
-        }
-
-        timeoutAvancoRef.current = setTimeout(() => {
-            setIndiceAtual((valorAtual) => {
-                const proximo = valorAtual + 1
-                return proximo >= midiasValidas.length ? 0 : proximo
-            })
-        }, 150)
+        setIndiceAtual((valorAtual) => {
+            const proximo = valorAtual + 1
+            return proximo >= midiasValidas.length ? 0 : proximo
+        })
     }, [midiasValidas.length])
 
     useEffect(() => {

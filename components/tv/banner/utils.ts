@@ -94,6 +94,9 @@ export function obterAssinaturaMidia(midia: Midia) {
         midia.plantao ? JSON.stringify(midia.plantao) : "",
         midia.contatosOficiais
             ? JSON.stringify(midia.contatosOficiais)
+            : "",
+        midia.comunicado
+            ? JSON.stringify(midia.comunicado)
             : ""
     ].join(":")
 }

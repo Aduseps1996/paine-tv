@@ -8,6 +8,7 @@ export type TemplateMidia =
     | "social"
     | "plantao-juridico"
     | "contatos-oficiais"
+    | "comunicado"
 
 
 export type ModoExibicaoMidia = "cover" | "contain"
@@ -99,6 +100,7 @@ export type Midia = {
     orientacaoVideo?: "vertical" | "horizontal" | "quadrado"
     plantao?: DadosPlantao
     contatosOficiais?: DadosContatosOficiais
+    comunicado?: AvisoUrgente
 
     // Controle do arquivo
     versao?: number
@@ -138,7 +140,17 @@ export type AvisoUrgente = {
     categoria?: "normal" | "urgente" | "atencao"
     inicioExibicao?: string
     fimExibicao?: string
+    exibirRotacao?: boolean
+    intervaloRotacaoMidias?: number
+    duracaoTela?: number
+    exibirSobreposicao?: boolean
+    intervaloSobreposicaoMinutos?: number
+    duracaoSobreposicaoSegundos?: number
+    criadoEm?: unknown
+    atualizadoEm?: unknown
 }
+
+export type NovoAvisoUrgente = Omit<AvisoUrgente, "id">
 
 export type ModoLogo = "transparente" | "fundo" | "card"
 
@@ -146,9 +158,11 @@ export type TamanhoLogoPainel = "pequeno" | "medio" | "grande"
 
 export type AbaAdmin =
     | "inicio"
+    | "previa-tv"
     | "midias"
     | "noticias"
     | "contatos"
+    | "comunicados"
     | "configuracao-painel"
     | "configuracao-tipografia"
 

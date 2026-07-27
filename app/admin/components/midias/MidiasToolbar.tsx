@@ -1,4 +1,5 @@
 import type { TemplateMidia, TipoMidia } from "@/types/painel"
+import { Search } from "lucide-react"
 
 type Props = {
     busca: string
@@ -14,7 +15,6 @@ type Props = {
     setFiltroStatus: (valor: "todos" | "ativas" | "inativas" | "programadas") => void
 
     totalResultados: number
-    onNovaMidia: () => void
 }
 
 export default function MidiasToolbar({
@@ -26,44 +26,66 @@ export default function MidiasToolbar({
     setFiltroTipo,
     filtroStatus,
     setFiltroStatus,
-    totalResultados,
-    onNovaMidia
+    totalResultados
 }: Props) {
+    const tipos: Array<{ valor: "todos" | TipoMidia; rotulo: string }> = [
+        { valor: "todos", rotulo: "Todas" },
+        { valor: "imagem", rotulo: "Imagens" },
+        { valor: "video", rotulo: "Vídeos" },
+        { valor: "youtube", rotulo: "YouTube" },
+        { valor: "dinamica", rotulo: "Dinâmicas" }
+    ]
+
     return (
-        <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="border-b border-slate-200 p-4 sm:p-5">
+            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h2 className="text-2xl font-black sm:text-3xl">
-                        Biblioteca
+                    <h2 className="text-lg font-extrabold text-slate-950 sm:text-xl">
+                        Biblioteca de mídias
                     </h2>
 
-                    <p className="mt-2 text-sm text-zinc-400 sm:text-base">
-                        {totalResultados} resultado(s) encontrado(s) no rascunho.
+                    <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+                        {totalResultados} resultado(s) no rascunho
                     </p>
                 </div>
-
-                <button
-                    type="button"
-                    onClick={onNovaMidia}
-                    className="w-fit rounded-2xl border border-sky-300/20 bg-sky-500 px-5 py-3 text-sm font-black text-white shadow-[0_14px_35px_rgba(14,165,233,0.22)] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                    + Nova mídia
-                </button>
             </div>
 
-            <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
-                <input
-                    type="text"
-                    placeholder="Pesquisar por título, categoria ou arquivo..."
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
-                />
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+                <label className="relative block">
+                    <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Buscar por título..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        className="min-w-0 pl-10 xl:w-80"
+                    />
+                </label>
 
+                <div className="flex flex-wrap gap-2">
+                    {tipos.map((item) => (
+                        <button
+                            key={item.valor}
+                            type="button"
+                            onClick={() => setFiltroTipo(item.valor)}
+                            className={`min-h-10 rounded-lg border px-4 text-sm font-bold transition ${
+                                filtroTipo === item.valor
+                                    ? "border-[#0d6efd] bg-blue-50 text-[#0d6efd]"
+                                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                            }`}
+                        >
+                            {item.rotulo}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row xl:ml-auto">
                 <select
                     value={filtroTemplate}
                     onChange={(e) =>
                         setFiltroTemplate(e.target.value as "todos" | TemplateMidia)
                     }
+                    className="min-w-44"
                 >
                     <option value="todos">Todos os templates</option>
                     <option value="cheio">Banner Cheio</option>
@@ -71,19 +93,6 @@ export default function MidiasToolbar({
                     <option value="painel">Painel Informativo</option>
                     <option value="plantao-juridico">Plantão Judicial</option>
                     <option value="contatos-oficiais">Contatos Oficiais</option>
-                </select>
-
-                <select
-                    value={filtroTipo}
-                    onChange={(e) =>
-                        setFiltroTipo(e.target.value as "todos" | TipoMidia)
-                    }
-                >
-                    <option value="todos">Todos os tipos</option>
-                    <option value="imagem">Imagem</option>
-                    <option value="video">Vídeo</option>
-                    <option value="youtube">YouTube / Live</option>
-                    <option value="dinamica">Conteúdo dinâmico</option>
                 </select>
 
                 <select
@@ -103,7 +112,8 @@ export default function MidiasToolbar({
                     <option value="inativas">Inativas</option>
                     <option value="programadas">Programadas</option>
                 </select>
+                </div>
             </div>
-        </section>
+        </div>
     )
 }

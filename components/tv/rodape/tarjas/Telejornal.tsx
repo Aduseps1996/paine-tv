@@ -22,7 +22,6 @@ type TelejornalProps = {
 
 export default function Telejornal({
     logo,
-    slogan,
     hora,
     tituloTarja,
     subtituloTarja,

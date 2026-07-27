@@ -1,4 +1,4 @@
-const CACHE_NAME = "painel-tv-midias-v1"
+const CACHE_NAME = "painel-tv-midias-v2"
 
 self.addEventListener("install", () => {
   self.skipWaiting()
@@ -31,18 +31,29 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
       const respostaCache = await cache.match(event.request)
+      const ehStorageFirebase =
+        url.href.includes("firebasestorage.googleapis.com") ||
+        url.href.includes("firebasestorage.app")
 
-      if (respostaCache) {
+      // URLs do Firebase são versionadas/tokenizadas e podem usar cache-first.
+      if (ehStorageFirebase && respostaCache) {
         return respostaCache
       }
 
-      const respostaRede = await fetch(event.request)
+      try {
+        // Arquivos locais usam network-first para receber atualizações feitas
+        // mantendo o mesmo nome, com o cache servindo como fallback offline.
+        const respostaRede = await fetch(event.request)
 
-      if (respostaRede && respostaRede.ok) {
-        cache.put(event.request, respostaRede.clone())
+        if (respostaRede && respostaRede.ok) {
+          await cache.put(event.request, respostaRede.clone())
+        }
+
+        return respostaRede
+      } catch (erro) {
+        if (respostaCache) return respostaCache
+        throw erro
       }
-
-      return respostaRede
     })
   )
 })

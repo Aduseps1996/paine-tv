@@ -16,7 +16,9 @@ export async function sincronizarNoticias(noticiasDraft: Noticia[]) {
 
     for (const noticia of noticiasDraft) {
         if (ehNoticiaDraft(noticia.id)) {
-            const { id, ...novaNoticia } = noticia
+            const novaNoticia = Object.fromEntries(
+                Object.entries(noticia).filter(([chave]) => chave !== "id")
+            )
 
             await criarNoticia(novaNoticia as NovaNoticia)
             continue

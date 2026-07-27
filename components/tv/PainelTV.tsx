@@ -9,8 +9,7 @@ import Image from "next/image"
 
 import {
   doc,
-  onSnapshot,
-  updateDoc
+  onSnapshot
 } from "firebase/firestore"
 
 import { db } from "@/lib/firebase"
@@ -18,20 +17,27 @@ import { useAvisoUrgente } from "@/hooks/tv/useAvisoUrgente"
 import { useOnlineStatus } from "@/hooks/useOnlineStatus"
 
 
-import type { ConfiguracoesPainel, Midia, Noticia } from "@/types/painel"
+import type {
+  AvisoUrgente,
+  ConfiguracoesPainel,
+  Midia,
+  Noticia
+} from "@/types/painel"
 
 type Props = {
   modoPreview?: boolean
   previewConfiguracoes?: ConfiguracoesPainel
   previewMidias?: Midia[]
   previewNoticias?: Noticia[]
+  previewComunicados?: AvisoUrgente[]
 }
 
 export default function PainelTV({
   modoPreview = false,
   previewConfiguracoes,
   previewMidias,
-  previewNoticias
+  previewNoticias,
+  previewComunicados
 }: Props) {
 
   const [mostrarChamada, setMostrarChamada] = useState(false)
@@ -40,6 +46,7 @@ export default function PainelTV({
   const [guicheAtual, setGuicheAtual] = useState("Guichê 2")
   const ultimaChamadaIdRef = useRef("")
   const ultimaRepeticaoIdRef = useRef<number | null>(null)
+  const timeoutChamadaRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [painelIniciadoEm] = useState(() => Date.now())
   const [nomePainel, setNomePainel] = useState("ADUSEPS")
   const [subtitulo, setSubtitulo] = useState("Painel Institucional")
@@ -55,7 +62,7 @@ export default function PainelTV({
   const online = useOnlineStatus()
 
   const [midiaAtualTv, setMidiaAtualTv] = useState<Midia | null>(null)
-  const avisoUrgente = useAvisoUrgente()
+  const avisoUrgente = useAvisoUrgente(modoPreview, previewComunicados)
 
   const tocarSomChamada = useCallback(() => {
     try {
@@ -150,10 +157,6 @@ export default function PainelTV({
         }
 
         if (criadoEmMs < painelIniciadoEm) {
-          updateDoc(doc(db, "painel_chamadas", "atual"), {
-            ativo: false
-          }).catch(() => { })
-
           return
         }
 
@@ -191,17 +194,13 @@ export default function PainelTV({
         setMostrarChamada(true)
         tocarSomChamada()
 
-        setTimeout(async () => {
+        if (timeoutChamadaRef.current) {
+          clearTimeout(timeoutChamadaRef.current)
+        }
 
+        timeoutChamadaRef.current = setTimeout(() => {
           setMostrarChamada(false)
-
-          await updateDoc(
-            doc(db, "painel_chamadas", "atual"),
-            {
-              ativo: false
-            }
-          ).catch(() => { })
-          /* Controle de tempo de chamada */
+          timeoutChamadaRef.current = null
         }, 15000)
 
       },
@@ -210,7 +209,14 @@ export default function PainelTV({
       }
     )
 
-    return () => unsubscribe()
+    return () => {
+      unsubscribe()
+
+      if (timeoutChamadaRef.current) {
+        clearTimeout(timeoutChamadaRef.current)
+        timeoutChamadaRef.current = null
+      }
+    }
 
   }, [modoPreview, painelIniciadoEm, tocarSomChamada])
 
@@ -253,6 +259,8 @@ export default function PainelTV({
         modoPreview={modoPreview}
         previewMidias={previewMidias}
         previewConfiguracoes={previewConfiguracoes}
+        previewNoticias={previewNoticias}
+        previewComunicados={previewComunicados}
       />
 
       <AvisoUrgenteOverlay aviso={avisoUrgente} />

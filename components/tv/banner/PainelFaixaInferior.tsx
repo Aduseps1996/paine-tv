@@ -24,8 +24,6 @@ export default function PainelFaixaInferior({
             midiaAtual.titulo ||
             "ADUSEPS - Informacao, acolhimento e defesa do associado"
 
-    const logo = configuracoes.logo || ""
-
     const { modoCompacto } = useModoTelaPainel()
 
     return (

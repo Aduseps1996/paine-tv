@@ -2,7 +2,10 @@ import {
     Clock3,
     ContactRound,
     Gavel,
+    GripVertical,
     MessageCircleMore,
+    MoreHorizontal,
+    Pencil,
     Phone
 } from "lucide-react"
 
@@ -19,44 +22,20 @@ import {
 
 type Props = {
     midia: Midia
+    onEditar: (midia: Midia) => void
     onAlternar: (midia: Midia) => void
     onExcluir: (midia: Midia) => void
-    onAlterarOrdem: (id: string, ordem: number) => void
-    onAtualizar: (id: string, dados: Partial<Midia>) => void
-    exibirExibicao: boolean
-    exibirTarja: boolean
-    exibirPlantao: boolean
-    onToggleExibicao: (midia: Midia) => void
-    onToggleTarja: (midia: Midia) => void
-    onTogglePlantao: (midia: Midia) => void
-    children?: React.ReactNode
 }
 
 export default function MidiaCard({
     midia,
+    onEditar,
     onAlternar,
-    onExcluir,
-    onAlterarOrdem,
-    onAtualizar,
-    exibirExibicao,
-    exibirTarja,
-    exibirPlantao,
-    onToggleExibicao,
-    onToggleTarja,
-    onTogglePlantao,
-    children
+    onExcluir
 }: Props) {
     const titulo = obterTituloMidia(midia)
-    const orientacaoVideoLabel = midia.orientacaoVideo
-        ? {
-            horizontal: "Horizontal",
-            vertical: "Vertical",
-            quadrado: "Quadrado"
-        }[midia.orientacaoVideo]
-        : null
-
     return (
-        <article className="overflow-hidden rounded-[30px] border border-white/10 bg-zinc-900/85 shadow-[0_24px_70px_rgba(0,0,0,0.28)]">
+        <article className="admin-media-card h-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_4px_14px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.1)]">
             <div className="relative aspect-video overflow-hidden bg-black">
 
                 {midia.tipo === "imagem" && (
@@ -174,180 +153,88 @@ export default function MidiaCard({
                     </div>
                 )}
 
-                <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-                    <span className={`rounded-full border px-3 py-1 text-xs font-black ${obterCorStatus(midia.ativo)}`}>
-                        {obterTextoStatus(midia.ativo)}
+                <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+                    <span className="rounded border border-white/80 bg-white/95 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-[#0d6efd] shadow-sm">
+                        {midia.tipo === "dinamica" ? "Dinâmica" : midia.tipo}
                     </span>
 
-                    <span className={`rounded-full border px-3 py-1 text-xs font-black ${obterCorProgramacao(midia.exibicaoProgramada)}`}>
-                        {obterTextoProgramacao(midia)}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                        <span className={`rounded border px-2 py-1 text-[10px] font-black uppercase ${obterCorStatus(midia.ativo)}`}>
+                            {obterTextoStatus(midia.ativo)}
+                        </span>
+
+                        {midia.exibicaoProgramada && (
+                            <span className={`rounded border px-2 py-1 text-[10px] font-black uppercase ${obterCorProgramacao(true)}`}>
+                                {obterTextoProgramacao(midia)}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            <div className="p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <h3 className="text-xl font-black leading-tight">
-                            {titulo}
-                        </h3>
-
-                        {midia.template !== "plantao-juridico" &&
-                            midia.template !== "contatos-oficiais" && (
-                            <p className="mt-2 max-w-xl break-all text-sm text-zinc-500">
-                                {midia.arquivo}
-                            </p>
-                        )}
-
-                        {midia.tipo === "video" && (
-                            <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-zinc-300">
-                                {midia.duracaoVideo && (
-                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                                        Duração: {Math.floor(midia.duracaoVideo / 60)}:
-                                        {String(midia.duracaoVideo % 60).padStart(2, "0")}
-                                    </span>
-                                )}
-
-                                {midia.larguraVideo && midia.alturaVideo && (
-                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                                        {midia.larguraVideo} × {midia.alturaVideo}
-                                    </span>
-                                )}
-
-                                {midia.orientacaoVideo && (
-                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                                        {orientacaoVideoLabel}
-                                    </span>
-                                )}
-
-                                {midia.tamanhoBytes && (
-                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                                        {(midia.tamanhoBytes / 1024 / 1024).toFixed(2)} MB
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    <span className="w-fit rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-black text-zinc-300">
-                        {obterNomeTemplate(midia.template)}
-                    </span>
+            <div className="text-slate-950">
+                <div className="px-3.5 py-3">
+                    <h3 className="truncate text-[15px] font-extrabold leading-tight">
+                        {titulo}
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                        {midia.tipo === "imagem" || midia.tipo === "dinamica"
+                            ? `${midia.duracao}s`
+                            : "Até o fim"}
+                        {" · "}Ordem {String(midia.ordem).padStart(2, "0")}
+                        {" · "}{obterNomeTemplate(midia.template)}
+                    </p>
+                    {midia.exibicaoProgramada && (
+                        <p className="mt-1 truncate text-[11px] font-semibold text-amber-600">
+                            {obterTextoProgramacao(midia)}
+                        </p>
+                    )}
                 </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-3">
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">
-                            Ordem
-                        </p>
+                <div className="flex min-h-12 items-center gap-2 border-t border-slate-100 px-3">
+                    <GripVertical
+                        size={18}
+                        className="cursor-grab text-slate-400"
+                        aria-label="Arrastar para reordenar"
+                    />
 
-                        <input
-                            type="number"
-                            min="1"
-                            value={midia.ordem}
-                            onChange={(e) => onAlterarOrdem(midia.id, Number(e.target.value))}
-                            className="mt-2 w-full bg-transparent text-sm font-black text-white outline-none"
-                        />
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-3">
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">
-                            Duração
-                        </p>
-
-                        {midia.tipo === "imagem" || midia.tipo === "dinamica" ? (
-                            <input
-                                type="number"
-                                min="1"
-                                value={midia.duracao}
-                                onChange={(e) =>
-                                    onAtualizar(midia.id, {
-                                        duracao: Number(e.target.value)
-                                    })
-                                }
-                                className="mt-2 w-full bg-transparent text-sm font-black text-white outline-none"
-                            />
-                        ) : (
-                            <p className="mt-2 text-sm font-black text-zinc-300">
-                                Até o fim
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-3">
-                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">
-                            Repetição
-                        </p>
-
-                        <input
-                            type="number"
-                            min="1"
-                            max="10"
-                            value={midia.pesoExibicao || 1}
-                            onChange={(e) =>
-                                onAtualizar(midia.id, {
-                                    pesoExibicao: Number(e.target.value)
-                                })
-                            }
-                            className="mt-2 w-full bg-transparent text-sm font-black text-white outline-none"
-                        />
-                    </div>
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3">
                     <button
                         type="button"
                         onClick={() => onAlternar(midia)}
-                        className="rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-sm font-black text-zinc-200"
+                        className={`relative h-6 w-11 rounded-full transition ${
+                            midia.ativo ? "bg-[#0d6efd]" : "bg-slate-300"
+                        }`}
+                        aria-label={midia.ativo ? "Desativar mídia" : "Ativar mídia"}
                     >
-                        {midia.ativo ? "Desativar" : "Ativar"}
+                        <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition ${
+                            midia.ativo ? "left-6" : "left-1"
+                        }`} />
                     </button>
 
                     <button
                         type="button"
-                        onClick={() => onToggleExibicao(midia)}
-                        className={`rounded-2xl px-4 py-3 text-sm font-black ${exibirExibicao
-                            ? "border border-sky-300/30 bg-sky-500 text-white"
-                            : "border border-white/10 bg-white/[0.04] text-zinc-200"
-                            }`}
+                        onClick={() => onEditar(midia)}
+                        className="ml-auto inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 text-xs font-bold text-[#0d6efd] hover:bg-blue-50"
                     >
-                        Configurar exibição
+                        <Pencil size={14} />
+                        Editar
                     </button>
 
-                    {midia.template === "plantao-juridico" ||
-                    midia.template === "contatos-oficiais" ? (
-                        <button
-                            type="button"
-                            onClick={() => onTogglePlantao(midia)}
-                            className={`rounded-2xl px-4 py-3 text-sm font-black ${exibirPlantao
-                                ? "border border-cyan-300/30 bg-cyan-500 text-white"
-                                : "border border-white/10 bg-white/[0.04] text-zinc-200"
-                                }`}
-                        >
-                            Editar conteúdo
-                        </button>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => onToggleTarja(midia)}
-                            className={`rounded-2xl px-4 py-3 text-sm font-black ${exibirTarja
-                                ? "border border-sky-300/30 bg-sky-500 text-white"
-                                : "border border-white/10 bg-white/[0.04] text-zinc-200"
-                                }`}
-                        >
-                            Tarja
-                        </button>
-                    )}
-
-                    <button
-                        type="button"
-                        onClick={() => onExcluir(midia)}
-                        className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-black text-red-300"
-                    >
-                        Excluir
-                    </button>
+                    <details className="relative">
+                        <summary className="flex h-8 w-9 cursor-pointer list-none items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">
+                            <MoreHorizontal size={17} />
+                        </summary>
+                        <div className="absolute bottom-10 right-0 z-10 w-36 rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl">
+                            <button
+                                type="button"
+                                onClick={() => onExcluir(midia)}
+                                className="w-full rounded-md px-3 py-2 text-left text-xs font-bold text-red-700 hover:bg-red-50"
+                            >
+                                Excluir mídia
+                            </button>
+                        </div>
+                    </details>
                 </div>
-
-                {children}
             </div>
         </article>
     )

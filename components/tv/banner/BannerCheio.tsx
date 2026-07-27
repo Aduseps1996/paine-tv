@@ -29,7 +29,7 @@ export default function BannerCheio({
                     autoPlay
                     muted
                     playsInline
-                    preload="metadata"
+                    preload="auto"
                     className={areaMidia}
                     onError={(e) => onErroVideo(e.currentTarget)}
                     onEnded={(e) => onVideoEnded(e.currentTarget)}

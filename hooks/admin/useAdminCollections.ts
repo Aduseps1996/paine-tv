@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import {
     atualizarMidia,
@@ -12,19 +12,26 @@ import {
     listarNoticias,
     removerNoticiaPorId
 } from "@/lib/firestore/noticias"
-import type { Midia, Noticia } from "@/types/painel"
+import {
+    listarComunicados,
+    ordenarComunicados
+} from "@/lib/firestore/comunicados"
+import type { AvisoUrgente, Midia, Noticia } from "@/types/painel"
 
-export function useAdminCollections() {
+export function useAdminCollections(habilitado = true) {
     const [midias, setMidias] = useState<Midia[]>([])
     const [noticias, setNoticias] = useState<Noticia[]>([])
+    const [comunicados, setComunicados] = useState<AvisoUrgente[]>([])
+    const [colecoesCarregadas, setColecoesCarregadas] = useState(false)
+    const [erroCarregamento, setErroCarregamento] = useState<string | null>(null)
 
-    async function carregarMidias() {
+    const carregarMidias = useCallback(async () => {
         setMidias(await listarMidias())
-    }
+    }, [])
 
-    async function carregarNoticias() {
+    const carregarNoticias = useCallback(async () => {
         setNoticias(await listarNoticias())
-    }
+    }, [])
 
     async function removerMidia(id: string) {
         await removerMidiaPorId(id)
@@ -53,17 +60,61 @@ export function useAdminCollections() {
     }
 
     useEffect(() => {
-        void Promise.resolve().then(async () => {
-            await Promise.all([
-                carregarMidias(),
-                carregarNoticias()
-            ])
+        if (!habilitado) {
+            const timeout = window.setTimeout(() => {
+                setColecoesCarregadas(false)
+                setErroCarregamento(null)
+            }, 0)
+
+            return () => window.clearTimeout(timeout)
+        }
+
+        let ativo = true
+
+        void Promise.resolve().then(() => {
+            if (!ativo) return
+            setColecoesCarregadas(false)
+            setErroCarregamento(null)
         })
-    }, [])
+
+        void Promise.all([
+            listarMidias(),
+            listarNoticias(),
+            listarComunicados()
+        ])
+            .then(([midiasCarregadas, noticiasCarregadas, comunicadosCarregados]) => {
+                if (!ativo) return
+
+                // Atualiza as duas coleções juntas para o rascunho nunca ser
+                // inicializado com apenas metade dos dados publicados.
+                setMidias(midiasCarregadas)
+                setNoticias(noticiasCarregadas)
+                setComunicados(ordenarComunicados(comunicadosCarregados))
+                setErroCarregamento(null)
+                setColecoesCarregadas(true)
+            })
+            .catch((erro: unknown) => {
+                if (!ativo) return
+
+                setErroCarregamento(
+                    erro instanceof Error
+                        ? erro.message
+                        : "Não foi possível carregar o conteúdo publicado."
+                )
+                setColecoesCarregadas(false)
+            })
+
+        return () => {
+            ativo = false
+        }
+    }, [habilitado])
 
     return {
         midias,
         noticias,
+        comunicados,
+        colecoesCarregadas,
+        erroCarregamento,
         carregarMidias,
         carregarNoticias,
         removerMidia,

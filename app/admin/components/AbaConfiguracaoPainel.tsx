@@ -1,5 +1,17 @@
-import CidadeAutocomplete from "./clima/CidadeAutocomplete"
+"use client"
+
+import {
+    CalendarDays,
+    CloudSun,
+    ImageIcon,
+    LayoutPanelTop,
+    Megaphone,
+    Scale,
+    Settings2
+} from "lucide-react"
+
 import { usePainelDraftContext } from "../context/PainelDraftContext"
+import CidadeAutocomplete from "./clima/CidadeAutocomplete"
 import type { ConfiguracoesPainel } from "@/types/painel"
 
 type ModoLogo = "transparente" | "fundo" | "card"
@@ -13,578 +25,408 @@ type ChavePainelInformativo = keyof Pick<
     | "mostrarHoraPainel"
 >
 
+const inputClass =
+    "mt-2 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+
+function SectionTitle({
+    icon: Icon,
+    title,
+    description
+}: {
+    icon: typeof Settings2
+    title: string
+    description: string
+}) {
+    return (
+        <div className="flex items-start gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-[#0d6efd]">
+                <Icon size={20} />
+            </span>
+            <div>
+                <h2 className="text-lg font-extrabold tracking-tight text-slate-950">
+                    {title}
+                </h2>
+                <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                    {description}
+                </p>
+            </div>
+        </div>
+    )
+}
+
+function Toggle({
+    title,
+    description,
+    checked,
+    onChange
+}: {
+    title: string
+    description?: string
+    checked: boolean
+    onChange: (checked: boolean) => void
+}) {
+    return (
+        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3.5 transition hover:border-blue-200">
+            <span>
+                <span className="block text-sm font-bold text-slate-800">{title}</span>
+                {description && (
+                    <span className="mt-1 block text-xs leading-relaxed text-slate-500">
+                        {description}
+                    </span>
+                )}
+            </span>
+            <span className="relative shrink-0">
+                <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(event) => onChange(event.target.checked)}
+                    className="peer sr-only"
+                />
+                <span className="block h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-[#0d6efd]" />
+                <span className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition peer-checked:translate-x-5" />
+            </span>
+        </label>
+    )
+}
+
 export default function AbaConfiguracaoPainel() {
     const { draft, atualizarConfiguracoesDraft } = usePainelDraftContext()
     const config = draft.configuracoes
 
     const modoLogo = (config.modoLogo || "fundo") as ModoLogo
-    const tamanhoLogoPainel = (config.tamanhoLogoPainel || "medio") as TamanhoLogo
-
-    const logoConfigurada = (config.logo || "").trim() !== ""
-    const rodapeAtivo = config.mostrarRodapeNoticias ?? true
+    const tamanhoLogo = (config.tamanhoLogoPainel || "medio") as TamanhoLogo
+    const logoConfigurada = Boolean((config.logo || "").trim())
     const cidade = config.cidadeClimaPainel || "Recife"
 
-    const alturaLogoPreview =
-        tamanhoLogoPainel === "pequeno"
-            ? "h-10"
-            : tamanhoLogoPainel === "grande"
-                ? "h-20"
-                : "h-14"
+    const alturaLogo =
+        tamanhoLogo === "pequeno"
+            ? "h-9"
+            : tamanhoLogo === "grande"
+                ? "h-16"
+                : "h-12"
 
-    const classeLogoPreview =
-        modoLogo === "transparente"
-            ? "bg-transparent p-0"
-            : modoLogo === "card"
-                ? "bg-white/10 border border-white/15 p-3 rounded-2xl"
-                : "bg-white p-3 rounded-2xl"
-
-    function cardOpcao(ativo: boolean) {
-        return ativo
-            ? "border-sky-400/40 bg-sky-500/15 text-white shadow-[0_14px_35px_rgba(14,165,233,0.16)]"
-            : "border-white/10 bg-zinc-950/60 text-zinc-300"
+    function optionClass(active: boolean) {
+        return active
+            ? "border-blue-500 bg-blue-50 text-[#0755b5] ring-2 ring-blue-500/10"
+            : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-slate-50"
     }
 
     return (
-        <div className="space-y-8">
-            <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.22)] sm:p-7">
+        <div className="space-y-6">
+            <header className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <div className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.32em] text-sky-300">
-                        Identidade visual
+                    <div className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#0d6efd]">
+                        <Settings2 size={15} />
+                        Aparência e funcionamento
                     </div>
-
-                    <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
-                        Configuração do painel
+                    <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
+                        Configurações do painel
                     </h1>
-
-                    <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400 sm:text-base">
-                        Ajuste topo, logo, rodapé, clima e tarjas. Tudo fica no rascunho até ser publicado na página Início.
-                    </p>
-                </div>
-            </section>
-
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
-                    <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
-                        Logo
-                    </p>
-                    <p className="mt-4 text-3xl font-black">
-                        {logoConfigurada ? "Ativa" : "Vazia"}
-                    </p>
-                    <p className="mt-3 text-sm text-zinc-400">
-                        {logoConfigurada ? "Logo configurada." : "Nenhuma logo definida."}
+                    <p className="mt-2 max-w-3xl text-sm text-slate-500">
+                        Organize a identidade da TV, clima, rodapé, escala jurídica e tempos das tarjas.
                     </p>
                 </div>
 
-                <div className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
-                    <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
-                        Rodapé
-                    </p>
-                    <p className="mt-4 text-3xl font-black">
-                        {rodapeAtivo ? "Ativo" : "Inativo"}
-                    </p>
-                    <p className="mt-3 text-sm text-zinc-400">
-                        Faixa de notícias inferior.
-                    </p>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <strong className="block">Alterações no rascunho</strong>
+                    <span className="text-xs text-amber-700">
+                        Revise e publique pela aba Prévia da TV.
+                    </span>
                 </div>
+            </header>
 
-                <div className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
-                    <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
-                        Cidade
-                    </p>
-                    <p className="mt-4 text-3xl font-black">
-                        {cidade}
-                    </p>
-                    <p className="mt-3 text-sm text-zinc-400">
-                        Usada no clima do painel.
-                    </p>
-                </div>
-
-                <div className="rounded-[26px] border border-white/10 bg-zinc-900/80 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
-                    <p className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">
-                        Tarjas
-                    </p>
-                    <p className="mt-4 text-3xl font-black">
-                        Padrão
-                    </p>
-                    <p className="mt-3 text-sm text-zinc-400">
-                        Tempos globais configurados.
-                    </p>
-                </div>
-            </section>
-
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Topo da TV
-                </h2>
-
-                <p className="mt-2 text-sm text-zinc-400">
-                    Informações principais exibidas na parte superior do painel.
-                </p>
-
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Nome do painel
-                        </label>
-
-                        <input
-                            type="text"
-                            value={config.nomePainel || ""}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({ nomePainel: e.target.value })
-                            }
-                            placeholder="Ex: ADUSEPS"
-                        />
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                    { label: "Logo", value: logoConfigurada ? "Configurada" : "Não definida", detail: tamanhoLogo },
+                    { label: "Rodapé", value: config.mostrarRodapeNoticias ?? true ? "Ativo" : "Inativo", detail: "notícias" },
+                    { label: "Clima", value: cidade, detail: config.mostrarTemperaturaPainel ?? true ? "visível" : "oculto" },
+                    { label: "Escala jurídica", value: config.mostrarEscalaJuridicaTv ? "Ativa" : "Inativa", detail: `${config.duracaoEscalaJuridicaTv || 15}s na tela` }
+                ].map((item) => (
+                    <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{item.label}</p>
+                        <p className="mt-2 truncate text-xl font-extrabold text-slate-950">{item.value}</p>
+                        <p className="mt-1 text-xs capitalize text-slate-500">{item.detail}</p>
                     </div>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Subtítulo
-                        </label>
-
-                        <input
-                            type="text"
-                            value={config.subtitulo || ""}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({ subtitulo: e.target.value })
-                            }
-                            placeholder="Ex: Painel Institucional"
-                        />
-                    </div>
-                </div>
+                ))}
             </section>
 
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Logo
-                </h2>
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+                <div className="space-y-6">
+                    <section id="identidade" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                        <SectionTitle
+                            icon={LayoutPanelTop}
+                            title="Identidade do painel"
+                            description="Nome, subtítulo e logo exibidos no cabeçalho da TV."
+                        />
 
-                <p className="mt-2 text-sm text-zinc-400">
-                    Controle a imagem, o fundo e o tamanho da logo no topo da TV.
-                </p>
+                        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                            <label className="text-sm font-bold text-slate-700">
+                                Nome do painel
+                                <input
+                                    className={inputClass}
+                                    value={config.nomePainel || ""}
+                                    onChange={(event) => atualizarConfiguracoesDraft({ nomePainel: event.target.value })}
+                                    placeholder="Ex: ADUSEPS"
+                                />
+                            </label>
+                            <label className="text-sm font-bold text-slate-700">
+                                Subtítulo
+                                <input
+                                    className={inputClass}
+                                    value={config.subtitulo || ""}
+                                    onChange={(event) => atualizarConfiguracoesDraft({ subtitulo: event.target.value })}
+                                    placeholder="Ex: Painel Institucional"
+                                />
+                            </label>
+                        </div>
 
-                <div className="mt-6 space-y-6">
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
+                        <label className="mt-4 block text-sm font-bold text-slate-700">
                             URL ou caminho da logo
-                        </label>
-
-                        <input
-                            type="text"
-                            value={config.logo || ""}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({ logo: e.target.value })
-                            }
-                            placeholder="https://... ou /logos/logo.png"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-3 block text-sm font-bold text-zinc-300">
-                            Modo da logo
-                        </label>
-
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    atualizarConfiguracoesDraft({ modoLogo: "transparente" })
-                                }
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(modoLogo === "transparente")}`}
-                            >
-                                Sem fundo
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    atualizarConfiguracoesDraft({ modoLogo: "fundo" })
-                                }
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(modoLogo === "fundo")}`}
-                            >
-                                Fundo branco
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    atualizarConfiguracoesDraft({ modoLogo: "card" })
-                                }
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(modoLogo === "card")}`}
-                            >
-                                Card discreto
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="mb-3 block text-sm font-bold text-zinc-300">
-                            Tamanho da logo
-                        </label>
-
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    atualizarConfiguracoesDraft({ tamanhoLogoPainel: "pequeno" })
-                                }
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(tamanhoLogoPainel === "pequeno")}`}
-                            >
-                                Pequena
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    atualizarConfiguracoesDraft({ tamanhoLogoPainel: "medio" })
-                                }
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(tamanhoLogoPainel === "medio")}`}
-                            >
-                                Média
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    atualizarConfiguracoesDraft({ tamanhoLogoPainel: "grande" })
-                                }
-                                className={`rounded-2xl border px-4 py-4 text-sm font-black ${cardOpcao(tamanhoLogoPainel === "grande")}`}
-                            >
-                                Grande
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="overflow-hidden rounded-[26px] border border-white/10 bg-[#071633] p-5">
-                        <p className="mb-4 text-xs font-black uppercase tracking-[0.25em] text-zinc-400">
-                            Prévia rápida da logo
-                        </p>
-
-                        <div className="flex items-center gap-4">
-                            {logoConfigurada && (
-                                <div className={classeLogoPreview}>
-                                    <img
-                                        src={config.logo || ""}
-                                        alt="Prévia da logo"
-                                        className={`${alturaLogoPreview} w-auto object-contain`}
-                                    />
-                                </div>
-                            )}
-
-                            <div className="min-w-0">
-                                <h3 className="truncate text-2xl font-black text-white">
-                                    {config.nomePainel || "Nome do painel"}
-                                </h3>
-
-                                <p className="truncate text-sm font-semibold text-white/65">
-                                    {config.subtitulo || "Subtítulo do painel"}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Rodapé
-                </h2>
-
-                <p className="mt-2 text-sm text-zinc-400">
-                    Controle a faixa inferior, a logo no rodapé e o slogan institucional.
-                </p>
-
-                <div className="mt-6 space-y-4">
-                    <label className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4">
-                        <div>
-                            <p className="font-bold text-white">
-                                Mostrar logo na faixa inferior
-                            </p>
-
-                            <p className="mt-1 text-sm text-zinc-400">
-                                Usa a mesma logo cadastrada, sem alterar a logo do topo.
-                            </p>
-                        </div>
-
-                        <input
-                            type="checkbox"
-                            checked={config.mostrarLogoFaixaPainel ?? false}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({
-                                    mostrarLogoFaixaPainel: e.target.checked
-                                })
-                            }
-                        />
-                    </label>
-
-                    <label className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4">
-                        <div>
-                            <p className="font-bold text-white">
-                                Mostrar rodapé de notícias
-                            </p>
-
-                            <p className="mt-1 text-sm text-zinc-400">
-                                Liga ou desliga a faixa de notícias rolando.
-                            </p>
-                        </div>
-
-                        <input
-                            type="checkbox"
-                            checked={config.mostrarRodapeNoticias ?? true}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({
-                                    mostrarRodapeNoticias: e.target.checked
-                                })
-                            }
-                        />
-                    </label>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Slogan do rodapé
-                        </label>
-
-                        <input
-                            type="text"
-                            value={config.slogan || ""}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({ slogan: e.target.value })
-                            }
-                            placeholder="Ex: Informação e compromisso com o associado"
-                        />
-                    </div>
-                </div>
-            </section>
-
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Painel Informativo
-                </h2>
-
-                <p className="mt-2 text-sm text-zinc-400">
-                    Controle os elementos exibidos no template com clima, mídia principal e faixa inferior.
-                </p>
-
-                <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                    {[
-                        ["Mostrar temperatura", "mostrarTemperaturaPainel"],
-                        ["Mostrar descrição do clima", "mostrarDescricaoClimaPainel"],
-                        ["Mostrar cidade", "mostrarCidadePainel"],
-                        ["Mostrar data", "mostrarDataPainel"],
-                        ["Mostrar hora", "mostrarHoraPainel"]
-                    ].map(([label, key]) => (
-                        <label
-                            key={key}
-                            className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4"
-                        >
-                            <span className="font-bold text-white">
-                                {label}
-                            </span>
-
                             <input
-                                type="checkbox"
-                                checked={config[key as ChavePainelInformativo] ?? true}
-                                onChange={(e) =>
-                                    atualizarConfiguracoesDraft({
-                                        [key]: e.target.checked
-                                    })
-                                }
+                                className={inputClass}
+                                value={config.logo || ""}
+                                onChange={(event) => atualizarConfiguracoesDraft({ logo: event.target.value })}
+                                placeholder="https://... ou /logos/logo.png"
                             />
                         </label>
-                    ))}
 
-                    <div className="lg:col-span-2">
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Cidade exibida
-                        </label>
-
-                        <CidadeAutocomplete
-                            value={config.cidadeClimaPainel || ""}
-                            onSelecionar={(cidade) => {
-                                atualizarConfiguracoesDraft({
-                                    cidadeClimaPainel: cidade.nome,
-                                    latitudeClimaPainel: cidade.latitude,
-                                    longitudeClimaPainel: cidade.longitude,
-                                    timezoneClimaPainel: cidade.timezone
-                                })
-                            }}
-                        />
-                    </div>
-                </div>
-            </section>
-
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Escala jurídica na TV
-                </h2>
-
-                <p className="mt-2 text-sm text-zinc-400">
-                    Exibe automaticamente os advogados do atendimento presencial usando a escala semanal já cadastrada.
-                </p>
-
-                <div className="mt-6 space-y-4">
-                    <label className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 px-4 py-4">
-                        <div>
-                            <p className="font-bold text-white">
-                                Mostrar escala jurídica na TV
-                            </p>
-
-                            <p className="mt-1 text-sm text-zinc-400">
-                                A escala entra automaticamente na rotação dos banners.
-                            </p>
-                        </div>
-
-                        <input
-                            type="checkbox"
-                            checked={config.mostrarEscalaJuridicaTv ?? false}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({
-                                    mostrarEscalaJuridicaTv: e.target.checked
-                                })
-                            }
-                        />
-                    </label>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Tempo da escala na tela
-                        </label>
-
-                        <input
-                            type="number"
-                            min={5}
-                            value={config.duracaoEscalaJuridicaTv || 15}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({
-                                    duracaoEscalaJuridicaTv: Number(e.target.value)
-                                })
-                            }
-                        />
-                    </div>
-                </div>
-            </section>
-
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Padrão das tarjas
-                </h2>
-
-                <p className="mt-2 text-sm text-zinc-400">
-                    Tempos globais usados pelas mídias com tarja ativa.
-                </p>
-
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Entrada
-                        </label>
-                        <input
-                            type="number"
-                            min={0}
-                            value={config.tempoEntradaTarja || 1}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({
-                                    tempoEntradaTarja: Number(e.target.value)
-                                })
-                            }
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Visível
-                        </label>
-                        <input
-                            type="number"
-                            min={1}
-                            value={config.tempoVisivelTarja || 8}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({
-                                    tempoVisivelTarja: Number(e.target.value)
-                                })
-                            }
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Saída
-                        </label>
-                        <input
-                            type="number"
-                            min={0}
-                            value={config.tempoSaidaTarja || 1}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({
-                                    tempoSaidaTarja: Number(e.target.value)
-                                })
-                            }
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-2 block text-sm font-bold text-zinc-300">
-                            Oculta
-                        </label>
-                        <input
-                            type="number"
-                            min={0}
-                            value={config.tempoOcultaTarja || 10}
-                            onChange={(e) =>
-                                atualizarConfiguracoesDraft({
-                                    tempoOcultaTarja: Number(e.target.value)
-                                })
-                            }
-                        />
-                    </div>
-                </div>
-            </section>
-
-            <section className="rounded-[34px] border border-white/10 bg-zinc-900/85 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:p-7">
-                <h2 className="text-2xl font-black sm:text-3xl">
-                    Prévia do painel
-                </h2>
-
-                <div className="mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#071633] p-5">
-                    <div className="flex items-center gap-4">
-                        {logoConfigurada && (
-                            <div className={classeLogoPreview}>
-                                <img
-                                    src={config.logo || ""}
-                                    alt="Prévia da logo"
-                                    className={`${alturaLogoPreview} w-auto object-contain`}
-                                />
+                        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+                            <div>
+                                <p className="mb-2 text-sm font-bold text-slate-700">Fundo da logo</p>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        ["transparente", "Sem fundo"],
+                                        ["fundo", "Branco"],
+                                        ["card", "Discreto"]
+                                    ].map(([value, label]) => (
+                                        <button
+                                            key={value}
+                                            type="button"
+                                            onClick={() => atualizarConfiguracoesDraft({ modoLogo: value as ModoLogo })}
+                                            className={`rounded-xl border px-3 py-3 text-xs font-bold transition ${optionClass(modoLogo === value)}`}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        )}
-
-                        <div className="min-w-0">
-                            <h3 className="truncate text-2xl font-black text-white">
-                                {config.nomePainel || "Nome do painel"}
-                            </h3>
-
-                            <p className="truncate text-sm font-semibold text-white/65">
-                                {config.subtitulo || "Subtítulo do painel"}
-                            </p>
+                            <div>
+                                <p className="mb-2 text-sm font-bold text-slate-700">Tamanho da logo</p>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        ["pequeno", "Pequena"],
+                                        ["medio", "Média"],
+                                        ["grande", "Grande"]
+                                    ].map(([value, label]) => (
+                                        <button
+                                            key={value}
+                                            type="button"
+                                            onClick={() => atualizarConfiguracoesDraft({ tamanhoLogoPainel: value as TamanhoLogo })}
+                                            className={`rounded-xl border px-3 py-3 text-xs font-bold transition ${optionClass(tamanhoLogo === value)}`}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div className="mt-5 rounded-xl bg-[#183b78] px-4 py-3">
-                        <p className="truncate font-bold text-white">
-                            {config.slogan || "Slogan do rodapé"}
-                        </p>
-                    </div>
+                    <section id="rodape" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                        <SectionTitle
+                            icon={Megaphone}
+                            title="Rodapé e notícias"
+                            description="Controle a faixa inferior e o texto institucional."
+                        />
+                        <div className="mt-6 grid gap-3 lg:grid-cols-2">
+                            <Toggle
+                                title="Mostrar rodapé de notícias"
+                                description="Exibe a faixa de notícias rolando."
+                                checked={config.mostrarRodapeNoticias ?? true}
+                                onChange={(checked) => atualizarConfiguracoesDraft({ mostrarRodapeNoticias: checked })}
+                            />
+                            <Toggle
+                                title="Mostrar logo na faixa inferior"
+                                description="Usa a mesma logo configurada acima."
+                                checked={config.mostrarLogoFaixaPainel ?? false}
+                                onChange={(checked) => atualizarConfiguracoesDraft({ mostrarLogoFaixaPainel: checked })}
+                            />
+                        </div>
+                        <label className="mt-4 block text-sm font-bold text-slate-700">
+                            Slogan do rodapé
+                            <input
+                                className={inputClass}
+                                value={config.slogan || ""}
+                                onChange={(event) => atualizarConfiguracoesDraft({ slogan: event.target.value })}
+                                placeholder="Ex: Informação, acolhimento e defesa do associado"
+                            />
+                        </label>
+                    </section>
+
+                    <section id="clima" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                        <SectionTitle
+                            icon={CloudSun}
+                            title="Clima, data e hora"
+                            description="Escolha quais informações aparecem no template Painel."
+                        />
+                        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                            {[
+                                ["Mostrar temperatura", "mostrarTemperaturaPainel"],
+                                ["Mostrar descrição do clima", "mostrarDescricaoClimaPainel"],
+                                ["Mostrar cidade", "mostrarCidadePainel"],
+                                ["Mostrar data", "mostrarDataPainel"],
+                                ["Mostrar hora", "mostrarHoraPainel"]
+                            ].map(([label, key]) => (
+                                <Toggle
+                                    key={key}
+                                    title={label}
+                                    checked={config[key as ChavePainelInformativo] ?? true}
+                                    onChange={(checked) => atualizarConfiguracoesDraft({ [key]: checked })}
+                                />
+                            ))}
+                        </div>
+                        <div className="mt-4">
+                            <label className="mb-2 block text-sm font-bold text-slate-700">Cidade exibida</label>
+                            <CidadeAutocomplete
+                                value={config.cidadeClimaPainel || ""}
+                                onSelecionar={(cidadeSelecionada) => atualizarConfiguracoesDraft({
+                                    cidadeClimaPainel: cidadeSelecionada.nome,
+                                    latitudeClimaPainel: cidadeSelecionada.latitude,
+                                    longitudeClimaPainel: cidadeSelecionada.longitude,
+                                    timezoneClimaPainel: cidadeSelecionada.timezone
+                                })}
+                            />
+                        </div>
+                    </section>
+
+                    <section id="escala" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                        <SectionTitle
+                            icon={Scale}
+                            title="Escala jurídica"
+                            description="Inclua automaticamente o atendimento presencial na rotação."
+                        />
+                        <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_180px]">
+                            <Toggle
+                                title="Mostrar escala jurídica na TV"
+                                description="A escala entra na rotação dos banners."
+                                checked={config.mostrarEscalaJuridicaTv ?? false}
+                                onChange={(checked) => atualizarConfiguracoesDraft({ mostrarEscalaJuridicaTv: checked })}
+                            />
+                            <label className="text-sm font-bold text-slate-700">
+                                Tempo na tela
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min={5}
+                                        className={`${inputClass} pr-10`}
+                                        value={config.duracaoEscalaJuridicaTv || 15}
+                                        onChange={(event) => atualizarConfiguracoesDraft({ duracaoEscalaJuridicaTv: Number(event.target.value) })}
+                                    />
+                                    <span className="absolute bottom-3 right-3 text-xs font-bold text-slate-400">seg</span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section id="tarjas" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                        <SectionTitle
+                            icon={CalendarDays}
+                            title="Tempos das tarjas"
+                            description="Padrão global usado pelas mídias que possuem tarja ativa."
+                        />
+                        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                            {[
+                                ["Entrada", "tempoEntradaTarja", 0, 1],
+                                ["Visível", "tempoVisivelTarja", 1, 8],
+                                ["Saída", "tempoSaidaTarja", 0, 1],
+                                ["Oculta", "tempoOcultaTarja", 0, 10]
+                            ].map(([label, key, min, fallback]) => (
+                                <label key={String(key)} className="text-sm font-bold text-slate-700">
+                                    {label}
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            min={Number(min)}
+                                            className={`${inputClass} pr-10`}
+                                            value={Number(config[key as keyof ConfiguracoesPainel] ?? fallback)}
+                                            onChange={(event) => atualizarConfiguracoesDraft({ [key]: Number(event.target.value) })}
+                                        />
+                                        <span className="absolute bottom-3 right-3 text-xs font-bold text-slate-400">seg</span>
+                                    </div>
+                                </label>
+                            ))}
+                        </div>
+                    </section>
                 </div>
-            </section>
 
-            <section className="rounded-[26px] border border-amber-400/20 bg-amber-500/10 p-5">
-                <p className="font-black text-amber-200">
-                    Alterações salvas no rascunho
-                </p>
+                <aside className="xl:sticky xl:top-[100px] xl:self-start">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                            <div>
+                                <p className="text-sm font-extrabold text-slate-900">Prévia da TV</p>
+                                <p className="text-xs text-slate-500">Atualização instantânea</p>
+                            </div>
+                            <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                Prévia
+                            </span>
+                        </div>
 
-                <p className="mt-2 text-sm text-amber-100/80">
-                    Para enviar essas configurações para a TV, volte para a página Início e clique em Publicar na TV.
-                </p>
-            </section>
+                        <div className="aspect-video bg-[linear-gradient(145deg,#073f91_0%,#061c3f_100%)] p-4 text-white">
+                            <div className="flex items-center gap-3">
+                                {logoConfigurada ? (
+                                    <div className={`shrink-0 ${modoLogo === "transparente" ? "" : modoLogo === "card" ? "rounded-lg border border-white/15 bg-white/10 p-2" : "rounded-lg bg-white p-2"}`}>
+                                        <img
+                                            src={config.logo || ""}
+                                            alt="Prévia da logo"
+                                            className={`${alturaLogo} max-w-24 object-contain`}
+                                        />
+                                    </div>
+                                ) : (
+                                    <span className="grid h-12 w-12 place-items-center rounded-lg border border-dashed border-white/30">
+                                        <ImageIcon size={20} className="text-white/50" />
+                                    </span>
+                                )}
+                                <div className="min-w-0">
+                                    <p className="truncate text-lg font-extrabold">{config.nomePainel || "ADUSEPS"}</p>
+                                    <p className="truncate text-xs text-blue-100">{config.subtitulo || "Painel Institucional"}</p>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-[80px_1fr] gap-2">
+                                <div className="rounded-lg bg-sky-400/20 p-2 text-center">
+                                    <CloudSun className="mx-auto" size={20} />
+                                    <p className="mt-1 text-base font-extrabold">
+                                        {config.mostrarTemperaturaPainel ?? true ? "28°" : "--"}
+                                    </p>
+                                    <p className="truncate text-[9px] text-blue-100">{cidade}</p>
+                                </div>
+                                <div className="grid place-items-center rounded-lg bg-white/10 text-xs font-bold text-white/55">
+                                    Área da mídia
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-[#0a57b7] px-4 py-3 text-xs font-bold text-white">
+                            {config.slogan || "Informação, acolhimento e defesa do associado"}
+                        </div>
+
+                        <nav className="grid grid-cols-2 gap-2 p-4 text-xs font-bold">
+                            {[
+                                ["Identidade", "#identidade"],
+                                ["Rodapé", "#rodape"],
+                                ["Clima", "#clima"],
+                                ["Escala", "#escala"],
+                                ["Tarjas", "#tarjas"]
+                            ].map(([label, href]) => (
+                                <a key={href} href={href} className="rounded-lg border border-slate-200 px-3 py-2 text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
+                                    {label}
+                                </a>
+                            ))}
+                        </nav>
+                    </div>
+                </aside>
+            </div>
         </div>
     )
 }

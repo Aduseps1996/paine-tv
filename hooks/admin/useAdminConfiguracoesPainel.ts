@@ -7,6 +7,7 @@ import {
     salvarConfiguracoesPainel
 } from "@/lib/firestore/configuracoes"
 import type {
+    ConfiguracoesPainel,
     ContatoPainel,
     ModoLogo,
     TamanhoLogoPainel
@@ -15,6 +16,9 @@ import { limitarValor } from "@/utils/numero"
 
 export function useAdminConfiguracoesPainel() {
     const [configuracoesCarregadas, setConfiguracoesCarregadas] = useState(false)
+    const [erroConfiguracoes, setErroConfiguracoes] = useState<string | null>(null)
+    const [configuracoesPublicadas, setConfiguracoesPublicadas] =
+        useState<ConfiguracoesPainel>({})
     const [nomePainel, setNomePainel] = useState("")
     const [subtitulo, setSubtitulo] = useState("")
     const [logo, setLogo] = useState("")
@@ -55,10 +59,17 @@ export function useAdminConfiguracoesPainel() {
     const [contatos, setContatos] = useState<ContatoPainel[] | undefined>()
 
     const carregarConfiguracoes = useCallback(async () => {
+        setConfiguracoesCarregadas(false)
+        setErroConfiguracoes(null)
+
         try {
             const dados = await buscarConfiguracoesPainel()
 
+            setConfiguracoesPublicadas(dados || {})
+
             if (!dados) return
+
+            setErroConfiguracoes(null)
 
             setNomePainel(dados.nomePainel || "")
         setSubtitulo(dados.subtitulo || "")
@@ -114,6 +125,12 @@ export function useAdminConfiguracoesPainel() {
         )
             setDuracaoAnimacaoNoticias(
                 limitarValor(Number(dados.duracaoAnimacaoNoticias || 150), 60, 300, 150)
+            )
+        } catch (erro) {
+            setErroConfiguracoes(
+                erro instanceof Error
+                    ? erro.message
+                    : "Não foi possível carregar as configurações."
             )
         } finally {
             setConfiguracoesCarregadas(true)
@@ -204,7 +221,9 @@ export function useAdminConfiguracoesPainel() {
         longitudeClimaPainel,
         timezoneClimaPainel,
         contatos,
+        configuracoesPublicadas,
         configuracoesCarregadas,
+        erroConfiguracoes,
         setNomePainel,
         setSubtitulo,
         setLogo,

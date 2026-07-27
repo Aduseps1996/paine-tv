@@ -51,8 +51,8 @@ export function obterCorTemplate(template?: Midia["template"]) {
 
 export function obterCorStatus(ativo: boolean) {
     return ativo
-        ? "bg-emerald-500/15 text-emerald-300 border-emerald-400/20"
-        : "bg-red-500/15 text-red-300 border-red-400/20"
+        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+        : "bg-red-50 text-red-700 border-red-200"
 }
 
 export function obterTextoStatus(ativo: boolean) {
@@ -67,6 +67,6 @@ export function obterTextoProgramacao(midia: Midia) {
 
 export function obterCorProgramacao(programada?: boolean) {
     return programada
-        ? "bg-amber-500/15 text-amber-300 border-amber-400/20"
-        : "bg-sky-500/15 text-sky-300 border-sky-400/20"
+        ? "bg-amber-50 text-amber-800 border-amber-200"
+        : "bg-blue-50 text-blue-700 border-blue-200"
 }

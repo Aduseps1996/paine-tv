@@ -9,10 +9,12 @@ export function useAdminAuth() {
     const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
     const [logado, setLogado] = useState(false)
+    const [authVerificada, setAuthVerificada] = useState(false)
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (usuario) => {
             setLogado(!!usuario)
+            setAuthVerificada(true)
         })
 
         return () => unsubscribe()
@@ -34,6 +36,7 @@ export function useAdminAuth() {
         email,
         senha,
         logado,
+        authVerificada,
         setEmail,
         setSenha,
         entrar,
