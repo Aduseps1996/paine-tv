@@ -164,10 +164,8 @@ export default function AbaConfiguracaoPainel() {
     }
 
     function limparCor(chave: keyof PersonalizacaoVisualBanner) {
-        const atualizada = { ...personalizacao }
-        delete atualizada[chave]
-        atualizarConfiguracoesDraft({
-            personalizacaoBanners: atualizada
+        atualizarPersonalizacao({
+            [chave]: ""
         })
     }
 

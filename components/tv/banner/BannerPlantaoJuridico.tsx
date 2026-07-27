@@ -93,10 +93,14 @@ export default function BannerPlantaoJuridico({
                 <div className="absolute inset-0 bg-[linear-gradient(118deg,#061944_0%,#073c85_54%,#0a88bf_100%)]" />
             )}
             <FundoBannerPersonalizado personalizacao={personalizacao} />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(117,225,255,0.34),transparent_30%),radial-gradient(circle_at_38%_100%,rgba(28,148,255,0.28),transparent_42%)]" />
-            <div className="absolute -right-[12vw] -top-[24vw] h-[61vw] w-[61vw] rounded-full border-[5vw] border-white/[0.045]" />
-            <div className="absolute -bottom-[37vw] left-[19vw] h-[70vw] w-[70vw] rounded-full border-[7vw] border-cyan-200/[0.045]" />
-            <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.25)_1px,transparent_1px)] [background-size:5vw_5vw]" />
+            {!personalizacao.fundoImagem && (
+                <>
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(117,225,255,0.34),transparent_30%),radial-gradient(circle_at_38%_100%,rgba(28,148,255,0.28),transparent_42%)]" />
+                    <div className="absolute -right-[12vw] -top-[24vw] h-[61vw] w-[61vw] rounded-full border-[5vw] border-white/[0.045]" />
+                    <div className="absolute -bottom-[37vw] left-[19vw] h-[70vw] w-[70vw] rounded-full border-[7vw] border-cyan-200/[0.045]" />
+                    <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.25)_1px,transparent_1px)] [background-size:5vw_5vw]" />
+                </>
+            )}
 
             <header className="absolute left-[5vw] right-[5vw] top-[5.5vh] z-10 flex items-center justify-between border-b border-white/20 pb-[2.2vh]">
                 <div className="flex items-center gap-[1vw]">

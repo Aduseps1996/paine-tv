@@ -333,9 +333,13 @@ export default function EscalaJuridicaPainel({
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0d5cff] via-[#063ea8] to-[#020617]" />
             )}
             <FundoBannerPersonalizado personalizacao={personalizacao} />
-            <div className="absolute -left-32 top-10 h-80 w-80 rounded-full bg-sky-300/25 blur-3xl" />
-            <div className="absolute right-[-120px] top-[-80px] h-96 w-96 rounded-full bg-white/15 blur-3xl" />
-            <div className="absolute bottom-[-140px] left-1/3 h-96 w-96 rounded-full bg-blue-950/70 blur-3xl" />
+            {!personalizacao.fundoImagem && (
+                <>
+                    <div className="absolute -left-32 top-10 h-80 w-80 rounded-full bg-sky-300/25 blur-3xl" />
+                    <div className="absolute right-[-120px] top-[-80px] h-96 w-96 rounded-full bg-white/15 blur-3xl" />
+                    <div className="absolute bottom-[-140px] left-1/3 h-96 w-96 rounded-full bg-blue-950/70 blur-3xl" />
+                </>
+            )}
 
             <div className="relative z-10 flex h-full flex-col p-3">
                 <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

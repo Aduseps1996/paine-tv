@@ -97,10 +97,14 @@ export default function BannerContatosOficiais({
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,#0b3977_0%,#061f4f_45%,#020f32_100%)]" />
             )}
             <FundoBannerPersonalizado personalizacao={personalizacao} />
-            <div className="absolute inset-y-0 left-0 w-[18vw] bg-[radial-gradient(circle_at_0%_45%,rgba(10,118,222,0.28),transparent_68%)]" />
-            <div className="absolute inset-y-0 right-0 w-[18vw] bg-[radial-gradient(circle_at_100%_55%,rgba(10,118,222,0.25),transparent_68%)]" />
-            <div className="absolute left-0 top-[9vh] h-[17vh] w-[14vw] opacity-25 [background-image:radial-gradient(circle,rgba(53,190,255,0.8)_1.2px,transparent_1.2px)] [background-size:1.25vw_1.25vw]" />
-            <div className="absolute bottom-[9vh] right-0 h-[17vh] w-[14vw] opacity-25 [background-image:radial-gradient(circle,rgba(53,190,255,0.8)_1.2px,transparent_1.2px)] [background-size:1.25vw_1.25vw]" />
+            {!personalizacao.fundoImagem && (
+                <>
+                    <div className="absolute inset-y-0 left-0 w-[18vw] bg-[radial-gradient(circle_at_0%_45%,rgba(10,118,222,0.28),transparent_68%)]" />
+                    <div className="absolute inset-y-0 right-0 w-[18vw] bg-[radial-gradient(circle_at_100%_55%,rgba(10,118,222,0.25),transparent_68%)]" />
+                    <div className="absolute left-0 top-[9vh] h-[17vh] w-[14vw] opacity-25 [background-image:radial-gradient(circle,rgba(53,190,255,0.8)_1.2px,transparent_1.2px)] [background-size:1.25vw_1.25vw]" />
+                    <div className="absolute bottom-[9vh] right-0 h-[17vh] w-[14vw] opacity-25 [background-image:radial-gradient(circle,rgba(53,190,255,0.8)_1.2px,transparent_1.2px)] [background-size:1.25vw_1.25vw]" />
+                </>
+            )}
 
             <header className="relative z-10 mx-auto flex max-w-[82vw] flex-col items-center pt-[5.8vh] text-center">
                 <div className="flex items-center gap-[1.35vw] text-cyan-200">

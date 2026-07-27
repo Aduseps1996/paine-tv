@@ -51,9 +51,13 @@ export default function BannerComunicado({
     return (
         <section className={`absolute inset-0 overflow-hidden text-white ${aparencia.fundo}`}>
             <FundoBannerPersonalizado personalizacao={personalizacao} />
-            <div className="absolute -right-[8vw] -top-[14vw] h-[38vw] w-[38vw] rounded-full border border-white/10" />
-            <div className="absolute -right-[2vw] -top-[8vw] h-[26vw] w-[26vw] rounded-full border border-white/10" />
-            <div className="absolute bottom-[-18vw] left-[-12vw] h-[38vw] w-[38vw] rounded-full bg-white/[0.05] blur-2xl" />
+            {!personalizacao.fundoImagem && (
+                <>
+                    <div className="absolute -right-[8vw] -top-[14vw] h-[38vw] w-[38vw] rounded-full border border-white/10" />
+                    <div className="absolute -right-[2vw] -top-[8vw] h-[26vw] w-[26vw] rounded-full border border-white/10" />
+                    <div className="absolute bottom-[-18vw] left-[-12vw] h-[38vw] w-[38vw] rounded-full bg-white/[0.05] blur-2xl" />
+                </>
+            )}
 
             <div className="relative z-[2] flex h-full items-center px-[clamp(3rem,8vw,10rem)] pb-[clamp(3rem,8vh,7rem)] pt-[clamp(6rem,15vh,11rem)]">
                 <div className="w-full max-w-[1450px]">

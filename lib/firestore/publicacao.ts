@@ -40,6 +40,26 @@ function removerCamposUndefined<T>(valor: T): T {
     return valor
 }
 
+function normalizarConfiguracoesParaPublicacao(
+    configuracoes: ConfiguracoesPainel
+): ConfiguracoesPainel {
+    const personalizacao = configuracoes.personalizacaoBanners || {}
+
+    return {
+        ...configuracoes,
+        personalizacaoBanners: {
+            ...personalizacao,
+            fundoImagem: personalizacao.fundoImagem || "",
+            fundoStoragePath: personalizacao.fundoStoragePath || "",
+            corFundo: personalizacao.corFundo || "",
+            corTitulo: personalizacao.corTitulo || "",
+            corTexto: personalizacao.corTexto || "",
+            corDestaque: personalizacao.corDestaque || "",
+            posicaoLogo: personalizacao.posicaoLogo
+        }
+    }
+}
+
 export async function publicarPainel({
     configuracoes,
     midias,
@@ -95,7 +115,9 @@ export async function publicarPainel({
 
     lote.set(
         doc(db, "configuracoes", "geral"),
-        removerCamposUndefined(configuracoes),
+        removerCamposUndefined(
+            normalizarConfiguracoesParaPublicacao(configuracoes)
+        ),
         { merge: true }
     )
 

@@ -9,21 +9,12 @@ export default function FundoBannerPersonalizado({
 }: Props) {
     if (personalizacao.fundoImagem) {
         return (
-            <>
-                <img
-                    src={personalizacao.fundoImagem}
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute inset-0 h-full w-full object-cover"
-                />
-                <div
-                    className="absolute inset-0 opacity-60"
-                    style={{
-                        backgroundColor:
-                            personalizacao.corFundo || "#020f32"
-                    }}
-                />
-            </>
+            <img
+                src={personalizacao.fundoImagem}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover"
+            />
         )
     }
 
